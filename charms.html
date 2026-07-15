@@ -1,0 +1,3020 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>チャーム組み合わせ | maison &amp;.</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #252922;
+      --ink-soft: #5f6259;
+      --paper: #f2eee4;
+      --paper-deep: #e7dfd0;
+      --panel: rgba(253, 251, 246, 0.9);
+      --line: rgba(51, 53, 45, 0.18);
+      --line-strong: rgba(51, 53, 45, 0.38);
+      --accent: #a45f3d;
+      --accent-pale: #d9b99f;
+      --sage: #728073;
+      --shadow: 0 28px 70px rgba(48, 43, 34, 0.14);
+      --radius-lg: 2px;
+      --radius-md: 2px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: light;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(120% 80% at 12% -8%, rgba(207, 177, 139, 0.34), transparent 56%),
+        radial-gradient(90% 75% at 100% 18%, rgba(155, 179, 171, 0.22), transparent 58%),
+        linear-gradient(135deg, #ece5d8 0%, #f5f1e8 48%, #e8ece6 100%);
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", sans-serif;
+      padding: 20px clamp(14px, 3vw, 42px) 48px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.28;
+      background-image:
+        linear-gradient(rgba(66, 62, 53, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(66, 62, 53, 0.025) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    button,
+    .swatch,
+    select,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .site-nav {
+      max-width: 1370px;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--ink-soft);
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+    }
+
+    .site-nav a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+
+    .site-nav a:hover,
+    .site-nav a:focus-visible {
+      color: var(--accent);
+      border-color: currentColor;
+    }
+
+    .site-nav [aria-current="page"] {
+      color: var(--ink);
+    }
+
+    .layout {
+      max-width: 1370px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.38fr) minmax(360px, 0.82fr);
+      gap: clamp(20px, 2.5vw, 38px);
+      align-items: start;
+    }
+
+    .panel {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      pointer-events: none;
+    }
+
+    .preview-panel {
+      position: sticky;
+      top: 20px;
+      padding: clamp(18px, 2.4vw, 32px);
+      overflow: hidden;
+    }
+
+    .preview-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--accent);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Bodoni 72", "Didot", "Yu Mincho", "YuMincho", serif;
+      font-size: clamp(1.65rem, 3vw, 2.72rem);
+      font-weight: 500;
+      letter-spacing: 0.035em;
+      line-height: 1.12;
+    }
+
+    .sub {
+      max-width: 44rem;
+      margin: 10px 0 0;
+      color: var(--ink-soft);
+      font-size: clamp(0.78rem, 1.25vw, 0.9rem);
+      line-height: 1.8;
+    }
+
+    .tag {
+      position: relative;
+      z-index: 1;
+      padding: 7px 10px 6px;
+      border: 1px solid var(--line-strong);
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.55);
+      font-family: "Bodoni 72", "Didot", serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      white-space: nowrap;
+    }
+
+    .canvas-frame {
+      position: relative;
+      isolation: isolate;
+      padding: clamp(9px, 1.2vw, 14px);
+      border: 1px solid var(--line);
+      background: #ddd6c8;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(42, 43, 37, 0.14);
+      background: #f7f4ed;
+    }
+
+    #previewCanvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 220 / 160;
+      background: #f7f4ed;
+    }
+
+    .loading {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: grid;
+      place-content: center;
+      gap: 12px;
+      color: var(--ink-soft);
+      background: rgba(247, 244, 237, 0.88);
+      font-size: 0.78rem;
+      letter-spacing: 0.09em;
+      text-align: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .loading[hidden] {
+      display: none;
+    }
+
+    .loading::before {
+      content: "";
+      width: 30px;
+      height: 30px;
+      margin: 0 auto;
+      border: 1px solid rgba(37, 41, 34, 0.18);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 900ms linear infinite;
+    }
+
+    .loading.is-error::before {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .scale-note {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 12px 2px 0;
+      color: var(--ink-soft);
+      font-size: 0.68rem;
+      line-height: 1.55;
+      letter-spacing: 0.035em;
+    }
+
+    .scale-note span:last-child {
+      text-align: right;
+    }
+
+    .control-panel {
+      padding: clamp(16px, 2vw, 24px);
+      display: grid;
+      gap: 12px;
+    }
+
+    .control-intro {
+      padding: 8px 6px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .control-intro h2 {
+      margin: 0;
+      font-family: "Bodoni 72", "Didot", "Yu Mincho", serif;
+      font-size: 1.35rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .control-intro p {
+      margin: 6px 0 0;
+      color: var(--ink-soft);
+      font-size: 0.74rem;
+      line-height: 1.65;
+    }
+
+    .block {
+      position: relative;
+      z-index: 1;
+      padding: 14px 15px 15px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .block-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 11px;
+    }
+
+    .block h3 {
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.085em;
+    }
+
+    .block-index {
+      color: var(--accent);
+      font-family: "Bodoni 72", "Didot", serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+    }
+
+    .selector-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(132px, 44%);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .selector-row + .selector-row {
+      margin-top: 9px;
+    }
+
+    .selector-row label {
+      color: var(--ink-soft);
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    select {
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 30px 6px 10px;
+      border: 1px solid rgba(42, 43, 37, 0.25);
+      border-radius: 0;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.86);
+      font-size: 0.78rem;
+    }
+
+    select:disabled {
+      color: var(--ink);
+      opacity: 0.78;
+      cursor: not-allowed;
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .swatch {
+      position: relative;
+      aspect-ratio: 1;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        0 0 0 1px rgba(46, 48, 40, 0.15),
+        0 3px 8px rgba(48, 43, 34, 0.16);
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .swatch::before {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 1px solid transparent;
+      border-radius: inherit;
+    }
+
+    .swatch:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 1px rgba(46, 48, 40, 0.22),
+        0 7px 13px rgba(48, 43, 34, 0.2);
+    }
+
+    .swatch.active {
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 2px var(--ink),
+        0 7px 13px rgba(48, 43, 34, 0.19);
+    }
+
+    .swatch.active::before {
+      border-color: rgba(255, 255, 255, 0.88);
+    }
+
+    .swatch:focus-visible,
+    .option-btn:focus-visible,
+    .copy-btn:focus-visible,
+    select:focus-visible,
+    .site-nav a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .option-btn {
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid rgba(42, 43, 37, 0.24);
+      border-radius: 0;
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.72);
+      cursor: pointer;
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+      transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .option-btn:hover {
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+
+    .option-btn.active {
+      color: var(--ink);
+      border-color: var(--ink);
+      background: #fffdfa;
+      box-shadow: inset 0 -2px 0 var(--accent-pale);
+      transform: translateY(-1px);
+    }
+
+    .option-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .option-note {
+      margin: 9px 0 0;
+      color: var(--ink-soft);
+      font-size: 0.67rem;
+      line-height: 1.55;
+    }
+
+    .summary-wrap {
+      position: relative;
+      z-index: 1;
+      border: 1px solid var(--line);
+      background: rgba(232, 225, 212, 0.58);
+    }
+
+    .summary {
+      min-height: 68px;
+      margin: 0;
+      padding: 13px 88px 13px 14px;
+      font-size: 0.76rem;
+      line-height: 1.78;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      border: 1px solid rgba(42, 43, 37, 0.24);
+      border-radius: 0;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.82);
+      cursor: pointer;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+    }
+
+    .copy-btn:disabled {
+      opacity: 0.66;
+      cursor: default;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .charts img {
+      display: block;
+      width: 100%;
+      border: 1px solid rgba(42, 43, 37, 0.13);
+      background: white;
+    }
+
+    .note {
+      margin: 10px 0 0;
+      color: var(--ink-soft);
+      font-size: 0.66rem;
+      line-height: 1.65;
+    }
+
+    .debug-panel {
+      display: none;
+      max-width: 1370px;
+      margin: 26px auto 0;
+      padding: 22px;
+      border: 1px solid #714d36;
+      background: rgba(255, 250, 240, 0.96);
+      box-shadow: var(--shadow);
+    }
+
+    body.debug .debug-panel {
+      display: block;
+    }
+
+    .debug-panel h2 {
+      margin: 0 0 7px;
+      font: 500 1.45rem/1.2 "Bodoni 72", "Didot", serif;
+      letter-spacing: 0.05em;
+    }
+
+    .debug-lead {
+      margin: 0 0 15px;
+      color: var(--ink-soft);
+      font-size: 0.73rem;
+      line-height: 1.65;
+    }
+
+    .debug-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 13px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      font: 700 0.72rem/1 monospace;
+      letter-spacing: 0.05em;
+    }
+
+    .debug-status[data-status="pass"] {
+      color: #245731;
+      border-color: #5c9468;
+      background: #edf6ee;
+    }
+
+    .debug-status[data-status="fail"] {
+      color: #7d2720;
+      border-color: #b7716b;
+      background: #fff0ee;
+    }
+
+    .debug-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .debug-results {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .debug-results li {
+      padding: 7px 9px;
+      border-left: 3px solid #7d8a7a;
+      background: rgba(255, 255, 255, 0.74);
+      font: 0.7rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .debug-results li.fail {
+      border-left-color: #aa4a42;
+      color: #722921;
+    }
+
+    .mask-view {
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(45deg, #d7d7d2 25%, transparent 25%),
+        linear-gradient(-45deg, #d7d7d2 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #d7d7d2 75%),
+        linear-gradient(-45deg, transparent 75%, #d7d7d2 75%), #f1f1ed;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-size: 16px 16px;
+    }
+
+    #maskCanvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 925 / 1200;
+      object-fit: contain;
+    }
+
+    .mask-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin: 9px 0 0;
+      color: var(--ink-soft);
+      font: 0.65rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 4px;
+      border-radius: 50%;
+      vertical-align: -1px;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        padding: 14px 14px 36px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-panel {
+        position: relative;
+        top: auto;
+      }
+
+      .swatches {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+      }
+
+      .debug-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .site-nav {
+        font-size: 0.64rem;
+      }
+
+      .site-nav a,
+      .copy-btn {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-header {
+        grid-template-columns: 1fr;
+      }
+
+      .tag {
+        justify-self: start;
+      }
+
+      .preview-panel .canvas-frame {
+        width: 66.6667%;
+        margin: 0 auto;
+      }
+
+      .scale-note {
+        display: grid;
+      }
+
+      .scale-note span:last-child {
+        text-align: left;
+      }
+
+      .swatches {
+        grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+      }
+
+      select,
+      .option-btn {
+        min-height: 44px;
+      }
+
+      .selector-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="ページナビゲーション">
+    <a href="index.html">配色プレビュー（ドーナツ＆キャンディ）</a>
+    <span aria-hidden="true">|</span>
+    <span aria-current="page">チャーム組み合わせ</span>
+  </nav>
+
+  <main class="layout">
+    <section class="panel preview-panel" aria-labelledby="pageTitle">
+      <header class="preview-header">
+        <div>
+          <p class="eyebrow">maison &amp;. color atelier</p>
+          <h1 id="pageTitle">チャーム組み合わせ</h1>
+          <p class="sub">実物の革の陰影と質感を残しながら、チャーム・金具・ロゴ・ステッチの配色をご確認いただけます。</p>
+        </div>
+        <span class="tag">horseshoe · 1 point</span>
+      </header>
+
+      <div class="canvas-frame">
+        <div class="canvas-wrap">
+          <canvas id="previewCanvas" width="1320" height="960" role="img" aria-label="horseshoeチャームと丸カンの配色プレビュー" aria-describedby="scaleNote"></canvas>
+          <div id="loading" class="loading" role="status" aria-live="polite">画像を読み込み中...</div>
+        </div>
+      </div>
+      <div id="scaleNote" class="scale-note">
+        <span>実寸比率プレビュー · 丸カン外径 42mm</span>
+        <span>非接続レイアウト · 間隔 3mm</span>
+      </div>
+    </section>
+
+    <section class="panel control-panel" aria-label="チャーム配色コントロール">
+      <div class="control-intro">
+        <h2>Color notes</h2>
+        <p>代表チャームで、革・金具・ロゴ・ステッチの仕上がりをお試しください。</p>
+      </div>
+
+      <div class="block">
+        <div class="block-title">
+          <h3>チャームと革カラー</h3>
+          <span class="block-index">01</span>
+        </div>
+        <div class="selector-row">
+          <label for="charmSelect">代表チャーム</label>
+          <select id="charmSelect" disabled aria-describedby="phaseNote">
+            <option value="horseshoe">horseshoe</option>
+          </select>
+        </div>
+        <div class="selector-row">
+          <label for="colorGroup">カラーグループ</label>
+          <select id="colorGroup"></select>
+        </div>
+        <div id="colorSwatches" class="swatches" role="group" aria-label="革カラー"></div>
+        <p id="phaseNote" class="option-note">現在は代表チャーム1点で仕上がりをご確認いただけます。</p>
+      </div>
+
+      <div class="block">
+        <div class="block-title">
+          <h3>金具カラー</h3>
+          <span class="block-index">02</span>
+        </div>
+        <div class="option-grid" role="group" aria-label="金具カラー">
+          <button id="metalSilver" class="option-btn active" type="button" data-value="silver" aria-pressed="true">シルバー</button>
+          <button id="metalGold" class="option-btn" type="button" data-value="gold" aria-pressed="false">ゴールド</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-title">
+          <h3>ロゴカラー</h3>
+          <span class="block-index">03</span>
+        </div>
+        <div class="option-grid" role="group" aria-label="ロゴカラー">
+          <button id="logoGold" class="option-btn active" type="button" data-value="gold" aria-pressed="true">ゴールド</button>
+          <button id="logoSilver" class="option-btn" type="button" data-value="silver" aria-pressed="false">シルバー</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-title">
+          <h3>ステッチカラー</h3>
+          <span class="block-index">04</span>
+        </div>
+        <div class="option-grid" role="group" aria-label="ステッチカラー">
+          <button id="stitchBlack" class="option-btn" type="button" data-value="black" aria-pressed="false">ブラック</button>
+          <button id="stitchWhite" class="option-btn active" type="button" data-value="white" aria-pressed="true">ホワイト</button>
+        </div>
+        <p class="option-note">ステッチ対応: horseshoe / osanpo</p>
+      </div>
+
+      <div class="summary-wrap">
+        <button id="copySummary" class="copy-btn" type="button" aria-describedby="copyStatus">コピー</button>
+        <span id="copyStatus" class="sr-only" role="status" aria-live="polite"></span>
+        <p id="summary" class="summary" aria-live="polite"></p>
+      </div>
+
+      <div class="block">
+        <div class="block-title">
+          <h3>カラーチャート（参照）</h3>
+          <span class="block-index">05</span>
+        </div>
+        <div class="charts">
+          <img src="イエロー系.jpg" alt="イエロー系カラーチャート">
+          <img src="ブラウン系.jpg" alt="ブラウン系カラーチャート">
+          <img src="ブルー系.jpg" alt="ブルー系カラーチャート">
+          <img src="レッド系.jpg" alt="レッド系カラーチャート">
+        </div>
+        <p class="note">画面上の色は、お使いの端末や表示環境により実物と異なる場合があります。カラーチャートもあわせてご確認ください。</p>
+      </div>
+    </section>
+  </main>
+
+  <section id="debugPanel" class="debug-panel" aria-labelledby="debugTitle">
+    <h2 id="debugTitle">Charm debug laboratory</h2>
+    <p class="debug-lead">転記照合9項目・所有権恒等式・有限値168組・実寸配置を機械検査します。グリッドは10mm単位です。</p>
+    <div id="debugStatus" class="debug-status" data-status="running">RUNNING · 検査中</div>
+    <div class="debug-grid">
+      <ul id="debugResults" class="debug-results" aria-live="polite"></ul>
+      <div>
+        <div class="mask-view">
+          <canvas id="maskCanvas" aria-label="horseshoe所有権マスク可視化"></canvas>
+        </div>
+        <p class="mask-legend">
+          <span><i class="legend-dot" style="background:#bf6555"></i>革 R</span>
+          <span><i class="legend-dot" style="background:#e0b84f"></i>ロゴ G</span>
+          <span><i class="legend-dot" style="background:#55a8c4"></i>ステッチ B</span>
+          <span><i class="legend-dot" style="background:#f4f0e8;border:1px solid #666"></i>保持 α&lt;128</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    "use strict";
+
+    const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
+
+    const LAYOUT = Object.freeze({
+      stageMm: Object.freeze({ w: 220, h: 160 }),
+      pxPerMmStage: 6,
+      ringCenterXMm: 110,
+      ringCenterYMm: 31,
+      ringOuterMm: 42,
+      gapMm: 8,
+      ringGapMm: 3,
+    });
+
+    const CHARMS = Object.freeze({
+      horse: Object.freeze({
+        label: "horse",
+        base: "assets/charms/horse.base.png",
+        masks: "assets/charms/horse.masks.png",
+        prep: "assets/charms/horse.prep.json",
+        sizeMm: Object.freeze({ w: 95, h: 70 }),
+        bboxPx: Object.freeze({ x: 190, y: 376, w: 868, h: 636 }),
+        fgBboxPx: Object.freeze({ x: 190, y: 376, w: 868, h: 636 }),
+        pxPerMm: 9.136842105263158,
+        attachmentMode: "none",
+        threadColor: null,
+        stitchMode: "none",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.035062745098039215,
+      }),
+      horseshoe: Object.freeze({
+        label: "horseshoe",
+        base: "assets/charms/horseshoe.base.png",
+        masks: "assets/charms/horseshoe.masks.png",
+        prep: "assets/charms/horseshoe.prep.json",
+        sizeMm: Object.freeze({ w: 46, h: 54 }),
+        bboxPx: Object.freeze({ x: 203, y: 360, w: 518, h: 609 }),
+        fgBboxPx: Object.freeze({ x: 203, y: 360, w: 518, h: 611 }),
+        pxPerMm: 11.26086956521739,
+        attachmentMode: "none",
+        threadColor: "light",
+        stitchMode: "detect",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.14577490196078433,
+      }),
+      frenchie: Object.freeze({
+        label: "frenchie",
+        base: "assets/charms/frenchie.base.png",
+        masks: "assets/charms/frenchie.masks.png",
+        prep: "assets/charms/frenchie.prep.json",
+        sizeMm: Object.freeze({ w: 60, h: 75 }),
+        bboxPx: Object.freeze({ x: 89, y: 161, w: 570, h: 713 }),
+        fgBboxPx: Object.freeze({ x: 89, y: 161, w: 570, h: 713 }),
+        pxPerMm: 9.5,
+        attachmentMode: "none",
+        threadColor: null,
+        stitchMode: "none",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.8739866666666666,
+      }),
+      dachshund: Object.freeze({
+        label: "dachshund",
+        base: "assets/charms/dachshund.base.png",
+        masks: "assets/charms/dachshund.masks.png",
+        prep: "assets/charms/dachshund.prep.json",
+        sizeMm: Object.freeze({ w: 90, h: 60 }),
+        bboxPx: Object.freeze({ x: 81, y: 262, w: 978, h: 652 }),
+        fgBboxPx: Object.freeze({ x: 81, y: 262, w: 978, h: 652 }),
+        pxPerMm: 10.866666666666667,
+        attachmentMode: "none",
+        threadColor: null,
+        stitchMode: "none",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.3233239215686275,
+      }),
+      toypoodle: Object.freeze({
+        label: "toy poodle",
+        base: "assets/charms/toypoodle.base.png",
+        masks: "assets/charms/toypoodle.masks.png",
+        prep: "assets/charms/toypoodle.prep.json",
+        sizeMm: Object.freeze({ w: 80, h: 60 }),
+        bboxPx: Object.freeze({ x: 118, y: 303, w: 773, h: 580 }),
+        fgBboxPx: Object.freeze({ x: 118, y: 303, w: 773, h: 580 }),
+        pxPerMm: 9.6625,
+        attachmentMode: "none",
+        threadColor: null,
+        stitchMode: "none",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.39121960784313725,
+      }),
+      osanpo: Object.freeze({
+        label: "osanpo",
+        base: "assets/charms/osanpo.base.png",
+        masks: "assets/charms/osanpo.masks.png",
+        prep: "assets/charms/osanpo.prep.json",
+        sizeMm: Object.freeze({ w: 92, h: 40 }),
+        bboxPx: Object.freeze({ x: 363, y: 252, w: 434, h: 704 }),
+        fgBboxPx: Object.freeze({ x: 363, y: 252, w: 436, h: 704 }),
+        pxPerMm: 6.909872461132081,
+        attachmentMode: "none",
+        threadColor: "light",
+        stitchMode: "detect",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.031105098039215684,
+      }),
+      cat: Object.freeze({
+        label: "cat",
+        base: "assets/charms/cat.base.png",
+        masks: "assets/charms/cat.masks.png",
+        prep: "assets/charms/cat.prep.json",
+        sizeMm: Object.freeze({ w: 68, h: 65 }),
+        bboxPx: Object.freeze({ x: 140, y: 348, w: 709, h: 677 }),
+        fgBboxPx: Object.freeze({ x: 140, y: 348, w: 709, h: 677 }),
+        pxPerMm: 10.426470588235293,
+        attachmentMode: "none",
+        threadColor: null,
+        stitchMode: "none",
+        stitchPaths: Object.freeze([]),
+        baseLum: 0.13245098039215686,
+      }),
+    });
+
+    const COLORS = Object.freeze([
+      { name: "ゴールド", group: "イエロー/オレンジ", hex: "#cb945f" },
+      { name: "オレンジ", group: "イエロー/オレンジ", hex: "#e59032" },
+      { name: "ライムイエロー", group: "イエロー/オレンジ", hex: "#f1e157" },
+      { name: "ペールイエロー", group: "イエロー/オレンジ", hex: "#f5ebb7" },
+      { name: "ブリック", group: "イエロー/オレンジ", hex: "#8a5653" },
+      { name: "ピスタチオ", group: "イエロー/オレンジ", hex: "#99b482" },
+      { name: "ブラック", group: "ベーシック", hex: "#41413d" },
+      { name: "グレージュ", group: "ベーシック", hex: "#817469" },
+      { name: "ブラウン", group: "ベーシック", hex: "#925a45" },
+      { name: "チャコールグレー", group: "ベーシック", hex: "#616162" },
+      { name: "アイボリー", group: "ベーシック", hex: "#eee9de" },
+      { name: "エトープ", group: "ベーシック", hex: "#a18c71" },
+      { name: "ライトブルー", group: "ブルー", hex: "#afece8" },
+      { name: "シェルブルー", group: "ブルー", hex: "#6cb9cf" },
+      { name: "ミストブルー", group: "ブルー", hex: "#7cacc1" },
+      { name: "アイスグレー", group: "ブルー", hex: "#cccecd" },
+      { name: "ロイヤルブルー", group: "ブルー", hex: "#4661c6" },
+      { name: "ネイビー", group: "ブルー", hex: "#3a4b60" },
+      { name: "ピンク", group: "ピンク/レッド", hex: "#f87f8f" },
+      { name: "レッド", group: "ピンク/レッド", hex: "#e55a60" },
+      { name: "ローズピンク", group: "ピンク/レッド", hex: "#a94174" },
+      { name: "パープル", group: "ピンク/レッド", hex: "#a854a4" },
+      { name: "ペールピンク", group: "ピンク/レッド", hex: "#e8cfde" },
+      { name: "コーラルピンク", group: "ピンク/レッド", hex: "#f0a180" },
+    ]);
+
+    const GROUPS = Object.freeze(["すべて", "イエロー/オレンジ", "ベーシック", "ブルー", "ピンク/レッド"]);
+    const TRANSFER_FIELDS = Object.freeze([
+      "sizeMm", "bboxPx", "fgBboxPx", "pxPerMm", "attachmentMode",
+      "threadColor", "stitchMode", "stitchPaths", "baseLum",
+    ]);
+
+    const state = {
+      representative: {
+        charm: "horseshoe",
+        color: COLORS.find((color) => color.name === "ネイビー") || COLORS[0],
+      },
+      colorGroup: "すべて",
+      metal: "silver",
+      logo: "gold",
+      stitch: "white",
+    };
+
+    const canvas = document.getElementById("previewCanvas");
+    const ctx = canvas.getContext("2d", { alpha: true });
+    const loadingEl = document.getElementById("loading");
+    const summaryEl = document.getElementById("summary");
+    const copySummaryBtn = document.getElementById("copySummary");
+    const copyStatusEl = document.getElementById("copyStatus");
+    const colorGroupEl = document.getElementById("colorGroup");
+    const colorSwatchesEl = document.getElementById("colorSwatches");
+    const maskCanvas = document.getElementById("maskCanvas");
+    const maskCtx = DEBUG ? maskCanvas.getContext("2d", { alpha: true }) : null;
+    const debugStatusEl = document.getElementById("debugStatus");
+    const debugResultsEl = document.getElementById("debugResults");
+
+    canvas.width = LAYOUT.stageMm.w * LAYOUT.pxPerMmStage;
+    canvas.height = LAYOUT.stageMm.h * LAYOUT.pxPerMmStage;
+    if (DEBUG) document.body.classList.add("debug");
+
+    const assetPromises = new Map();
+    const ringPromises = new Map();
+    const bitmapInFlight = new Map();
+    let renderGen = 0;
+    let lastRenderedGen = 0;
+    let lastRenderPromise = Promise.resolve({ status: "idle", durationMs: 0 });
+    let lastRenderDurationMs = 0;
+    let debugReport = null;
+    const copyFeedbackState = { timer: null, clearTimer: null, token: 0 };
+    let debugSwatchRenderOverride = null;
+
+    const runtimeStats = {
+      cacheHits: 0,
+      cacheMisses: 0,
+      recolorCount: 0,
+      evictionCount: 0,
+      closedBitmapCount: 0,
+      discardedGenerationCount: 0,
+      drawCount: 0,
+    };
+
+    class BitmapLRU {
+      constructor(limit, options = {}) {
+        this.limit = limit;
+        this.entries = new Map();
+        this.stats = options.stats === undefined ? runtimeStats : options.stats;
+        this.close = options.close || closeBitmap;
+      }
+
+      acquire(key) {
+        if (!this.entries.has(key)) {
+          if (this.stats) this.stats.cacheMisses += 1;
+          return null;
+        }
+        const entry = this.entries.get(key);
+        this.entries.delete(key);
+        this.entries.set(key, entry);
+        if (this.stats) this.stats.cacheHits += 1;
+        return this.acquireEntry(entry);
+      }
+
+      acquireEntry(entry) {
+        if (!entry || entry.closed) throw new Error("close済みビットマップはacquireできません。");
+        entry.leases += 1;
+        let released = false;
+        return Object.freeze({
+          bitmap: entry.bitmap,
+          release: () => {
+            if (released) return;
+            released = true;
+            entry.leases -= 1;
+            if (entry.leases < 0) throw new Error("ビットマップleaseの過剰releaseを検出しました。");
+            if (entry.leases === 0 && entry.pendingClose) this.closeEntry(entry);
+          },
+        });
+      }
+
+      closeEntry(entry) {
+        if (entry.closed) return;
+        entry.closed = true;
+        entry.pendingClose = false;
+        this.close(entry.bitmap);
+      }
+
+      retireEntry(entry) {
+        entry.cached = false;
+        entry.pendingClose = true;
+        if (entry.leases === 0) this.closeEntry(entry);
+      }
+
+      peek(key) {
+        const entry = this.entries.get(key);
+        return entry ? entry.bitmap : null;
+      }
+
+      set(key, bitmap) {
+        if (this.entries.has(key)) {
+          const previous = this.entries.get(key);
+          if (previous.bitmap === bitmap) {
+            this.entries.delete(key);
+            this.entries.set(key, previous);
+            return previous;
+          }
+          this.entries.delete(key);
+          this.retireEntry(previous);
+        }
+        const entry = {
+          key,
+          bitmap,
+          leases: 0,
+          cached: true,
+          pendingClose: false,
+          closed: false,
+        };
+        this.entries.set(key, entry);
+        while (this.entries.size > this.limit) {
+          const oldestKey = this.entries.keys().next().value;
+          const oldestEntry = this.entries.get(oldestKey);
+          this.entries.delete(oldestKey);
+          if (this.stats) this.stats.evictionCount += 1;
+          this.retireEntry(oldestEntry);
+        }
+        return entry;
+      }
+
+      clear() {
+        for (const entry of this.entries.values()) this.retireEntry(entry);
+        this.entries.clear();
+      }
+
+      keys() {
+        return [...this.entries.keys()];
+      }
+
+      get size() {
+        return this.entries.size;
+      }
+    }
+
+    const bitmapCache = new BitmapLRU(8);
+
+    function closeBitmap(bitmap) {
+      if (bitmap && typeof bitmap.close === "function") {
+        bitmap.close();
+        runtimeStats.closedBitmapCount += 1;
+      }
+    }
+
+    function clamp(value, min = 0, max = 255) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function hexToRgb(hex) {
+      const value = Number.parseInt(hex.slice(1), 16);
+      return {
+        r: (value >> 16) & 255,
+        g: (value >> 8) & 255,
+        b: value & 255,
+      };
+    }
+
+    // 係数は b29274f の参照実装に固定。全呼び出しで shadeFactor=1.0 を明示する。
+    function photoLeatherTone(base, target, baseLum, shadeFactor) {
+      const lum = (0.2126 * base.r + 0.7152 * base.g + 0.0722 * base.b) / 255;
+      let ratio = Math.max(0.35, Math.min(1.60, lum / (baseLum || 0.001)));
+      ratio *= shadeFactor;
+      let r = target.r * ratio;
+      let g = target.g * ratio;
+      let b = target.b * ratio;
+      if (lum >= 0.94) {
+        const blend = Math.min(0.38, ((lum - 0.94) / 0.06) * 0.38);
+        r = r * (1 - blend) + 255 * blend;
+        g = g * (1 - blend) + 255 * blend;
+        b = b * (1 - blend) + 255 * blend;
+      }
+      return { r: clamp(r), g: clamp(g), b: clamp(b) };
+    }
+
+    // index.html の metalTone() を変更せず流用。適用先は masks.G のロゴのみ。
+    function metalTone(base, mode) {
+      const lum = (0.2126 * base.r + 0.7152 * base.g + 0.0722 * base.b) / 255;
+      const highlight = mode === "silver"
+        ? { r: 243, g: 246, b: 252 }
+        : { r: 236, g: 223, b: 192 };
+      const shadow = mode === "silver"
+        ? { r: 109, g: 118, b: 130 }
+        : { r: 117, g: 100, b: 72 };
+      const mix = 0.18 + lum * 0.82;
+      let r = shadow.r * (1 - mix) + highlight.r * mix;
+      let g = shadow.g * (1 - mix) + highlight.g * mix;
+      let b = shadow.b * (1 - mix) + highlight.b * mix;
+      if (mode === "gold") {
+        const mute = 0.14;
+        const gray = (r + g + b) / 3;
+        r = r * (1 - mute) + gray * mute;
+        g = g * (1 - mute) + gray * mute;
+        b = b * (1 - mute) + gray * mute;
+      }
+      return { r: clamp(r), g: clamp(g), b: clamp(b) };
+    }
+
+    function stitchColor(base, selection) {
+      const lum = (0.2126 * base.r + 0.7152 * base.g + 0.0722 * base.b) / 255;
+      const color = selection === "white"
+        ? { r: 245, g: 245, b: 244 }
+        : { r: 26, g: 26, b: 22 };
+      const shade = 0.85 + lum * 0.3;
+      return {
+        r: clamp(color.r * shade),
+        g: clamp(color.g * shade),
+        b: clamp(color.b * shade),
+      };
+    }
+
+    function cacheKey(job) {
+      return `${job.charmKey}|${job.colorHex}|${job.logo}|${job.stitch}`;
+    }
+
+    function makeBitmapJob(selection, gen, logo, stitch) {
+      if (!selection || selection.charm === "none") return null;
+      const charm = CHARMS[selection.charm];
+      if (!charm) throw new Error(`未知のチャーム: ${selection.charm}`);
+      return Object.freeze({
+        gen,
+        charmKey: selection.charm,
+        charm,
+        colorName: selection.color.name,
+        colorHex: selection.color.hex,
+        target: Object.freeze(hexToRgb(selection.color.hex)),
+        logo,
+        stitch,
+      });
+    }
+
+    function captureRenderJob(gen) {
+      const representative = Object.freeze({
+        charm: state.representative.charm,
+        color: Object.freeze({ ...state.representative.color }),
+      });
+      const logo = state.logo;
+      const stitch = state.stitch;
+      return Object.freeze({
+        gen,
+        metal: state.metal,
+        representative: makeBitmapJob(representative, gen, logo, stitch),
+      });
+    }
+
+    async function responseBlob(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+      return response.blob();
+    }
+
+    async function decodeImageData(url) {
+      const blob = await responseBlob(url);
+      const bitmap = await createImageBitmap(blob);
+      try {
+        const work = document.createElement("canvas");
+        work.width = bitmap.width;
+        work.height = bitmap.height;
+        const workCtx = work.getContext("2d", { willReadFrequently: true });
+        workCtx.drawImage(bitmap, 0, 0);
+        return workCtx.getImageData(0, 0, work.width, work.height);
+      } finally {
+        closeBitmap(bitmap);
+      }
+    }
+
+    async function loadAsset(charmKey) {
+      if (assetPromises.has(charmKey)) return assetPromises.get(charmKey);
+      const charm = CHARMS[charmKey];
+      if (!charm) throw new Error(`未知のチャーム: ${charmKey}`);
+      const promise = Promise.all([
+        decodeImageData(charm.base),
+        decodeImageData(charm.masks),
+      ]).then(([base, masks]) => {
+        if (base.width !== masks.width || base.height !== masks.height) {
+          throw new Error(`${charmKey}: base/masks寸法不一致`);
+        }
+        return Object.freeze({ base, masks, width: base.width, height: base.height });
+      }).catch((error) => {
+        assetPromises.delete(charmKey);
+        throw error;
+      });
+      assetPromises.set(charmKey, promise);
+      return promise;
+    }
+
+    async function loadRing(mode) {
+      if (ringPromises.has(mode)) return ringPromises.get(mode);
+      const path = mode === "gold" ? "assets/rings/ring-gold.png" : "assets/rings/ring-silver.png";
+      const promise = responseBlob(path).then(async (blob) => {
+        const bitmap = await createImageBitmap(blob);
+        return Object.freeze({ bitmap, width: bitmap.width, height: bitmap.height, path });
+      }).catch((error) => {
+        ringPromises.delete(mode);
+        throw error;
+      });
+      ringPromises.set(mode, promise);
+      return promise;
+    }
+
+    function recolorCharmImageData(job, asset) {
+      const out = new ImageData(asset.width, asset.height);
+      const base = asset.base.data;
+      const masks = asset.masks.data;
+      const output = out.data;
+
+      for (let i = 0; i < base.length; i += 4) {
+        const baseAlpha = base[i + 3];
+        output[i + 3] = baseAlpha;
+        if (baseAlpha === 0) continue;
+
+        // 保持判定はαだけ。保持画素では masks.RGB を一切読まない。
+        if (masks[i + 3] < 128) {
+          output[i] = base[i];
+          output[i + 1] = base[i + 1];
+          output[i + 2] = base[i + 2];
+          continue;
+        }
+
+        const weightLeather = masks[i] / 255;
+        const weightLogo = masks[i + 1] / 255;
+        const weightStitch = masks[i + 2] / 255;
+        const source = { r: base[i], g: base[i + 1], b: base[i + 2] };
+        const leather = photoLeatherTone(source, job.target, job.charm.baseLum, 1.0);
+        const logo = metalTone(source, job.logo);
+        const stitch = stitchColor(source, job.stitch);
+        output[i] = leather.r * weightLeather + logo.r * weightLogo + stitch.r * weightStitch;
+        output[i + 1] = leather.g * weightLeather + logo.g * weightLogo + stitch.g * weightStitch;
+        output[i + 2] = leather.b * weightLeather + logo.b * weightLogo + stitch.b * weightStitch;
+      }
+
+      return out;
+    }
+
+    async function buildCharmBitmap(job) {
+      const asset = await loadAsset(job.charmKey);
+      const out = recolorCharmImageData(job, asset);
+
+      const work = document.createElement("canvas");
+      work.width = asset.width;
+      work.height = asset.height;
+      work.getContext("2d").putImageData(out, 0, 0);
+      runtimeStats.recolorCount += 1;
+      return createImageBitmap(work);
+    }
+
+    const defaultBitmapRuntime = Object.freeze({
+      cache: bitmapCache,
+      inFlight: bitmapInFlight,
+      build: buildCharmBitmap,
+    });
+
+    function acquireCharmBitmap(job, runtime = defaultBitmapRuntime) {
+      const key = cacheKey(job);
+      const cachedLease = runtime.cache.acquire(key);
+      if (cachedLease) return Promise.resolve(cachedLease);
+
+      let flight = runtime.inFlight.get(key);
+      if (!flight) {
+        flight = { waiters: [] };
+        runtime.inFlight.set(key, flight);
+        Promise.resolve().then(() => runtime.build(job)).then((bitmap) => {
+          const entry = runtime.cache.set(key, bitmap);
+          for (const waiter of flight.waiters) {
+            try {
+              waiter.resolve(runtime.cache.acquireEntry(entry));
+            } catch (error) {
+              waiter.reject(error);
+            }
+          }
+        }).catch((error) => {
+          for (const waiter of flight.waiters) waiter.reject(error);
+        }).finally(() => {
+          if (runtime.inFlight.get(key) === flight) runtime.inFlight.delete(key);
+        });
+      }
+
+      return new Promise((resolve, reject) => {
+        flight.waiters.push({ resolve, reject });
+      });
+    }
+
+    function onePointPlacement(charm) {
+      const mmPerAssetPx = 1 / charm.pxPerMm;
+      const ringBottomY = LAYOUT.ringCenterYMm + LAYOUT.ringOuterMm / 2;
+      return Object.freeze({
+        xMm: LAYOUT.ringCenterXMm - (charm.bboxPx.x + charm.bboxPx.w / 2) * mmPerAssetPx,
+        yMm: ringBottomY + LAYOUT.ringGapMm - charm.fgBboxPx.y * mmPerAssetPx,
+        mmPerAssetPx,
+      });
+    }
+
+    function paintStageBackground() {
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, "#faf8f2");
+      gradient.addColorStop(0.55, "#f4f1e9");
+      gradient.addColorStop(1, "#eee9de");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawDebugGrid() {
+      const pixelsPerMm = LAYOUT.pxPerMmStage;
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.font = "16px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textBaseline = "top";
+      for (let mm = 0; mm <= LAYOUT.stageMm.w; mm += 10) {
+        const x = mm * pixelsPerMm + 0.5;
+        ctx.strokeStyle = mm % 50 === 0 ? "rgba(135,63,43,0.34)" : "rgba(40,45,39,0.12)";
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+        if (mm < LAYOUT.stageMm.w) {
+          ctx.fillStyle = "rgba(90,55,43,0.66)";
+          ctx.fillText(`${mm}`, x + 4, 4);
+        }
+      }
+      for (let mm = 0; mm <= LAYOUT.stageMm.h; mm += 10) {
+        const y = mm * pixelsPerMm + 0.5;
+        ctx.strokeStyle = mm % 50 === 0 ? "rgba(135,63,43,0.34)" : "rgba(40,45,39,0.12)";
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+        if (mm > 0 && mm < LAYOUT.stageMm.h) {
+          ctx.fillStyle = "rgba(90,55,43,0.66)";
+          ctx.fillText(`${mm}mm`, 4, y + 4);
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawStage(renderJob, bitmap, ring) {
+      paintStageBackground();
+      const pixelsPerMm = LAYOUT.pxPerMmStage;
+      const ringSize = LAYOUT.ringOuterMm * pixelsPerMm;
+      const ringX = (LAYOUT.ringCenterXMm - LAYOUT.ringOuterMm / 2) * pixelsPerMm;
+      const ringY = (LAYOUT.ringCenterYMm - LAYOUT.ringOuterMm / 2) * pixelsPerMm;
+      ctx.drawImage(ring.bitmap, ringX, ringY, ringSize, ringSize);
+
+      if (renderJob.representative && bitmap) {
+        const placement = onePointPlacement(renderJob.representative.charm);
+        const scale = pixelsPerMm / renderJob.representative.charm.pxPerMm;
+        ctx.drawImage(
+          bitmap,
+          placement.xMm * pixelsPerMm,
+          placement.yMm * pixelsPerMm,
+          bitmap.width * scale,
+          bitmap.height * scale,
+        );
+      }
+
+      if (DEBUG) drawDebugGrid();
+      runtimeStats.drawCount += 1;
+    }
+
+    function setLoading(gen, message, isError = false) {
+      loadingEl.dataset.gen = String(gen);
+      loadingEl.textContent = message;
+      loadingEl.classList.toggle("is-error", isError);
+      loadingEl.hidden = false;
+    }
+
+    function clearLoading(gen) {
+      if (loadingEl.dataset.gen === String(gen)) {
+        loadingEl.hidden = true;
+        loadingEl.classList.remove("is-error");
+      }
+    }
+
+    const defaultRenderRuntime = Object.freeze({
+      acquire: acquireCharmBitmap,
+      ring: loadRing,
+      currentGeneration: () => renderGen,
+      draw: drawStage,
+      discard: () => { runtimeStats.discardedGenerationCount += 1; },
+      commitDraw: (gen, durationMs) => {
+        lastRenderedGen = gen;
+        lastRenderDurationMs = durationMs;
+      },
+      clearLoading,
+      showError: (gen) => {
+        setLoading(gen, "画像の読み込みに失敗しました。ファイル名をご確認ください。", true);
+      },
+      reportError: (error) => { console.error(error); },
+    });
+
+    async function renderSnapshot(renderJob, startedAt, runtime = defaultRenderRuntime) {
+      let bitmapLease = null;
+      try {
+        const settled = await Promise.allSettled([
+          renderJob.representative ? runtime.acquire(renderJob.representative) : Promise.resolve(null),
+          runtime.ring(renderJob.metal),
+        ]);
+        if (settled[0].status === "fulfilled") bitmapLease = settled[0].value;
+        const rejected = settled.find((result) => result.status === "rejected");
+        if (rejected) throw rejected.reason;
+        const ring = settled[1].value;
+        if (renderJob.gen !== runtime.currentGeneration()) {
+          runtime.discard();
+          return { status: "discarded", gen: renderJob.gen, durationMs: performance.now() - startedAt };
+        }
+        runtime.draw(renderJob, bitmapLease ? bitmapLease.bitmap : null, ring);
+        const durationMs = performance.now() - startedAt;
+        runtime.commitDraw(renderJob.gen, durationMs);
+        runtime.clearLoading(renderJob.gen);
+        return { status: "drawn", gen: renderJob.gen, durationMs };
+      } catch (error) {
+        if (renderJob.gen === runtime.currentGeneration()) runtime.showError(renderJob.gen);
+        runtime.reportError(error);
+        return { status: "error", gen: renderJob.gen, durationMs: performance.now() - startedAt, error: String(error) };
+      } finally {
+        if (bitmapLease) bitmapLease.release();
+      }
+    }
+
+    function requestRender(reason = "input") {
+      const startedAt = performance.now();
+      const gen = ++renderGen;
+      const renderJob = captureRenderJob(gen);
+      setLoading(gen, "画像を読み込み中...");
+      lastRenderPromise = renderSnapshot(renderJob, startedAt).then((result) => ({ ...result, reason }));
+      return lastRenderPromise;
+    }
+
+    function colorsInGroup(group) {
+      return group === "すべて" ? COLORS : COLORS.filter((color) => color.group === group);
+    }
+
+    function buildGroupSelect() {
+      colorGroupEl.replaceChildren();
+      for (const group of GROUPS) {
+        const option = document.createElement("option");
+        option.value = group;
+        option.textContent = group;
+        option.selected = group === state.colorGroup;
+        colorGroupEl.appendChild(option);
+      }
+    }
+
+    function updateSwatchSelection() {
+      colorSwatchesEl.querySelectorAll(".swatch").forEach((button) => {
+        const selected = button.dataset.colorName === state.representative.color.name;
+        button.classList.toggle("active", selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
+    }
+
+    function selectLeatherColor(color) {
+      state.representative.color = color;
+      updateSwatchSelection();
+      updateSummary();
+      const render = DEBUG && debugSwatchRenderOverride
+        ? debugSwatchRenderOverride
+        : requestRender;
+      return render("leather-color");
+    }
+
+    function buildSwatches() {
+      colorSwatchesEl.replaceChildren();
+      for (const color of colorsInGroup(state.colorGroup)) {
+        const button = document.createElement("button");
+        const selected = color.name === state.representative.color.name;
+        button.type = "button";
+        button.className = `swatch${selected ? " active" : ""}`;
+        button.style.background = color.hex;
+        button.title = color.name;
+        button.dataset.colorName = color.name;
+        button.setAttribute("aria-label", color.name);
+        button.setAttribute("aria-pressed", String(selected));
+        button.addEventListener("click", () => {
+          selectLeatherColor(color);
+        });
+        colorSwatchesEl.appendChild(button);
+      }
+    }
+
+    function updateOptionButtons(prefix, value) {
+      document.querySelectorAll(`[id^="${prefix}"]`).forEach((button) => {
+        const active = button.dataset.value === value;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function displayMetal(value) {
+      return value === "silver" ? "シルバー" : "ゴールド";
+    }
+
+    function displayLogo(value) {
+      return value === "silver" ? "シルバー" : "ゴールド";
+    }
+
+    function displayStitch(value) {
+      return value === "white" ? "ホワイト" : "ブラック";
+    }
+
+    function summaryText() {
+      const charm = CHARMS[state.representative.charm];
+      return `現在の組み合わせ: ${charm.label}「${state.representative.color.name}」（1点） / 金具「${displayMetal(state.metal)}」 / ロゴ「${displayLogo(state.logo)}」 / ステッチ「${displayStitch(state.stitch)}」。`;
+    }
+
+    function updateSummary() {
+      summaryEl.textContent = summaryText();
+    }
+
+    function createCopyTextarea(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      return textarea;
+    }
+
+    const defaultCopyRuntime = Object.freeze({
+      feedback: copyFeedbackState,
+      summary: summaryEl,
+      button: copySummaryBtn,
+      status: copyStatusEl,
+      canUseClipboard: () => Boolean(navigator.clipboard && window.isSecureContext),
+      writeClipboard: (text) => navigator.clipboard.writeText(text),
+      createTextarea: createCopyTextarea,
+      appendTextarea: (textarea) => document.body.appendChild(textarea),
+      selectTextarea: (textarea) => textarea.select(),
+      execCopy: () => document.execCommand("copy"),
+      removeTextarea: (textarea) => textarea.remove(),
+      activeElement: () => document.activeElement,
+      isConnected: (element) => Boolean(element?.isConnected),
+      focus: (element) => element.focus({ preventScroll: true }),
+      setTimer: (callback, delay) => window.setTimeout(callback, delay),
+      clearTimer: (timer) => window.clearTimeout(timer),
+    });
+
+    function cancelCopyFeedbackTimer(feedback) {
+      if (feedback.timer === null) return;
+      feedback.clearTimer(feedback.timer);
+      feedback.timer = null;
+      feedback.clearTimer = null;
+    }
+
+    async function copySummaryText(runtime = defaultCopyRuntime) {
+      const text = runtime.summary.textContent.trim();
+      if (!text) return { copied: false, method: "empty", stale: false, focusRestored: true };
+      const focusBefore = runtime.activeElement();
+      const feedback = runtime.feedback;
+      const feedbackToken = ++feedback.token;
+      cancelCopyFeedbackTimer(feedback);
+      runtime.button.textContent = "コピー";
+      runtime.status.textContent = "";
+      let copied = false;
+      let method = "none";
+      let focusRestored = !focusBefore || !runtime.isConnected(focusBefore);
+
+      try {
+        try {
+          if (runtime.canUseClipboard()) {
+            await runtime.writeClipboard(text);
+            copied = true;
+            method = "clipboard";
+          }
+        } catch {
+          copied = false;
+        }
+
+        if (!copied) {
+          method = "fallback";
+          let textarea = null;
+          try {
+            textarea = runtime.createTextarea(text);
+            runtime.appendTextarea(textarea);
+            runtime.selectTextarea(textarea);
+            copied = Boolean(runtime.execCopy());
+          } catch {
+            copied = false;
+          } finally {
+            if (textarea) runtime.removeTextarea(textarea);
+          }
+        }
+      } finally {
+        if (focusBefore && runtime.isConnected(focusBefore)) {
+          try {
+            runtime.focus(focusBefore);
+          } catch {
+            // focus復元不能でもコピー結果のフィードバックは維持する。
+          }
+          focusRestored = runtime.activeElement() === focusBefore;
+        }
+      }
+
+      if (feedbackToken !== feedback.token) {
+        return { copied, method, stale: true, focusRestored };
+      }
+      if (copied) {
+        runtime.button.textContent = "コピーしました";
+        runtime.status.textContent = "組み合わせをコピーしました。";
+      } else {
+        runtime.button.textContent = "コピー失敗";
+        runtime.status.textContent = "コピーできませんでした。ブラウザの権限をご確認ください。";
+      }
+      feedback.clearTimer = runtime.clearTimer;
+      feedback.timer = runtime.setTimer(() => {
+        if (feedbackToken === feedback.token) {
+          runtime.button.textContent = "コピー";
+          runtime.status.textContent = "";
+          feedback.timer = null;
+          feedback.clearTimer = null;
+        }
+      }, 1200);
+      return { copied, method, stale: false, focusRestored };
+    }
+
+    function bindControls() {
+      colorGroupEl.addEventListener("change", () => {
+        state.colorGroup = colorGroupEl.value;
+        buildSwatches();
+      });
+
+      document.getElementById("metalSilver").addEventListener("click", () => {
+        state.metal = "silver";
+        updateOptionButtons("metal", state.metal);
+        updateSummary();
+        requestRender("metal");
+      });
+      document.getElementById("metalGold").addEventListener("click", () => {
+        state.metal = "gold";
+        updateOptionButtons("metal", state.metal);
+        updateSummary();
+        requestRender("metal");
+      });
+      document.getElementById("logoGold").addEventListener("click", () => {
+        state.logo = "gold";
+        updateOptionButtons("logo", state.logo);
+        updateSummary();
+        requestRender("logo");
+      });
+      document.getElementById("logoSilver").addEventListener("click", () => {
+        state.logo = "silver";
+        updateOptionButtons("logo", state.logo);
+        updateSummary();
+        requestRender("logo");
+      });
+      document.getElementById("stitchBlack").addEventListener("click", () => {
+        state.stitch = "black";
+        updateOptionButtons("stitch", state.stitch);
+        updateSummary();
+        requestRender("stitch");
+      });
+      document.getElementById("stitchWhite").addEventListener("click", () => {
+        state.stitch = "white";
+        updateOptionButtons("stitch", state.stitch);
+        updateSummary();
+        requestRender("stitch");
+      });
+      copySummaryBtn.addEventListener("click", () => {
+        copySummaryText().catch((error) => { console.error(error); });
+      });
+    }
+
+    function deepEqualExact(left, right) {
+      if (Object.is(left, right)) return true;
+      if (typeof left !== typeof right || left === null || right === null) return false;
+      if (Array.isArray(left) || Array.isArray(right)) {
+        if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+        return left.every((value, index) => deepEqualExact(value, right[index]));
+      }
+      if (typeof left === "object") {
+        const leftKeys = Object.keys(left).sort();
+        const rightKeys = Object.keys(right).sort();
+        if (!deepEqualExact(leftKeys, rightKeys)) return false;
+        return leftKeys.every((key) => deepEqualExact(left[key], right[key]));
+      }
+      return false;
+    }
+
+    function prepTransferFields(prep) {
+      return {
+        sizeMm: prep.inputs.sizeMm,
+        bboxPx: prep.derived.bboxPx,
+        fgBboxPx: prep.derived.fgBboxPx,
+        pxPerMm: prep.derived.pxPerMm,
+        attachmentMode: prep.inputs.attachmentMode,
+        threadColor: prep.inputs.threadColor,
+        stitchMode: prep.inputs.stitchMode,
+        stitchPaths: prep.derived.stitchPathsAsset,
+        baseLum: prep.derived.baseLum,
+      };
+    }
+
+    function charmTransferFields(charm) {
+      return Object.fromEntries(TRANSFER_FIELDS.map((field) => [field, charm[field]]));
+    }
+
+    function finiteToneCheck() {
+      const failures = [];
+      let checked = 0;
+      for (const charm of Object.values(CHARMS)) {
+        for (const color of COLORS) {
+          const target = hexToRgb(color.hex);
+          const output = photoLeatherTone(
+            { r: 128, g: 128, b: 128 },
+            target,
+            charm.baseLum,
+            1.0,
+          );
+          checked += 1;
+          if (![output.r, output.g, output.b].every(Number.isFinite)) {
+            failures.push(`${charm.label} × ${color.name}`);
+          }
+        }
+      }
+      return { ok: checked === 168 && failures.length === 0, checked, failures };
+    }
+
+    function inspectOwnership(charmKey, asset) {
+      const base = asset.base.data;
+      const masks = asset.masks.data;
+      let violations = 0;
+      let foregroundPxCount = 0;
+      let ownedPxCount = 0;
+      let keepPxCount = 0;
+      let featherPxCount = 0;
+      let stitchOwnedPxCount = 0;
+      let coreLeatherPxCount = 0;
+
+      for (let i = 0; i < base.length; i += 4) {
+        const baseAlpha = base[i + 3];
+        const maskAlpha = masks[i + 3];
+        if (baseAlpha > 0) {
+          foregroundPxCount += 1;
+          if (baseAlpha < 255) featherPxCount += 1;
+          if (maskAlpha < 128) {
+            // 保持画素はαだけを読み、masks.RGBには触れない。
+            keepPxCount += 1;
+          } else {
+            ownedPxCount += 1;
+            const red = masks[i];
+            const green = masks[i + 1];
+            const blue = masks[i + 2];
+            if (red + green + blue !== 255) violations += 1;
+            if (blue > 0) stitchOwnedPxCount += 1;
+            if (baseAlpha === 255 && red === 255) coreLeatherPxCount += 1;
+          }
+        } else if (maskAlpha !== 255 || masks[i] !== 0 || masks[i + 1] !== 0 || masks[i + 2] !== 0) {
+          violations += 1;
+        }
+      }
+
+      const charm = CHARMS[charmKey];
+      const stitchContract = charm.stitchMode === "detect"
+        ? stitchOwnedPxCount > 0
+        : charm.stitchMode === "none" && stitchOwnedPxCount === 0;
+      return {
+        ok: violations === 0 && coreLeatherPxCount > 0 && featherPxCount > 0 && stitchContract,
+        violations,
+        foregroundPxCount,
+        ownedPxCount,
+        keepPxCount,
+        featherPxCount,
+        stitchOwnedPxCount,
+        coreLeatherPxCount,
+        stitchContract,
+      };
+    }
+
+    function placementFor(charm, slot, count) {
+      const mmPerAssetPx = 1 / charm.pxPerMm;
+      const ringBottomY = LAYOUT.ringCenterYMm + LAYOUT.ringOuterMm / 2;
+      let xMm;
+      if (count === 1) {
+        xMm = LAYOUT.ringCenterXMm - (charm.bboxPx.x + charm.bboxPx.w / 2) * mmPerAssetPx;
+      } else if (slot === "left") {
+        xMm = LAYOUT.ringCenterXMm - LAYOUT.gapMm / 2
+          - (charm.bboxPx.x + charm.bboxPx.w) * mmPerAssetPx;
+      } else {
+        xMm = LAYOUT.ringCenterXMm + LAYOUT.gapMm / 2 - charm.bboxPx.x * mmPerAssetPx;
+      }
+      const yMm = ringBottomY + LAYOUT.ringGapMm - charm.fgBboxPx.y * mmPerAssetPx;
+      return { xMm, yMm, mmPerAssetPx };
+    }
+
+    function foregroundBoundsMm(charm, slot, count) {
+      const placement = placementFor(charm, slot, count);
+      return {
+        left: placement.xMm + charm.fgBboxPx.x * placement.mmPerAssetPx,
+        top: placement.yMm + charm.fgBboxPx.y * placement.mmPerAssetPx,
+        right: placement.xMm + (charm.fgBboxPx.x + charm.fgBboxPx.w) * placement.mmPerAssetPx,
+        bottom: placement.yMm + (charm.fgBboxPx.y + charm.fgBboxPx.h) * placement.mmPerAssetPx,
+      };
+    }
+
+    function geometryCheck64() {
+      const keys = ["none", ...Object.keys(CHARMS)];
+      const failures = [];
+      let checked = 0;
+      const epsilon = 1e-9;
+      for (const leftKey of keys) {
+        for (const rightKey of keys) {
+          checked += 1;
+          const visible = [leftKey, rightKey].filter((key) => key !== "none");
+          if (visible.length === 1) {
+            const charm = CHARMS[visible[0]];
+            const bounds = foregroundBoundsMm(charm, "center", 1);
+            if (bounds.left < -epsilon || bounds.top < -epsilon
+              || bounds.right > LAYOUT.stageMm.w + epsilon
+              || bounds.bottom > LAYOUT.stageMm.h + epsilon) {
+              failures.push(`${leftKey}:${rightKey}`);
+            }
+          } else if (visible.length === 2) {
+            const leftBounds = foregroundBoundsMm(CHARMS[leftKey], "left", 2);
+            const rightBounds = foregroundBoundsMm(CHARMS[rightKey], "right", 2);
+            for (const bounds of [leftBounds, rightBounds]) {
+              if (bounds.left < -epsilon || bounds.top < -epsilon
+                || bounds.right > LAYOUT.stageMm.w + epsilon
+                || bounds.bottom > LAYOUT.stageMm.h + epsilon) {
+                failures.push(`${leftKey}:${rightKey}`);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      const ringBounds = {
+        left: LAYOUT.ringCenterXMm - LAYOUT.ringOuterMm / 2,
+        top: LAYOUT.ringCenterYMm - LAYOUT.ringOuterMm / 2,
+        right: LAYOUT.ringCenterXMm + LAYOUT.ringOuterMm / 2,
+        bottom: LAYOUT.ringCenterYMm + LAYOUT.ringOuterMm / 2,
+      };
+      const ringInside = ringBounds.left >= 0 && ringBounds.top >= 0
+        && ringBounds.right <= LAYOUT.stageMm.w && ringBounds.bottom <= LAYOUT.stageMm.h;
+      const horsePairWidth = CHARMS.horse.sizeMm.w * 2 + LAYOUT.gapMm;
+      const expectedCanvas = {
+        width: LAYOUT.stageMm.w * LAYOUT.pxPerMmStage,
+        height: LAYOUT.stageMm.h * LAYOUT.pxPerMmStage,
+      };
+      const canvasMatches = canvas.width === expectedCanvas.width && canvas.height === expectedCanvas.height;
+      return {
+        ok: checked === 64 && failures.length === 0 && ringInside && horsePairWidth === 198 && canvasMatches,
+        checked,
+        failures,
+        ringBounds,
+        ringInside,
+        horsePairWidth,
+        expectedCanvas,
+        canvasMatches,
+        horseToHorseshoe: CHARMS.horse.sizeMm.w / CHARMS.horseshoe.sizeMm.w,
+      };
+    }
+
+    async function inspectRingAsset(mode) {
+      const path = mode === "gold" ? "assets/rings/ring-gold.png" : "assets/rings/ring-silver.png";
+      const imageData = await decodeImageData(path);
+      const data = imageData.data;
+      let minX = imageData.width;
+      let minY = imageData.height;
+      let maxX = -1;
+      let maxY = -1;
+      let visiblePxCount = 0;
+      for (let y = 0; y < imageData.height; y += 1) {
+        for (let x = 0; x < imageData.width; x += 1) {
+          if (data[(y * imageData.width + x) * 4 + 3] === 0) continue;
+          visiblePxCount += 1;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+      const alphaBounds = visiblePxCount > 0
+        ? { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 }
+        : null;
+      const center = Math.floor(imageData.width / 2);
+      const centerAlpha = data[(center * imageData.width + center) * 4 + 3];
+      const ok = imageData.width === 512 && imageData.height === 512
+        && deepEqualExact(alphaBounds, { x: 0, y: 0, w: 512, h: 512 })
+        && centerAlpha === 0 && visiblePxCount > 0;
+      return { ok, width: imageData.width, height: imageData.height, alphaBounds, centerAlpha, visiblePxCount };
+    }
+
+    function inspectRepresentativeRecolor(asset) {
+      const black = COLORS.find((color) => color.name === "ブラック");
+      const ivory = COLORS.find((color) => color.name === "アイボリー");
+      const baseline = recolorCharmImageData(
+        makeBitmapJob({ charm: "horseshoe", color: black }, 0, "gold", "white"),
+        asset,
+      );
+      const leatherVariant = recolorCharmImageData(
+        makeBitmapJob({ charm: "horseshoe", color: ivory }, 0, "gold", "white"),
+        asset,
+      );
+      const logoVariant = recolorCharmImageData(
+        makeBitmapJob({ charm: "horseshoe", color: black }, 0, "silver", "white"),
+        asset,
+      );
+      const stitchVariant = recolorCharmImageData(
+        makeBitmapJob({ charm: "horseshoe", color: black }, 0, "gold", "black"),
+        asset,
+      );
+      const outputs = [baseline.data, leatherVariant.data, logoVariant.data, stitchVariant.data];
+      const base = asset.base.data;
+      const masks = asset.masks.data;
+      let alphaMismatchPxCount = 0;
+      let keepMismatchPxCount = 0;
+      let leatherDiffPxCount = 0;
+      let logoDiffPxCount = 0;
+      let stitchDiffPxCount = 0;
+
+      const rgbDiffers = (left, right, index) => left[index] !== right[index]
+        || left[index + 1] !== right[index + 1]
+        || left[index + 2] !== right[index + 2];
+
+      for (let i = 0; i < base.length; i += 4) {
+        if (outputs.some((output) => output[i + 3] !== base[i + 3])) alphaMismatchPxCount += 1;
+        if (base[i + 3] === 0) continue;
+        if (masks[i + 3] < 128) {
+          if (outputs.some((output) => rgbDiffers(output, base, i))) keepMismatchPxCount += 1;
+          continue;
+        }
+        if (masks[i] > 0 && rgbDiffers(baseline.data, leatherVariant.data, i)) leatherDiffPxCount += 1;
+        if (masks[i + 1] > 0 && rgbDiffers(baseline.data, logoVariant.data, i)) logoDiffPxCount += 1;
+        if (masks[i + 2] > 0 && rgbDiffers(baseline.data, stitchVariant.data, i)) stitchDiffPxCount += 1;
+      }
+
+      return {
+        ok: alphaMismatchPxCount === 0 && keepMismatchPxCount === 0
+          && leatherDiffPxCount > 0 && logoDiffPxCount > 0 && stitchDiffPxCount > 0,
+        alphaMismatchPxCount,
+        keepMismatchPxCount,
+        leatherDiffPxCount,
+        logoDiffPxCount,
+        stitchDiffPxCount,
+      };
+    }
+
+    function drawMaskVisualization(asset) {
+      if (!DEBUG || !maskCtx) throw new Error("マスク可視化は ?debug=1 でのみ利用できます。");
+      maskCanvas.width = asset.width;
+      maskCanvas.height = asset.height;
+      const output = new ImageData(asset.width, asset.height);
+      const base = asset.base.data;
+      const masks = asset.masks.data;
+      for (let i = 0; i < output.data.length; i += 4) {
+        const baseAlpha = base[i + 3];
+        if (baseAlpha === 0) continue;
+        if (masks[i + 3] < 128) {
+          output.data[i] = 244;
+          output.data[i + 1] = 240;
+          output.data[i + 2] = 232;
+          output.data[i + 3] = baseAlpha;
+          continue;
+        }
+        const red = masks[i] / 255;
+        const green = masks[i + 1] / 255;
+        const blue = masks[i + 2] / 255;
+        output.data[i] = 191 * red + 224 * green + 85 * blue;
+        output.data[i + 1] = 101 * red + 184 * green + 168 * blue;
+        output.data[i + 2] = 85 * red + 79 * green + 196 * blue;
+        output.data[i + 3] = baseAlpha;
+      }
+      maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+      maskCtx.putImageData(output, 0, 0);
+    }
+
+    function addDebugResult(results, name, ok, detail, data = null) {
+      const result = { name, ok: Boolean(ok), detail, data };
+      results.push(result);
+      const item = document.createElement("li");
+      item.className = result.ok ? "pass" : "fail";
+      item.textContent = `${result.ok ? "PASS" : "FAIL"} · ${name} · ${detail}`;
+      debugResultsEl.appendChild(item);
+      return result;
+    }
+
+    async function runDebugChecks() {
+      if (!DEBUG) throw new Error("自動検査は ?debug=1 でのみ実行できます。");
+      debugStatusEl.dataset.status = "running";
+      debugStatusEl.textContent = "RUNNING · 検査中";
+      debugResultsEl.replaceChildren();
+      const results = [];
+
+      const finite = finiteToneCheck();
+      addDebugResult(
+        results,
+        "photoLeatherTone finite",
+        finite.ok,
+        `${finite.checked}/168組・FAIL ${finite.failures.length}件`,
+        finite,
+      );
+
+      for (const [charmKey, charm] of Object.entries(CHARMS)) {
+        try {
+          // prep.json のfetchはこの debug 分岐内だけで行う。
+          const prepResponse = await fetch(charm.prep);
+          if (!prepResponse.ok) throw new Error(`HTTP ${prepResponse.status}`);
+          const prep = await prepResponse.json();
+          const prepFields = prepTransferFields(prep);
+          const charmFields = charmTransferFields(charm);
+          const mismatches = TRANSFER_FIELDS.filter(
+            (field) => !deepEqualExact(charmFields[field], prepFields[field]),
+          );
+          const phase0ChecksPass = ["1", "2", "3", "4", "5", "6", "7"]
+            .every((check) => prep.checks?.[check]?.status === "pass");
+          const verifyPass = prep.verify?.status === "pass"
+            && prep.verify?.inputMatch === true
+            && prep.verify?.outputMatch === true
+            && prep.verify?.regenerationMatch === true;
+          addDebugResult(
+            results,
+            `${charmKey} 転記9項目`,
+            mismatches.length === 0,
+            mismatches.length ? `不一致: ${mismatches.join(", ")}` : "9/9一致",
+            { mismatches, prepFields, charmFields },
+          );
+          addDebugResult(
+            results,
+            `${charmKey} prep検査1〜8`,
+            phase0ChecksPass && verifyPass,
+            `checks1-7=${phase0ChecksPass ? "PASS" : "FAIL"} / verify=${verifyPass ? "PASS" : "FAIL"}`,
+            { phase0ChecksPass, verifyPass },
+          );
+
+          const asset = await loadAsset(charmKey);
+          const ownership = inspectOwnership(charmKey, asset);
+          addDebugResult(
+            results,
+            `${charmKey} 所有権恒等式`,
+            ownership.ok,
+            `違反${ownership.violations}px・keep ${ownership.keepPxCount}px・B ${ownership.stitchOwnedPxCount}px・feather ${ownership.featherPxCount}px`,
+            ownership,
+          );
+          if (charmKey === "horseshoe") {
+            drawMaskVisualization(asset);
+            const recolor = inspectRepresentativeRecolor(asset);
+            addDebugResult(
+              results,
+              "horseshoe リカラー4経路",
+              recolor.ok,
+              `α不一致${recolor.alphaMismatchPxCount}px・保持差${recolor.keepMismatchPxCount}px・革差${recolor.leatherDiffPxCount}px・ロゴ差${recolor.logoDiffPxCount}px・糸差${recolor.stitchDiffPxCount}px`,
+              recolor,
+            );
+          }
+        } catch (error) {
+          addDebugResult(results, `${charmKey} 読込`, false, String(error));
+        }
+      }
+
+      const geometry = geometryCheck64();
+      addDebugResult(
+        results,
+        "実寸配置・64通り",
+        geometry.ok,
+        `${geometry.checked}/64・clip ${geometry.failures.length}件・horse×horse ${geometry.horsePairWidth}mm・stage ${LAYOUT.stageMm.w}×${LAYOUT.stageMm.h}mm`,
+        geometry,
+      );
+
+      try {
+        const [silver, gold] = await Promise.all([inspectRingAsset("silver"), inspectRingAsset("gold")]);
+        const aligned = deepEqualExact(silver.alphaBounds, gold.alphaBounds)
+          && silver.width === gold.width && silver.height === gold.height;
+        addDebugResult(
+          results,
+          "丸カン42mm・銀金共通枠",
+          silver.ok && gold.ok && aligned,
+          `silver ${silver.width}×${silver.height} / gold ${gold.width}×${gold.height} / center α=${silver.centerAlpha},${gold.centerAlpha}`,
+          { silver, gold, aligned, drawMm: LAYOUT.ringOuterMm },
+        );
+      } catch (error) {
+        addDebugResult(results, "丸カン42mm・銀金共通枠", false, String(error));
+      }
+
+      const snapshotJob = makeBitmapJob(
+        { charm: state.representative.charm, color: state.representative.color },
+        renderGen,
+        state.logo,
+        state.stitch,
+      );
+      const silverRenderJob = Object.freeze({ metal: "silver", representative: snapshotJob });
+      const goldRenderJob = Object.freeze({ metal: "gold", representative: snapshotJob });
+      const keyBeforeMetal = cacheKey(silverRenderJob.representative);
+      const keyAfterMetal = cacheKey(goldRenderJob.representative);
+      const snapshotContract = Object.isFrozen(snapshotJob)
+        && snapshotJob.gen === renderGen
+        && keyBeforeMetal === keyAfterMetal
+        && !Object.hasOwn(snapshotJob, "metal");
+      addDebugResult(
+        results,
+        "不変job・cache key",
+        snapshotContract,
+        `${keyBeforeMetal}（金具を含まない）`,
+        { snapshotContract, keyBeforeMetal },
+      );
+
+      const asyncContracts = await runAsyncContractTests();
+      addDebugResult(
+        results,
+        "世代競合・最新描画後の旧結果破棄",
+        asyncContracts.generationRace.ok,
+        `draw=${(asyncContracts.generationRace.drawOrder || []).join(",")}・discard=${asyncContracts.generationRace.discarded ?? "n/a"}・global clean=${asyncContracts.generationRace.globalsUnchanged ?? false}`,
+        asyncContracts.generationRace,
+      );
+      addDebugResult(
+        results,
+        "同一cache key・単一build／独立2 lease",
+        asyncContracts.sharedLease.ok,
+        `build=${asyncContracts.sharedLease.buildCount}・lease別=${asyncContracts.sharedLease.distinctLeases}・close=${asyncContracts.sharedLease.closeWhileBothLeased}/${asyncContracts.sharedLease.closeAfterFirstRelease}/${asyncContracts.sharedLease.closeAfterFinalRelease}`,
+        asyncContracts.sharedLease,
+      );
+      addDebugResult(
+        results,
+        "build reject・in-flight削除／retry",
+        asyncContracts.buildRetry.ok,
+        `build=${asyncContracts.buildRetry.buildCount}・flight clear=${asyncContracts.buildRetry.flightClearedAfterReject}・retry=${asyncContracts.buildRetry.retrySucceeded}`,
+        asyncContracts.buildRetry,
+      );
+      addDebugResult(
+        results,
+        "ring reject・lease finally解放",
+        asyncContracts.exceptionalRelease.ringReject.ok,
+        `pending close=${asyncContracts.exceptionalRelease.ringReject.closeBeforeSettlement}→${asyncContracts.exceptionalRelease.ringReject.closeAfterFinally}・draw=${asyncContracts.exceptionalRelease.ringReject.drawCalls}`,
+        asyncContracts.exceptionalRelease.ringReject,
+      );
+      addDebugResult(
+        results,
+        "draw例外・lease finally解放",
+        asyncContracts.exceptionalRelease.drawThrow.ok,
+        `pending close=${asyncContracts.exceptionalRelease.drawThrow.closeBeforeSettlement}→${asyncContracts.exceptionalRelease.drawThrow.closeAfterFinally}・draw=${asyncContracts.exceptionalRelease.drawThrow.drawCalls}`,
+        asyncContracts.exceptionalRelease.drawThrow,
+      );
+      addDebugResult(
+        results,
+        "革スウォッチ・選択後focus保持",
+        asyncContracts.swatchFocus.ok,
+        `same element=${asyncContracts.swatchFocus.sameElementAfterClick}・state clean=${asyncContracts.swatchFocus.stateRestored}・cache clean=${asyncContracts.swatchFocus.runtimeUntouched}`,
+        asyncContracts.swatchFocus,
+      );
+
+      const copyFocus = await captureDebugTest(testCopyFocusRetention);
+      const clipboardSuccess = copyFocus.clipboardSuccess || { ok: false, error: copyFocus.error };
+      const completeFailure = copyFocus.completeFailure || { ok: false, error: copyFocus.error };
+      const fallbackSuccess = copyFocus.fallbackSuccess || { ok: false, error: copyFocus.error };
+      const copyCleanup = copyFocus.cleanup || { ok: false, error: copyFocus.error };
+      addDebugResult(
+        results,
+        "コピーfocus・clipboard成功",
+        clipboardSuccess.ok,
+        `same element=${clipboardSuccess.sameElementAfterCopy ?? false}・文言=${clipboardSuccess.visibleTextCorrect ?? false}・aria-live=${clipboardSuccess.ariaLiveCorrect ?? false}`,
+        clipboardSuccess,
+      );
+      addDebugResult(
+        results,
+        "コピーfocus・完全失敗",
+        completeFailure.ok,
+        `same element=${completeFailure.sameElementAfterCopy ?? false}・失敗文言=${completeFailure.statusTextCorrect ?? false}・textarea removed=${completeFailure.textareaRemoved ?? false}`,
+        completeFailure,
+      );
+      addDebugResult(
+        results,
+        "コピーfocus・fallback成功",
+        fallbackSuccess.ok,
+        `same element=${fallbackSuccess.sameElementAfterCopy ?? false}・一時focus移動=${fallbackSuccess.fallbackFocusMoved ?? false}・textarea removed=${fallbackSuccess.textareaRemoved ?? false}`,
+        fallbackSuccess,
+      );
+      addDebugResult(
+        results,
+        "コピー検査・状態／timer後始末",
+        copyCleanup.ok,
+        `state=${copyCleanup.stateUnchanged ?? false}・cache=${copyCleanup.runtimeCacheUnchanged ?? false}・timer=${copyCleanup.timersCleared ?? false}・focus=${copyCleanup.focusRestored ?? false}`,
+        copyCleanup,
+      );
+
+      const ok = results.every((result) => result.ok);
+      debugReport = Object.freeze({
+        ok,
+        checkedAt: new Date().toISOString(),
+        finite,
+        geometry,
+        asyncContracts,
+        copyFocus,
+        results: Object.freeze(results.map((result) => Object.freeze(result))),
+      });
+      debugStatusEl.dataset.status = ok ? "pass" : "fail";
+      debugStatusEl.textContent = ok ? "PASS · 全検査通過" : "FAIL · 要確認";
+      return debugReport;
+    }
+
+    function syncControlsFromState() {
+      colorGroupEl.value = state.colorGroup;
+      buildSwatches();
+      updateOptionButtons("metal", state.metal);
+      updateOptionButtons("logo", state.logo);
+      updateOptionButtons("stitch", state.stitch);
+      updateSummary();
+    }
+
+    function applySelectionPatch(patch) {
+      if (patch.colorName !== undefined) {
+        const color = COLORS.find((candidate) => candidate.name === patch.colorName);
+        if (!color) throw new Error(`未知の革色: ${patch.colorName}`);
+        state.representative.color = color;
+        if (state.colorGroup !== "すべて" && color.group !== state.colorGroup) {
+          state.colorGroup = "すべて";
+        }
+      }
+      if (patch.metal !== undefined) {
+        if (!["silver", "gold"].includes(patch.metal)) throw new Error(`未知の金具色: ${patch.metal}`);
+        state.metal = patch.metal;
+      }
+      if (patch.logo !== undefined) {
+        if (!["silver", "gold"].includes(patch.logo)) throw new Error(`未知のロゴ色: ${patch.logo}`);
+        state.logo = patch.logo;
+      }
+      if (patch.stitch !== undefined) {
+        if (!["white", "black"].includes(patch.stitch)) throw new Error(`未知のステッチ色: ${patch.stitch}`);
+        state.stitch = patch.stitch;
+      }
+      syncControlsFromState();
+    }
+
+    async function setSelection(patch) {
+      applySelectionPatch(patch);
+      return requestRender("debug-api-selection");
+    }
+
+    function stateSnapshot() {
+      return {
+        representative: {
+          charm: state.representative.charm,
+          color: { ...state.representative.color },
+        },
+        colorGroup: state.colorGroup,
+        metal: state.metal,
+        logo: state.logo,
+        stitch: state.stitch,
+        summary: summaryText(),
+        renderGen,
+        lastRenderedGen,
+      };
+    }
+
+    async function restoreStateSnapshot(saved, reason) {
+      const color = COLORS.find((candidate) => candidate.name === saved.representative.color.name);
+      if (!color) throw new Error(`復元対象の革色が見つかりません: ${saved.representative.color.name}`);
+      state.representative.charm = saved.representative.charm;
+      state.representative.color = color;
+      state.colorGroup = saved.colorGroup;
+      state.metal = saved.metal;
+      state.logo = saved.logo;
+      state.stitch = saved.stitch;
+      syncControlsFromState();
+      return requestRender(reason);
+    }
+
+    function createDeferred() {
+      let resolvePromise;
+      let rejectPromise;
+      let settled = false;
+      const promise = new Promise((resolve, reject) => {
+        resolvePromise = resolve;
+        rejectPromise = reject;
+      });
+      return {
+        promise,
+        get settled() { return settled; },
+        resolve(value) {
+          if (settled) return;
+          settled = true;
+          resolvePromise(value);
+        },
+        reject(error) {
+          if (settled) return;
+          settled = true;
+          rejectPromise(error);
+        },
+      };
+    }
+
+    function createTestBitmap(id) {
+      return { id, width: 1, height: 1, closed: false, closeCount: 0 };
+    }
+
+    function createBitmapTestHarness(limit, build) {
+      const stats = { cacheHits: 0, cacheMisses: 0, evictionCount: 0 };
+      const close = (bitmap) => {
+        bitmap.closeCount += 1;
+        bitmap.closed = true;
+      };
+      const cache = new BitmapLRU(limit, { stats, close });
+      const inFlight = new Map();
+      return {
+        cache,
+        inFlight,
+        stats,
+        runtime: { cache, inFlight, build },
+      };
+    }
+
+    async function waitForDebugCondition(predicate, label, turns = 40) {
+      for (let turn = 0; turn < turns; turn += 1) {
+        if (predicate()) return;
+        await Promise.resolve();
+      }
+      throw new Error(`${label}: 所定のmicrotask内に成立しませんでした。`);
+    }
+
+    function testRenderJob(gen, colorName, logo = "gold", stitch = "white") {
+      const color = COLORS.find((candidate) => candidate.name === colorName);
+      if (!color) throw new Error(`テスト色が見つかりません: ${colorName}`);
+      return Object.freeze({
+        gen,
+        metal: "silver",
+        representative: makeBitmapJob({ charm: "horseshoe", color }, gen, logo, stitch),
+      });
+    }
+
+    async function testGenerationRace() {
+      if (!DEBUG) throw new Error("世代競合テストは ?debug=1 でのみ利用できます。");
+      const oldBuild = createDeferred();
+      const latestBuild = createDeferred();
+      const oldBitmap = createTestBitmap("generation-old");
+      const latestBitmap = createTestBitmap("generation-latest");
+      const harness = createBitmapTestHarness(8, (job) => (
+        job.gen === 700001 ? oldBuild.promise : latestBuild.promise
+      ));
+      const actualStateBefore = stateSnapshot();
+      const actualCanvasBefore = canvas.toDataURL("image/png");
+      const testCanvas = document.createElement("canvas");
+      testCanvas.width = 2;
+      testCanvas.height = 1;
+      const testContext = testCanvas.getContext("2d");
+      const drawOrder = [];
+      const errors = [];
+      let currentGeneration = 700002;
+      let localLastRenderedGen = 0;
+      let localLatestState = "none";
+      let discarded = 0;
+      const renderRuntime = {
+        acquire: (job) => acquireCharmBitmap(job, harness.runtime),
+        ring: () => Promise.resolve({ bitmap: createTestBitmap("generation-ring") }),
+        currentGeneration: () => currentGeneration,
+        draw: (renderJob) => {
+          drawOrder.push(renderJob.gen);
+          localLatestState = `${renderJob.representative.colorName}|${renderJob.representative.logo}|${renderJob.representative.stitch}`;
+          testContext.fillStyle = renderJob.gen === currentGeneration ? "#167c5a" : "#a42121";
+          testContext.fillRect(0, 0, testCanvas.width, testCanvas.height);
+        },
+        discard: () => { discarded += 1; },
+        commitDraw: (gen) => { localLastRenderedGen = gen; },
+        clearLoading: () => {},
+        showError: () => {},
+        reportError: (error) => { errors.push(String(error)); },
+      };
+      const oldJob = testRenderJob(700001, "ブラック", "gold", "white");
+      const latestJob = testRenderJob(700002, "アイボリー", "silver", "black");
+      let oldPromise;
+      let latestPromise;
+      let result;
+
+      try {
+        oldPromise = renderSnapshot(oldJob, performance.now(), renderRuntime);
+        latestPromise = renderSnapshot(latestJob, performance.now(), renderRuntime);
+        await waitForDebugCondition(() => harness.inFlight.size === 2, "世代競合の2 build待機");
+
+        latestBuild.resolve(latestBitmap);
+        const latestResult = await latestPromise;
+        const testCanvasAfterLatest = testCanvas.toDataURL("image/png");
+        const latestStateAfterDraw = localLatestState;
+        const lastGenAfterLatest = localLastRenderedGen;
+
+        oldBuild.resolve(oldBitmap);
+        const oldResult = await oldPromise;
+        const testCanvasAfterOld = testCanvas.toDataURL("image/png");
+        const actualStateAfter = stateSnapshot();
+        const actualCanvasAfter = canvas.toDataURL("image/png");
+        const globalsUnchanged = deepEqualExact(actualStateBefore, actualStateAfter)
+          && actualCanvasBefore === actualCanvasAfter;
+        const oldHadNoDrawEffect = drawOrder.length === 1 && drawOrder[0] === latestJob.gen
+          && testCanvasAfterLatest === testCanvasAfterOld
+          && lastGenAfterLatest === latestJob.gen
+          && localLastRenderedGen === latestJob.gen
+          && latestStateAfterDraw === "アイボリー|silver|black"
+          && localLatestState === latestStateAfterDraw;
+
+        result = {
+          ok: latestResult.status === "drawn" && oldResult.status === "discarded"
+            && discarded === 1 && oldHadNoDrawEffect && globalsUnchanged && errors.length === 0,
+          latestResult,
+          oldResult,
+          drawOrder,
+          discarded,
+          oldHadNoDrawEffect,
+          globalsUnchanged,
+          localLastRenderedGen,
+          localLatestState,
+          errors,
+        };
+      } finally {
+        latestBuild.resolve(latestBitmap);
+        oldBuild.resolve(oldBitmap);
+        await Promise.allSettled([oldPromise, latestPromise].filter(Boolean));
+        currentGeneration = -1;
+        harness.cache.clear();
+      }
+      return result;
+    }
+
+    async function testLeaseEvictionSafety() {
+      if (!DEBUG) throw new Error("leaseテストは ?debug=1 でのみ利用できます。");
+      const buildGate = createDeferred();
+      const targetBitmap = createTestBitmap("shared-target");
+      let buildCount = 0;
+      const harness = createBitmapTestHarness(8, () => {
+        buildCount += 1;
+        return buildGate.promise;
+      });
+      const job = testRenderJob(710001, "ネイビー").representative;
+      let firstWaiter = null;
+      let secondWaiter = null;
+      let firstLease = null;
+      let secondLease = null;
+      let result;
+
+      try {
+        firstWaiter = acquireCharmBitmap(job, harness.runtime);
+        secondWaiter = acquireCharmBitmap(job, harness.runtime);
+        await waitForDebugCondition(
+          () => buildCount === 1 && harness.inFlight.size === 1,
+          "同一keyの単一build",
+        );
+        buildGate.resolve(targetBitmap);
+        [firstLease, secondLease] = await Promise.all([firstWaiter, secondWaiter]);
+        await waitForDebugCondition(() => harness.inFlight.size === 0, "build完了後のin-flight削除");
+
+        for (let index = 0; index < 10; index += 1) {
+          harness.cache.set(`lease-evict-${index}`, createTestBitmap(`lease-evict-${index}`));
+        }
+        const targetEvicted = harness.cache.peek(cacheKey(job)) === null;
+        const closeWhileBothLeased = targetBitmap.closeCount;
+        firstLease.release();
+        const closeAfterFirstRelease = targetBitmap.closeCount;
+        secondLease.release();
+        const closeAfterFinalRelease = targetBitmap.closeCount;
+
+        result = {
+          ok: buildCount === 1 && firstLease !== secondLease
+            && firstLease.bitmap === targetBitmap && secondLease.bitmap === targetBitmap
+            && targetEvicted && closeWhileBothLeased === 0
+            && closeAfterFirstRelease === 0 && closeAfterFinalRelease === 1
+            && harness.inFlight.size === 0,
+          buildCount,
+          distinctLeases: firstLease !== secondLease,
+          sameBitmap: firstLease.bitmap === secondLease.bitmap,
+          targetEvicted,
+          closeWhileBothLeased,
+          closeAfterFirstRelease,
+          closeAfterFinalRelease,
+          inFlightSize: harness.inFlight.size,
+          evictionCount: harness.stats.evictionCount,
+        };
+      } finally {
+        buildGate.resolve(targetBitmap);
+        const waiterResults = await Promise.allSettled([firstWaiter, secondWaiter].filter(Boolean));
+        for (const waiterResult of waiterResults) {
+          if (waiterResult.status === "fulfilled") waiterResult.value.release();
+        }
+        if (firstLease) firstLease.release();
+        if (secondLease) secondLease.release();
+        harness.cache.clear();
+      }
+      return result;
+    }
+
+    async function testBuildRejectRetry() {
+      if (!DEBUG) throw new Error("build retryテストは ?debug=1 でのみ利用できます。");
+      const retryBitmap = createTestBitmap("retry-success");
+      let buildCount = 0;
+      const harness = createBitmapTestHarness(8, async () => {
+        buildCount += 1;
+        if (buildCount === 1) throw new Error("intentional build reject");
+        return retryBitmap;
+      });
+      const job = testRenderJob(720001, "エトープ").representative;
+      let firstError = "";
+      let retryLease = null;
+      let result;
+
+      try {
+        try {
+          await acquireCharmBitmap(job, harness.runtime);
+        } catch (error) {
+          firstError = String(error);
+        }
+        await waitForDebugCondition(() => harness.inFlight.size === 0, "reject後のin-flight削除");
+        const flightClearedAfterReject = harness.inFlight.size === 0;
+        retryLease = await acquireCharmBitmap(job, harness.runtime);
+        await waitForDebugCondition(() => harness.inFlight.size === 0, "retry後のin-flight削除");
+        result = {
+          ok: firstError.includes("intentional build reject")
+            && flightClearedAfterReject && buildCount === 2
+            && retryLease.bitmap === retryBitmap && harness.inFlight.size === 0,
+          firstError,
+          flightClearedAfterReject,
+          buildCount,
+          retrySucceeded: retryLease.bitmap === retryBitmap,
+          inFlightSize: harness.inFlight.size,
+        };
+      } finally {
+        if (retryLease) retryLease.release();
+        harness.cache.clear();
+      }
+      return result;
+    }
+
+    async function testRenderLeaseReleaseCase(mode) {
+      const ringGate = createDeferred();
+      const targetBitmap = createTestBitmap(`${mode}-target`);
+      const harness = createBitmapTestHarness(1, async () => targetBitmap);
+      const job = testRenderJob(mode === "ring-reject" ? 730001 : 730002, "シェルブルー");
+      const errorLog = [];
+      let drawCalls = 0;
+      let showErrorCalls = 0;
+      const renderRuntime = {
+        acquire: (bitmapJob) => acquireCharmBitmap(bitmapJob, harness.runtime),
+        ring: () => ringGate.promise,
+        currentGeneration: () => job.gen,
+        draw: () => {
+          drawCalls += 1;
+          if (mode === "draw-throw") throw new Error("intentional draw exception");
+        },
+        discard: () => {},
+        commitDraw: () => {},
+        clearLoading: () => {},
+        showError: () => { showErrorCalls += 1; },
+        reportError: (error) => { errorLog.push(String(error)); },
+      };
+      const renderPromise = renderSnapshot(job, performance.now(), renderRuntime);
+      let result;
+
+      try {
+        await waitForDebugCondition(
+          () => harness.cache.peek(cacheKey(job.representative)) === targetBitmap,
+          `${mode}のlease取得`,
+        );
+        harness.cache.set(`${mode}-evictor`, createTestBitmap(`${mode}-evictor`));
+        const evictedPending = harness.cache.peek(cacheKey(job.representative)) === null;
+        const closeBeforeSettlement = targetBitmap.closeCount;
+        if (mode === "ring-reject") {
+          ringGate.reject(new Error("intentional ring reject"));
+        } else {
+          ringGate.resolve({ bitmap: createTestBitmap("draw-ring") });
+        }
+        const renderResult = await renderPromise;
+        result = {
+          ok: renderResult.status === "error" && evictedPending
+            && closeBeforeSettlement === 0 && targetBitmap.closeCount === 1
+            && showErrorCalls === 1 && errorLog.length === 1
+            && drawCalls === (mode === "draw-throw" ? 1 : 0),
+          mode,
+          renderResult,
+          evictedPending,
+          closeBeforeSettlement,
+          closeAfterFinally: targetBitmap.closeCount,
+          showErrorCalls,
+          drawCalls,
+          errorLog,
+        };
+      } finally {
+        ringGate.resolve({ bitmap: createTestBitmap("cleanup-ring") });
+        await Promise.allSettled([renderPromise]);
+        harness.cache.clear();
+      }
+      return result;
+    }
+
+    async function testRenderLeaseRelease() {
+      if (!DEBUG) throw new Error("render leaseテストは ?debug=1 でのみ利用できます。");
+      const ringReject = await captureDebugTest(() => testRenderLeaseReleaseCase("ring-reject"));
+      const drawThrow = await captureDebugTest(() => testRenderLeaseReleaseCase("draw-throw"));
+      return { ok: ringReject.ok && drawThrow.ok, ringReject, drawThrow };
+    }
+
+    async function testSwatchFocusRetention() {
+      if (!DEBUG) throw new Error("focusテストは ?debug=1 でのみ利用できます。");
+      const saved = stateSnapshot();
+      const savedFocus = document.activeElement;
+      const cacheKeysBefore = bitmapCache.keys();
+      const statsBefore = { ...runtimeStats };
+      const targetButton = [...colorSwatchesEl.querySelectorAll(".swatch")]
+        .find((button) => button.dataset.colorName !== saved.representative.color.name);
+      if (!targetButton) throw new Error("focusテスト対象の別色スウォッチが見つかりません。");
+      let measured = null;
+
+      try {
+        debugSwatchRenderOverride = () => Promise.resolve({ status: "debug-suppressed" });
+        targetButton.focus();
+        const focusedBeforeClick = document.activeElement === targetButton;
+        targetButton.click();
+        measured = {
+          focusedBeforeClick,
+          sameElementAfterClick: document.activeElement === targetButton,
+          selectedAfterClick: state.representative.color.name === targetButton.dataset.colorName,
+          activeAfterClick: targetButton.classList.contains("active")
+            && targetButton.getAttribute("aria-pressed") === "true",
+          stillConnected: targetButton.isConnected,
+        };
+      } finally {
+        debugSwatchRenderOverride = null;
+        const savedColor = COLORS.find((candidate) => candidate.name === saved.representative.color.name);
+        state.representative.charm = saved.representative.charm;
+        state.representative.color = savedColor;
+        state.colorGroup = saved.colorGroup;
+        state.metal = saved.metal;
+        state.logo = saved.logo;
+        state.stitch = saved.stitch;
+        colorGroupEl.value = saved.colorGroup;
+        updateSwatchSelection();
+        updateOptionButtons("metal", saved.metal);
+        updateOptionButtons("logo", saved.logo);
+        updateOptionButtons("stitch", saved.stitch);
+        updateSummary();
+        if (savedFocus instanceof HTMLElement && savedFocus.isConnected) savedFocus.focus();
+        else targetButton.blur();
+      }
+
+      const stateRestored = deepEqualExact(saved, stateSnapshot());
+      const runtimeUntouched = deepEqualExact(cacheKeysBefore, bitmapCache.keys())
+        && deepEqualExact(statsBefore, runtimeStats);
+      const uiRestored = colorGroupEl.value === saved.colorGroup
+        && colorSwatchesEl.querySelector(`.swatch[data-color-name="${saved.representative.color.name}"]`)
+          ?.getAttribute("aria-pressed") === "true";
+      return {
+        ok: Object.values(measured).every(Boolean) && stateRestored && runtimeUntouched && uiRestored,
+        ...measured,
+        stateRestored,
+        runtimeUntouched,
+        uiRestored,
+      };
+    }
+
+    async function runCopyFocusCase(mode) {
+      const feedback = { timer: null, clearTimer: null, token: 0 };
+      const timers = new Map();
+      const marker = `copy-focus-${mode}`;
+      let nextTimer = 1;
+      let clipboardCalls = 0;
+      let fallbackCalls = 0;
+      let fallbackFocusMoved = false;
+      let measured = null;
+      const runtime = {
+        ...defaultCopyRuntime,
+        feedback,
+        canUseClipboard: () => true,
+        writeClipboard: async () => {
+          clipboardCalls += 1;
+          if (mode !== "clipboard-success") throw new Error("intentional clipboard reject");
+        },
+        createTextarea: (text) => {
+          const textarea = createCopyTextarea(text);
+          textarea.dataset.copyFocusTest = marker;
+          return textarea;
+        },
+        selectTextarea: (textarea) => {
+          textarea.focus({ preventScroll: true });
+          textarea.select();
+          fallbackFocusMoved = document.activeElement === textarea;
+        },
+        execCopy: () => {
+          fallbackCalls += 1;
+          return mode === "fallback-success";
+        },
+        setTimer: (callback) => {
+          const timer = nextTimer;
+          nextTimer += 1;
+          timers.set(timer, callback);
+          return timer;
+        },
+        clearTimer: (timer) => { timers.delete(timer); },
+      };
+
+      try {
+        copySummaryBtn.focus({ preventScroll: true });
+        const focusedBeforeCopy = document.activeElement === copySummaryBtn;
+        const summaryBefore = summaryEl.textContent;
+        const outcome = await copySummaryText(runtime);
+        const expectedSuccess = mode !== "complete-failure";
+        const expectedButton = expectedSuccess ? "コピーしました" : "コピー失敗";
+        const expectedStatus = expectedSuccess
+          ? "組み合わせをコピーしました。"
+          : "コピーできませんでした。ブラウザの権限をご確認ください。";
+        measured = {
+          focusedBeforeCopy,
+          sameElementAfterCopy: document.activeElement === copySummaryBtn,
+          focusRestoredByBody: outcome.focusRestored,
+          copied: outcome.copied,
+          method: outcome.method,
+          stale: outcome.stale,
+          visibleTextCorrect: copySummaryBtn.textContent === expectedButton,
+          statusTextCorrect: copyStatusEl.textContent === expectedStatus,
+          ariaLiveCorrect: copyStatusEl.getAttribute("aria-live") === "polite"
+            && copyStatusEl.getAttribute("role") === "status",
+          summaryUnchanged: summaryEl.textContent === summaryBefore,
+          nativeEnabled: !copySummaryBtn.disabled && !copySummaryBtn.hasAttribute("aria-disabled"),
+          textareaRemoved: document.querySelector(`[data-copy-focus-test="${marker}"]`) === null,
+          fallbackFocusMoved,
+          clipboardCalls,
+          fallbackCalls,
+          timerScheduled: timers.size === 1 && feedback.timer !== null,
+        };
+        const routeCorrect = mode === "clipboard-success"
+          ? outcome.copied && outcome.method === "clipboard" && fallbackCalls === 0
+          : outcome.method === "fallback" && fallbackCalls === 1
+            && outcome.copied === (mode === "fallback-success");
+        measured.ok = focusedBeforeCopy && measured.sameElementAfterCopy
+          && measured.focusRestoredByBody && !measured.stale
+          && measured.visibleTextCorrect && measured.statusTextCorrect
+          && measured.ariaLiveCorrect && measured.summaryUnchanged
+          && measured.nativeEnabled && measured.textareaRemoved
+          && measured.timerScheduled && routeCorrect
+          && (mode === "clipboard-success" || fallbackFocusMoved);
+      } finally {
+        cancelCopyFeedbackTimer(feedback);
+        document.querySelectorAll(`[data-copy-focus-test="${marker}"]`).forEach((element) => element.remove());
+      }
+      measured.timerCleared = timers.size === 0 && feedback.timer === null && feedback.clearTimer === null;
+      measured.ok = measured.ok && measured.timerCleared;
+      return measured;
+    }
+
+    async function testCopyFocusRetention() {
+      if (!DEBUG) throw new Error("copy focusテストは ?debug=1 でのみ利用できます。");
+      const savedState = stateSnapshot();
+      const savedSummary = summaryEl.textContent;
+      const savedButtonText = copySummaryBtn.textContent;
+      const savedStatusText = copyStatusEl.textContent;
+      const savedFocus = document.activeElement;
+      const savedCacheKeys = bitmapCache.keys();
+      const savedStats = { ...runtimeStats };
+      const savedFeedback = { ...copyFeedbackState };
+      let clipboardSuccess;
+      let completeFailure;
+      let fallbackSuccess;
+
+      try {
+        clipboardSuccess = await captureDebugTest(() => runCopyFocusCase("clipboard-success"));
+        completeFailure = await captureDebugTest(() => runCopyFocusCase("complete-failure"));
+        fallbackSuccess = await captureDebugTest(() => runCopyFocusCase("fallback-success"));
+      } finally {
+        document.querySelectorAll("[data-copy-focus-test]").forEach((element) => element.remove());
+        copySummaryBtn.textContent = savedButtonText;
+        copyStatusEl.textContent = savedStatusText;
+        if (savedFocus === document.body) {
+          copySummaryBtn.blur();
+        } else if (savedFocus instanceof HTMLElement && savedFocus.isConnected) {
+          savedFocus.focus({ preventScroll: true });
+        } else {
+          copySummaryBtn.blur();
+        }
+      }
+
+      const cleanup = {
+        stateUnchanged: deepEqualExact(savedState, stateSnapshot()),
+        summaryUnchanged: summaryEl.textContent === savedSummary,
+        runtimeCacheUnchanged: deepEqualExact(savedCacheKeys, bitmapCache.keys())
+          && deepEqualExact(savedStats, runtimeStats),
+        productionTimerUnchanged: copyFeedbackState.timer === savedFeedback.timer
+          && copyFeedbackState.clearTimer === savedFeedback.clearTimer
+          && copyFeedbackState.token === savedFeedback.token,
+        uiRestored: copySummaryBtn.textContent === savedButtonText
+          && copyStatusEl.textContent === savedStatusText,
+        focusRestored: savedFocus === document.body
+          ? document.activeElement === document.body
+          : document.activeElement === savedFocus,
+        timersCleared: Boolean(clipboardSuccess?.timerCleared
+          && completeFailure?.timerCleared && fallbackSuccess?.timerCleared),
+        temporaryElementsRemoved: document.querySelector("[data-copy-focus-test]") === null,
+      };
+      cleanup.ok = Object.values(cleanup).every(Boolean);
+      return {
+        ok: Boolean(clipboardSuccess?.ok && completeFailure?.ok && fallbackSuccess?.ok && cleanup.ok),
+        clipboardSuccess,
+        completeFailure,
+        fallbackSuccess,
+        cleanup,
+      };
+    }
+
+    async function captureDebugTest(run) {
+      try {
+        return await run();
+      } catch (error) {
+        return { ok: false, error: String(error) };
+      }
+    }
+
+    async function runAsyncContractTests() {
+      const generationRace = await captureDebugTest(testGenerationRace);
+      const sharedLease = await captureDebugTest(testLeaseEvictionSafety);
+      const buildRetry = await captureDebugTest(testBuildRejectRetry);
+      const exceptionalRelease = await testRenderLeaseRelease();
+      const swatchFocus = await captureDebugTest(testSwatchFocusRetention);
+      return {
+        ok: generationRace.ok && sharedLease.ok && buildRetry.ok
+          && exceptionalRelease.ok && swatchFocus.ok,
+        generationRace,
+        sharedLease,
+        buildRetry,
+        exceptionalRelease,
+        swatchFocus,
+      };
+    }
+
+    async function testCacheEviction() {
+      return testLeaseEvictionSafety();
+    }
+
+    function median(values) {
+      const sorted = [...values].sort((a, b) => a - b);
+      const middle = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+
+    async function measureCachedSwitches(iterations = 10) {
+      if (!Number.isInteger(iterations) || iterations < 1) throw new Error("iterationsは1以上の整数で指定してください。");
+      const saved = stateSnapshot();
+      try {
+        await setSelection({ colorName: "ブラック" });
+        await setSelection({ colorName: "アイボリー" });
+        const durations = [];
+        for (let index = 0; index < iterations; index += 1) {
+          const colorName = index % 2 === 0 ? "ブラック" : "アイボリー";
+          applySelectionPatch({ colorName });
+          const result = await requestRender("performance-cached-switch");
+          durations.push(result.durationMs);
+        }
+        return { iterations, durations, medianMs: median(durations), thresholdMs: 300, ok: median(durations) <= 300 };
+      } finally {
+        await restoreStateSnapshot(saved, "performance-restore");
+      }
+    }
+
+    let resolveReady;
+    const readyPromise = new Promise((resolve) => { resolveReady = resolve; });
+
+    window.charmDebugAPI = Object.freeze({
+      ready: readyPromise,
+      getState: stateSnapshot,
+      getConstants: () => ({
+        layout: JSON.parse(JSON.stringify(LAYOUT)),
+        charms: JSON.parse(JSON.stringify(CHARMS)),
+        colors: JSON.parse(JSON.stringify(COLORS)),
+      }),
+      getStats: () => ({
+        ...runtimeStats,
+        cacheSize: bitmapCache.size,
+        cacheKeys: bitmapCache.keys(),
+        renderGen,
+        lastRenderedGen,
+        lastRenderDurationMs,
+      }),
+      getDebugReport: () => debugReport,
+      waitForIdle: () => lastRenderPromise,
+      setSelection,
+      requestRender: () => requestRender("debug-api-render"),
+      runChecks: () => runDebugChecks(),
+      finiteToneCheck,
+      geometryCheck64,
+      testGenerationRace,
+      testCacheEviction,
+      testLeaseEvictionSafety,
+      testBuildRejectRetry,
+      testRenderLeaseRelease,
+      testSwatchFocusRetention,
+      testCopyFocusRetention,
+      runAsyncContractTests,
+      measureCachedSwitches,
+      canvasDataUrl: () => canvas.toDataURL("image/png"),
+    });
+
+    async function init() {
+      buildGroupSelect();
+      buildSwatches();
+      bindControls();
+      updateSummary();
+      updateOptionButtons("metal", state.metal);
+      updateOptionButtons("logo", state.logo);
+      updateOptionButtons("stitch", state.stitch);
+      const initialRender = await requestRender("initial");
+      const checks = DEBUG ? await runDebugChecks() : null;
+      const readyState = { ok: initialRender.status === "drawn" && (!DEBUG || checks.ok), initialRender, checks };
+      resolveReady(readyState);
+      return readyState;
+    }
+
+    window.addEventListener("beforeunload", () => {
+      bitmapCache.clear();
+      for (const promise of ringPromises.values()) {
+        promise.then((ring) => closeBitmap(ring.bitmap)).catch(() => {});
+      }
+    });
+
+    init().catch((error) => {
+      setLoading(renderGen, "画像の読み込みに失敗しました。ファイル名をご確認ください。", true);
+      if (DEBUG) {
+        debugStatusEl.dataset.status = "fail";
+        debugStatusEl.textContent = "FAIL · 初期化エラー";
+        addDebugResult([], "初期化", false, String(error));
+      }
+      resolveReady({ ok: false, error: String(error) });
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
