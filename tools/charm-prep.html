@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
   <title>Charm Asset Atelier | maison &amp;.</title>
   <style>
     :root {
@@ -162,7 +163,7 @@
   <main class="shell">
     <aside class="sidebar" aria-label="準備ツール設定">
       <section class="card">
-        <div class="card-head"><h2>素材</h2><span class="tag">7種</span></div>
+        <div class="card-head"><h2>素材</h2><span class="tag">7種＋swan待ち</span></div>
         <div class="card-body">
           <label class="field"><span>チャーム</span><select id="charmSelect"></select></label>
           <div class="button-row">
@@ -189,6 +190,8 @@
           <label class="field"><span>背景距離・不透明</span><div class="range-row"><input id="bgHigh" type="range" min="10" max="90" step="1" value="32"><input id="bgHighNumber" type="number" min="10" max="90" value="32"></div></label>
           <label class="field"><span>ロゴ候補しきい値</span><div class="range-row"><input id="logoThreshold" type="range" min="0" max="100" step="1" value="42"><input id="logoThresholdNumber" type="number" min="0" max="100" value="42"></div></label>
           <label class="field"><span>ステッチ局所差</span><div class="range-row"><input id="stitchContrast" type="range" min="1" max="40" step="1" value="9"><input id="stitchContrastNumber" type="number" min="1" max="40" value="9"></div></label>
+          <label class="field"><span>グレイン尺度候補 (mm/px)</span><input id="grainScaleMm" type="number" min="0.001" step="0.001" value="0.105"></label>
+          <p class="tiny">colorless専用。0.105はfrenchie/質感画像のシボ周期比較による候補（比較0.09/0.12）。目視承認まで最終確定しません。</p>
         </div>
       </section>
 
@@ -227,11 +230,12 @@
         <div class="card-body">
           <div class="button-row">
             <button id="exportCurrentButton" type="button" disabled>選択素材を書出し</button>
+            <button id="exportRegressionButton" type="button" disabled>flat回帰シート</button>
             <button id="exportBatchButton" type="button" disabled>全素材アーカイブ</button>
             <button id="verifyArchiveButton" type="button" disabled>アーカイブ再検証</button>
           </div>
           <input id="archiveFileInput" class="hidden" type="file" accept=".json,application/json">
-          <p class="tiny">検査1〜7の全通過後に書き出し可能。検査8は書き出し済み一式の再読込でのみ確定します。</p>
+          <p class="tiny">検査1〜7＋M（colorlessはFも）の全通過後に書き出し可能。検査8は書き出し済み一式の再読込でのみ確定します。</p>
         </div>
       </section>
 
@@ -296,8 +300,8 @@
   <script>
     "use strict";
 
-    const TOOL_VERSION = "0.4.0";
-    const SCHEMA_VERSION = 3;
+    const TOOL_VERSION = "0.5.0";
+    const SCHEMA_VERSION = 4;
     const WORK_MAX = 1200;
     const ARCHIVE_FORMAT = "maison-charm-prep-archive";
     const ARCHIVE_VERSION = 1;
@@ -311,40 +315,126 @@
       stageMm: { w: 220, h: 160 },
       pxPerMmStage: 6,
       ringCenterXMm: 110,
-      ringCenterYMm: 31,
       ringOuterMm: 42,
       gapMm: 8,
       ringGapMm: 3
     });
 
-    const CHARM_SPECS = Object.freeze({
-      horse: { label: "horse", source: "../source-photos/horse.jpg", sizeMm: { w: 95, h: 70 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox" }, logoRoi: [.54,.49,.68,.63] },
-      horseshoe: { label: "horseshoe", source: "../source-photos/horseshoe.jpg", sizeMm: { w: 46, h: 54 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "bbox" }, logoRoi: [.40,.65,.61,.82], keepCircles: [[.31,.45,.032],[.70,.45,.032],[.31,.57,.032],[.69,.58,.032],[.37,.68,.032],[.64,.67,.032]] },
-      frenchie: { label: "frenchie", source: "../source-photos/frenchie.jpg", sizeMm: { w: 60, h: 75 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox" }, cropSource: { x: 120, y: 360, w: 820, h: 1040 }, logoRoiSource: { x: 590, y: 870, w: 180, h: 250 } },
-      dachshund: { label: "dachshund", source: "../source-photos/dachshund.jpg", sizeMm: { w: 90, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox" }, logoRoi: [.64,.56,.78,.72] },
-      toypoodle: { label: "toy poodle", source: "../source-photos/toy-poodle.jpg", sizeMm: { w: 80, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox" }, logoRoi: [.61,.58,.75,.73] },
-      osanpo: { label: "osanpo", source: "../source-photos/osanpo.jpg", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", widthLine: [[420,790],[825,300]], heightLine: [[510,360],[723,536]] }, logoRoi: [.53,.27,.68,.43] },
-      cat: { label: "cat", source: "../source-photos/cat.jpg", sizeMm: { w: 68, h: 65 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox" }, logoRoi: [.43,.66,.58,.82] }
+    const COLORS = Object.freeze([
+      { name: "ゴールド", group: "イエロー/オレンジ", hex: "#cb945f" },
+      { name: "オレンジ", group: "イエロー/オレンジ", hex: "#e59032" },
+      { name: "ライムイエロー", group: "イエロー/オレンジ", hex: "#f1e157" },
+      { name: "ペールイエロー", group: "イエロー/オレンジ", hex: "#f5ebb7" },
+      { name: "ブリック", group: "イエロー/オレンジ", hex: "#8a5653" },
+      { name: "ピスタチオ", group: "イエロー/オレンジ", hex: "#99b482" },
+      { name: "ブラック", group: "ベーシック", hex: "#41413d" },
+      { name: "グレージュ", group: "ベーシック", hex: "#817469" },
+      { name: "ブラウン", group: "ベーシック", hex: "#925a45" },
+      { name: "チャコールグレー", group: "ベーシック", hex: "#616162" },
+      { name: "アイボリー", group: "ベーシック", hex: "#eee9de" },
+      { name: "エトープ", group: "ベーシック", hex: "#a18c71" },
+      { name: "ライトブルー", group: "ブルー", hex: "#afece8" },
+      { name: "シェルブルー", group: "ブルー", hex: "#6cb9cf" },
+      { name: "ミストブルー", group: "ブルー", hex: "#7cacc1" },
+      { name: "アイスグレー", group: "ブルー", hex: "#cccecd" },
+      { name: "ロイヤルブルー", group: "ブルー", hex: "#4661c6" },
+      { name: "ネイビー", group: "ブルー", hex: "#3a4b60" },
+      { name: "ピンク", group: "ピンク/レッド", hex: "#f87f8f" },
+      { name: "レッド", group: "ピンク/レッド", hex: "#e55a60" },
+      { name: "ローズピンク", group: "ピンク/レッド", hex: "#a94174" },
+      { name: "パープル", group: "ピンク/レッド", hex: "#a854a4" },
+      { name: "ペールピンク", group: "ピンク/レッド", hex: "#e8cfde" },
+      { name: "コーラルピンク", group: "ピンク/レッド", hex: "#f0a180" }
+    ]);
+
+    const INPUT_MANIFEST = Object.freeze({
+      horse: { sourceMode: "photo", file: "source-photos/horse.jpg", sha256: "7e3d8444525355cc6d5c4f0c8f27b17c6063c723a95c6a94f63d56c6b7e2d2de" },
+      horseshoe: { sourceMode: "colorless", file: "source-photos/horseshoe-colorless.png", sha256: "111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c" },
+      frenchie: { sourceMode: "photo", file: "source-photos/frenchie.jpg", sha256: "bdc8ccb6234b621d05a5c3489623e8db2b124a8215563631b595e0ecd7531428" },
+      dachshund: { sourceMode: "photo", file: "source-photos/dachshund.jpg", sha256: "b6a4273ebfcc9d43980f30eade36621dc0e5d346d2c3b8e0fec488185b41fb1d" },
+      toypoodle: { sourceMode: "photo", file: "source-photos/toy-poodle.jpg", sha256: "4ce01fa9faa2080a0b02df0ed71562732a46dc70c39499c0410d6a263aa107a6" },
+      osanpo: { sourceMode: "photo", file: "source-photos/osanpo.jpg", sha256: "2793ad000290e78e82fa77c42110ff0ac398338e45b9bfe88589b0d51fb50504" },
+      cat: { sourceMode: "photo", file: "source-photos/cat.jpg", sha256: "e5b94c2e19c3979855a8d351e9d529f0a116a47a4f3ff17030ff08e7f7035f52" },
+      swan: { sourceMode: "colorless", file: "source-photos/swan-colorless.png", sha256: null },
+      grain: { file: "source-photos/leather-grain.jpg", sha256: "d0b7b644bcce2691b42b776f054ad2dd3f6c23313dab72f6a1b83b1292943a2a" }
     });
 
+    const GRAIN_DEFAULTS = Object.freeze({
+      file: "source-photos/leather-grain.jpg",
+      grainBase: 200,
+      grainAmp: .25,
+      grainRadiusPx: 24,
+      // §5-2 requires a common visually confirmed value. This seed remains
+      // explicit in prep.json and inspection F; do not silently change it.
+      grainScaleMm: .105,
+      tileMode: "mirror"
+    });
+
+    // Versioned preparation recipe for the accepted 2026-07-15 colorless
+    // horseshoe source. Coordinates are search seeds only: the keep/logo
+    // output pixels are selected from source-connected components, never by
+    // painting the search circles/rectangles themselves.
+    const HORSESHOE_COLORLESS_MANUAL = Object.freeze({
+      id: "horseshoe-colorless-20260715-v2",
+      backgroundDistance: 14,
+      autoAlphaLow: 12,
+      autoAlphaHigh: 32,
+      featureDistance: 4,
+      stoneHalfSize: .052,
+      stoneSeeds: Object.freeze([
+        [.741, .304], [.192, .443], [.785, .459],
+        [.246, .593], [.783, .618], [.375, .719]
+      ]),
+      logoRoi: Object.freeze([595 / 1016, 838 / 1200, 724 / 1016, 945 / 1200]),
+      logoSeed: Object.freeze([.636, .748]),
+      logoDotSeed: Object.freeze([.710, .786]),
+      hangingHoleRoi: Object.freeze([640 / 1016, 195 / 1200, 725 / 1016, 275 / 1200]),
+      hangingHoleSeed: Object.freeze([.674, .202]),
+      hangingHoleRange: Object.freeze({ areaMin: 650, areaMax: 1000, widthMin: 30, widthMax: 40, heightMin: 25, heightMax: 36 }),
+      designWhiteRange: Object.freeze({ areaMin: 220000, areaMax: 260000, widthMin: 750, widthMax: 790, heightMin: 830, heightMax: 870 }),
+      designPaddingPx: 12,
+      stitch: Object.freeze({ seedBoundaryMin: 16, seedBoundaryMax: 60, finalBoundaryMin: 13, finalBoundaryMax: 63, dilatePasses: 3, exclusionDilatePasses: 2 })
+    });
+
+    const BBOX_REASON = "正立素材の革本体外接矩形を実測W/Hへ対応付けるため";
+    const CHARM_SPECS = Object.freeze({
+      horse: { label: "horse", source: "../source-photos/horse.jpg", sourceMode: "photo", toneMode: "photo", sizeMm: { w: 95, h: 70 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.54,.49,.68,.63] },
+      horseshoe: { label: "horseshoe", source: "../source-photos/horseshoe-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 46, h: 54 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: HORSESHOE_COLORLESS_MANUAL.logoRoi, manualRecipe: HORSESHOE_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
+      frenchie: { label: "frenchie", source: "../source-photos/frenchie.jpg", sourceMode: "photo", toneMode: "photo", sizeMm: { w: 60, h: 75 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, cropSource: { x: 120, y: 360, w: 820, h: 1040 }, logoRoiSource: { x: 590, y: 870, w: 180, h: 250 } },
+      dachshund: { label: "dachshund", source: "../source-photos/dachshund.jpg", sourceMode: "photo", toneMode: "photo", sizeMm: { w: 90, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.64,.56,.78,.72] },
+      toypoodle: { label: "toy poodle", source: "../source-photos/toy-poodle.jpg", sourceMode: "photo", toneMode: "photo", sizeMm: { w: 80, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.61,.58,.75,.73] },
+      osanpo: { label: "osanpo", source: "../source-photos/osanpo.jpg", sourceMode: "photo", toneMode: "photo", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", reason: "斜め配置のため、幅線は骨型の長軸92mm、高さ線は短軸40mmに対応する端点を指定", widthLine: [[420,790],[825,300]], heightLine: [[510,360],[723,536]] }, logoRoi: [.53,.27,.68,.43] },
+      cat: { label: "cat", source: "../source-photos/cat.jpg", sourceMode: "photo", toneMode: "photo", sizeMm: { w: 68, h: 65 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.43,.66,.58,.82] }
+    });
+
+    function deepFreeze(value) {
+      if (!value || typeof value !== "object") return value;
+      Object.getOwnPropertyNames(value).forEach(function (name) { deepFreeze(value[name]); });
+      return Object.isFrozen(value) ? value : Object.freeze(value);
+    }
+
+    deepFreeze(CHARM_SPECS);
     const CHARM_KEYS = Object.keys(CHARM_SPECS);
     const CHECK_LABELS = [
       "所有権恒等式", "baseLum コア画素", "実寸校正", "エッジ帯 / defringe",
-      "ステッチ整合", "定義値 / 保持", "転送量", "再生成一致"
+      "ステッチ整合", "定義値 / 保持", "転送量", "正規入力 / モード (M)",
+      "無着色素材 (F)", "再生成一致"
     ];
+    const PRECHECK_COUNT = 9;
+    const VERIFY_CHECK_INDEX = 9;
 
     const dom = Object.fromEntries([
-      "globalStatus","charmSelect","loadButton","processButton","sourceMeta","cropX","cropY","cropW","cropH","bgLow","bgLowNumber","bgHigh","bgHighNumber","logoThreshold","logoThresholdNumber","stitchContrast","stitchContrastNumber",
+      "globalStatus","charmSelect","loadButton","processButton","sourceMeta","cropX","cropY","cropW","cropH","bgLow","bgLowNumber","bgHigh","bgHighNumber","logoThreshold","logoThresholdNumber","stitchContrast","stitchContrastNumber","grainScaleMm",
       "manualLayer","brushMode","brushSize","brushSizeNumber","undoButton","clearLayerButton","exportLayerButton","importLayerButton","layerFileInput","manualBadge",
-      "calibrationMode","calibrationModeBadge","lineFields","widthP1","widthP2","heightP1","heightP2","aspectStatus","exportCurrentButton","exportBatchButton","verifyArchiveButton","archiveFileInput","exportGate",
+      "calibrationMode","calibrationModeBadge","lineFields","widthP1","widthP2","heightP1","heightP2","aspectStatus","exportCurrentButton","exportRegressionButton","exportBatchButton","verifyArchiveButton","archiveFileInput","exportGate",
       "generateRingButton","downloadRingButton","ringGate","ringStatus","ringMetrics","ringSilverDarkCanvas","ringSilverLightCanvas","ringGoldDarkCanvas","ringGoldLightCanvas",
       "workspaceTitle","workDims","sourceCanvas","darkCanvas","lightCanvas","overlayCanvas","metricGrid","metricsBadge","checkList","checkBadge","batchBody","configPreview","copyConfigButton"
     ].map(function (id) { return [id, document.getElementById(id)]; }));
 
     const state = {
       selectedKey: CHARM_KEYS[0],
+      loadedKey: null,
       sourceBytes: null,
-      sourceBitmap: null,
       sourceImageData: null,
       work: null,
       manual: null,
@@ -356,8 +446,52 @@
       lastArchive: null,
       rings: null,
       painting: false,
-      lastPoint: null
+      lastPoint: null,
+      manualRevision: 0,
+      grainResource: null,
+      referenceIvoryResource: null,
+      operationSerial: 0,
+      operation: null,
+      operationControlSnapshot: null,
+      operationPointerEvents: ""
     };
+
+    function operationControls() {
+      return Array.from(document.querySelectorAll("button, input, select"));
+    }
+
+    function applyOperationLock() {
+      if (!state.operation) return;
+      operationControls().forEach(function (element) { element.disabled = true; });
+      dom.sourceCanvas.style.pointerEvents = "none";
+    }
+
+    function beginOperation(kind) {
+      if (state.operation) throw new Error("別の処理が実行中です: " + state.operation.kind);
+      if (state.painting) throw new Error("手動補正の描画中は処理を開始できません。描画を完了してから再実行してください");
+      const token = ++state.operationSerial;
+      state.operationControlSnapshot = operationControls().map(function (element) { return { element: element, disabled: element.disabled }; });
+      state.operationPointerEvents = dom.sourceCanvas.style.pointerEvents;
+      state.operation = { token: token, kind: kind };
+      applyOperationLock();
+      return token;
+    }
+
+    function assertOperationToken(token) {
+      if (!state.operation || state.operation.token !== token) throw new Error("処理トークンが一致しません");
+    }
+
+    function endOperation(token) {
+      assertOperationToken(token);
+      const snapshot = state.operationControlSnapshot || [];
+      const pointerEvents = state.operationPointerEvents;
+      state.operation = null;
+      state.operationControlSnapshot = null;
+      state.operationPointerEvents = "";
+      snapshot.forEach(function (item) { item.element.disabled = item.disabled; });
+      dom.sourceCanvas.style.pointerEvents = pointerEvents;
+      updateInteractivity();
+    }
 
     function setStatus(message, tone) {
       dom.globalStatus.textContent = message;
@@ -401,6 +535,10 @@
       return { w: w, h: h, scaleX: w / crop.w, scaleY: h / crop.h, rotation: 0, crop: crop, logoRoi: logoRoi };
     }
 
+    function mimeForSource(path) {
+      return /\.png$/i.test(path) ? "image/png" : "image/jpeg";
+    }
+
     function emptyLayer(width, height) {
       return new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
     }
@@ -409,52 +547,86 @@
       return new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
     }
 
+    function markManualEdited() {
+      state.manualRevision += 1;
+    }
+
     function imageDataToCanvas(imageData, canvas) {
       setCanvasSize(canvas, imageData.width, imageData.height);
       getContext(canvas).putImageData(imageData, 0, 0);
     }
 
-    async function loadSource(key) {
+    function releaseBatchPreviewMemory(result) {
+      if (!result) return;
+      // Archive/export only need checks, prep and artifact Blobs. Drop the
+      // multi-megabyte working/preview ImageData once another charm is loaded.
+      result.base = null;
+      result.masks = null;
+      result.preDerived = null;
+      result.grainContext = null;
+      result.previews = null;
+    }
+
+    async function loadSource(key, ownerToken) {
       const spec = CHARM_SPECS[key];
+      if (!spec) throw new Error("未知のチャームです: " + key);
+      const ownsOperation = ownerToken === undefined;
+      const operationToken = ownsOperation ? beginOperation("load:" + key) : ownerToken;
+      assertOperationToken(operationToken);
+      const requestedCrop = state.cropInputs[key]
+        ? jsonClone(state.cropInputs[key])
+        : spec.cropSource ? jsonClone(spec.cropSource) : null;
       setStatus(spec.label + " を読み込み中", "busy");
-      dom.processButton.disabled = true;
+      let bitmap = null;
       try {
         const response = await fetch(spec.source, { cache: "no-store" });
+        assertOperationToken(operationToken);
         if (!response.ok) throw new Error("HTTP " + response.status);
         const bytes = await response.arrayBuffer();
-        const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }));
-        const cropInput = state.cropInputs[key] || spec.cropSource || { x: 0, y: 0, w: bitmap.width, h: bitmap.height };
+        assertOperationToken(operationToken);
+        bitmap = await createImageBitmap(new Blob([bytes], { type: mimeForSource(spec.source) }));
+        assertOperationToken(operationToken);
+        const bitmapWidth = bitmap.width, bitmapHeight = bitmap.height;
+        const cropInput = requestedCrop || { x: 0, y: 0, w: bitmapWidth, h: bitmapHeight };
         state.cropInputs[key] = { x: cropInput.x, y: cropInput.y, w: cropInput.w, h: cropInput.h };
         seedTransformControls(state.cropInputs[key]);
-        const work = computeWork(bitmap.width, bitmap.height, spec, state.cropInputs[key]);
+        const work = computeWork(bitmapWidth, bitmapHeight, spec, state.cropInputs[key]);
         const sourceCanvas = document.createElement("canvas");
         setCanvasSize(sourceCanvas, work.w, work.h);
         const sourceCtx = getContext(sourceCanvas);
         sourceCtx.drawImage(bitmap, work.crop.x, work.crop.y, work.crop.w, work.crop.h, 0, 0, work.w, work.h);
         const sourceImageData = sourceCtx.getImageData(0, 0, work.w, work.h);
+        if (bitmap.close) bitmap.close();
+        bitmap = null;
 
+        releaseBatchPreviewMemory(state.result);
         state.selectedKey = key;
+        state.loadedKey = key;
         state.sourceBytes = bytes;
-        state.sourceBitmap = bitmap;
         state.sourceImageData = sourceImageData;
         state.work = work;
         state.transformDirty = false;
         state.manual = { alpha: emptyLayer(work.w, work.h), owner: emptyLayer(work.w, work.h), keep: emptyLayer(work.w, work.h), inpaint: emptyLayer(work.w, work.h) };
-        seedManualPresets(spec);
+        seedDeterministicManualLayers(spec, sourceImageData);
+        markManualEdited();
         state.history = [];
         state.result = null;
+        dom.charmSelect.value = key;
         seedSpecControls(spec);
         renderSource();
         resetDerivedViews();
         updateInteractivity();
         dom.workspaceTitle.textContent = spec.label;
-        dom.workDims.textContent = bitmap.width + "×" + bitmap.height + " → " + work.w + "×" + work.h + " px";
-        dom.sourceMeta.textContent = spec.source + " / JPEG " + bitmap.width + "×" + bitmap.height + " / work scale " + work.scaleX.toFixed(6);
+        dom.workDims.textContent = bitmapWidth + "×" + bitmapHeight + " → " + work.w + "×" + work.h + " px";
+        dom.sourceMeta.textContent = spec.source + " / " + (spec.sourceMode === "colorless" ? "PNG colorless" : "JPEG photo") + " " + bitmapWidth + "×" + bitmapHeight + " / work scale " + work.scaleX.toFixed(6);
         setStatus(spec.label + " 読み込み完了", "ok");
       } catch (error) {
         setStatus("読み込み失敗: " + error.message, "error");
         dom.sourceMeta.textContent = "ローカルHTTPサーバ経由で開いてください。file:// は使用できません。";
         throw error;
+      } finally {
+        if (bitmap && bitmap.close) bitmap.close();
+        if (ownsOperation) endOperation(operationToken);
       }
     }
 
@@ -545,11 +717,11 @@
         const body = document.createElement("div"); body.textContent = (index + 1) + ". " + label + " — " + check.detail;
         row.append(mark, body); dom.checkList.appendChild(row);
       });
-      const firstSevenPass = checks && checks.slice(0, 7).every(function (check) { return check.status === "pass"; });
-      const allEightPass = firstSevenPass && checks[7] && checks[7].status === "pass";
+      const prechecksPass = checks && checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
+      const allEightPass = prechecksPass && checks[VERIFY_CHECK_INDEX] && checks[VERIFY_CHECK_INDEX].status === "pass";
       const anyFail = checks && checks.some(function (check) { return check.status === "fail"; });
-      dom.checkBadge.textContent = allEightPass ? "1–8 PASS" : firstSevenPass ? "1–7 PASS" : anyFail ? "FAIL" : "PENDING";
-      dom.checkBadge.className = "tag " + (allEightPass || firstSevenPass ? "pass" : anyFail ? "fail" : "");
+      dom.checkBadge.textContent = allEightPass ? "1–8+M/F PASS" : prechecksPass ? "1–7+M/F PASS" : anyFail ? "FAIL" : "PENDING";
+      dom.checkBadge.className = "tag " + (allEightPass || prechecksPass ? "pass" : anyFail ? "fail" : "");
     }
 
     function renderBatch() {
@@ -568,13 +740,20 @@
     }
 
     function updateInteractivity() {
-      const loaded = !!state.sourceImageData;
+      const loaded = !!state.sourceImageData && state.loadedKey === state.selectedKey;
+      const currentResult = state.result && state.result.key === state.selectedKey ? state.result : null;
+      const currentPass = currentResult && currentResult.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
       dom.processButton.disabled = !loaded || state.transformDirty;
       dom.undoButton.disabled = !loaded || state.history.length === 0;
       dom.clearLayerButton.disabled = !loaded;
       dom.exportLayerButton.disabled = !loaded;
       dom.importLayerButton.disabled = !loaded;
-      dom.copyConfigButton.disabled = !state.result;
+      dom.copyConfigButton.disabled = !currentResult;
+      dom.exportRegressionButton.disabled = !currentPass || CHARM_SPECS[state.selectedKey].sourceMode !== "colorless";
+      dom.exportCurrentButton.disabled = !currentPass;
+      dom.exportBatchButton.disabled = !allBatchPass1to7();
+      dom.sourceCanvas.style.pointerEvents = loaded ? "" : "none";
+      applyOperationLock();
     }
 
     function updateBrushModes() {
@@ -668,17 +847,225 @@
 
     async function blobToImageData(blob) {
       const bitmap = await createImageBitmap(blob);
-      const canvas = document.createElement("canvas");
-      setCanvasSize(canvas, bitmap.width, bitmap.height);
-      getContext(canvas).drawImage(bitmap, 0, 0);
-      const imageData = getContext(canvas).getImageData(0, 0, canvas.width, canvas.height);
-      if (bitmap.close) bitmap.close();
-      return imageData;
+      try {
+        const canvas = document.createElement("canvas");
+        setCanvasSize(canvas, bitmap.width, bitmap.height);
+        getContext(canvas).drawImage(bitmap, 0, 0);
+        return getContext(canvas).getImageData(0, 0, canvas.width, canvas.height);
+      } finally {
+        if (bitmap.close) bitmap.close();
+      }
     }
 
     async function decodedRgbaHash(blob) {
       const decoded = await blobToImageData(blob);
       return sha256(decoded.data);
+    }
+
+    async function decodeArtifactSnapshot(blob) {
+      const imageData = await blobToImageData(blob);
+      return {
+        imageData: imageData,
+        width: imageData.width,
+        height: imageData.height,
+        decodedRgbaSha256: await sha256(imageData.data),
+        byteLength: blob.size
+      };
+    }
+
+    function artifactSnapshotMatchesExpected(snapshot, expected) {
+      return !!snapshot && !!expected
+        && snapshot.width === expected.width
+        && snapshot.height === expected.height
+        && snapshot.decodedRgbaSha256 === expected.decodedRgbaSha256
+        && snapshot.byteLength === expected.byteLength;
+    }
+
+    function hexToRgb(hex) {
+      const value = String(hex).replace(/^#/, "");
+      if (!/^[0-9a-f]{6}$/i.test(value)) throw new Error("色コードが不正です: " + hex);
+      return { r: parseInt(value.slice(0, 2), 16), g: parseInt(value.slice(2, 4), 16), b: parseInt(value.slice(4, 6), 16) };
+    }
+
+    function lowerMedian(values) {
+      if (!values.length) return NaN;
+      values.sort(function (a, b) { return a - b; });
+      return values[Math.floor((values.length - 1) / 2)];
+    }
+
+    function mirrorIndex(index, size) {
+      if (!Number.isInteger(index) || !Number.isInteger(size) || size <= 0) throw new Error("mirrorIndex引数が不正です");
+      const period = 2 * size;
+      const t = ((index % period) + period) % period;
+      return t < size ? t : period - 1 - t;
+    }
+
+    async function fetchImageResource(path, expectedSha256, hashKind) {
+      const response = await fetch("../" + path, { cache: "no-store" });
+      if (!response.ok) throw new Error(path + " HTTP " + response.status);
+      const bytes = await response.arrayBuffer();
+      const fileSha256 = await sha256(bytes);
+      if (hashKind !== "decoded" && fileSha256 !== expectedSha256) {
+        throw new Error(path + " file SHA-256不一致");
+      }
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: mimeForSource(path) }));
+      try {
+        const canvas = document.createElement("canvas");
+        setCanvasSize(canvas, bitmap.width, bitmap.height);
+        getContext(canvas).drawImage(bitmap, 0, 0);
+        const imageData = getContext(canvas).getImageData(0, 0, bitmap.width, bitmap.height);
+        const decodedSha256 = await sha256(imageData.data);
+        if (hashKind === "decoded" && decodedSha256 !== expectedSha256) {
+          throw new Error(path + " decoded RGBA SHA-256不一致");
+        }
+        return { path: path, fileSha256: fileSha256, decodedSha256: decodedSha256, imageData: imageData };
+      } finally {
+        if (bitmap.close) bitmap.close();
+      }
+    }
+
+    function deriveDisplayColors(referenceIvory) {
+      return COLORS.map(function (color) {
+        return { name: color.name, group: color.group, rgb: color.name === "アイボリー" ? jsonClone(referenceIvory) : hexToRgb(color.hex) };
+      });
+    }
+
+    function buildReferenceIvoryResource(base, masks, source) {
+      if (!base || !masks || base.width !== masks.width || base.height !== masks.height) throw new Error("frenchie reference base/masks寸法不一致");
+      const channels = [[], [], []];
+      for (let offset = 0; offset < base.data.length; offset += 4) {
+        if (base.data[offset + 3] !== 255 || masks.data[offset + 3] < 128 || masks.data[offset] !== 255) continue;
+        channels[0].push(base.data[offset]); channels[1].push(base.data[offset + 1]); channels[2].push(base.data[offset + 2]);
+      }
+      if (!channels[0].length) throw new Error("frenchie reference革コア画素がありません");
+      const referenceIvory = { r: lowerMedian(channels[0]), g: lowerMedian(channels[1]), b: lowerMedian(channels[2]) };
+      return {
+        source: jsonClone(source),
+        referenceIvory: referenceIvory,
+        displayColors: deriveDisplayColors(referenceIvory),
+        corePxCount: channels[0].length,
+        baseImageData: base,
+        masksImageData: masks
+      };
+    }
+
+    async function loadReferenceIvoryResource() {
+      if (state.referenceIvoryResource) return state.referenceIvoryResource;
+      const prepResponse = await fetch("../assets/charms/frenchie.prep.json", { cache: "no-store" });
+      if (!prepResponse.ok) throw new Error("frenchie.prep.json HTTP " + prepResponse.status);
+      const prep = await prepResponse.json();
+      const baseResource = await fetchImageResource("assets/charms/frenchie.base.png", prep.expectedOutput.base.decodedRgbaSha256, "decoded");
+      const masksResource = await fetchImageResource("assets/charms/frenchie.masks.png", prep.expectedOutput.masks.decodedRgbaSha256, "decoded");
+      state.referenceIvoryResource = buildReferenceIvoryResource(baseResource.imageData, masksResource.imageData, {
+        base: { file: "assets/charms/frenchie.base.png", decodedRgbaSha256: baseResource.decodedSha256 },
+        masks: { file: "assets/charms/frenchie.masks.png", decodedRgbaSha256: masksResource.decodedSha256 }
+      });
+      return state.referenceIvoryResource;
+    }
+
+    function exactMirrorBoxWorkerSource() {
+      return [
+        "self.onmessage = function (event) {",
+        "  try {",
+        "    const input = event.data;",
+        "    const g0 = new Float64Array(input.buffer);",
+        "    const width = input.width, height = input.height, radius = input.radius, amp = input.amp;",
+        "    const span = 2 * radius + 1, divisor = span * span;",
+        "    const map = new Float64Array(width * height);",
+        "    const mirrorIndex = " + mirrorIndex.toString() + ";",
+        "    function clamp(value, low, high) { return Math.max(low, Math.min(high, value)); }",
+        "    for (let y = 0; y < height; y += 1) {",
+        "      for (let x = 0; x < width; x += 1) {",
+        "        let sum = 0;",
+        "        for (let dy = -radius; dy <= radius; dy += 1) {",
+        "          const row = mirrorIndex(y + dy, height) * width;",
+        "          for (let dx = -radius; dx <= radius; dx += 1) sum += g0[row + mirrorIndex(x + dx, width)];",
+        "        }",
+        "        if (sum <= 0) throw new Error('leather-grain blur=0');",
+        "        const index = y * width + x;",
+        "        map[index] = clamp(g0[index] / (sum / divisor), 1 - amp, 1 + amp);",
+        "      }",
+        "    }",
+        "    self.postMessage({ buffer: map.buffer }, [map.buffer]);",
+        "  } catch (error) { self.postMessage({ error: error && error.message ? error.message : String(error) }); }",
+        "};"
+      ].join("\n");
+    }
+
+    async function exactMirrorBoxRatioMapMain(g0, width, height, radius, amp) {
+      const span = 2 * radius + 1, divisor = span * span;
+      const map = new Float64Array(width * height);
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          let sum = 0;
+          for (let dy = -radius; dy <= radius; dy += 1) {
+            const row = mirrorIndex(y + dy, height) * width;
+            for (let dx = -radius; dx <= radius; dx += 1) sum += g0[row + mirrorIndex(x + dx, width)];
+          }
+          if (sum <= 0) throw new Error("leather-grain blur=0");
+          const index = y * width + x;
+          map[index] = clamp(g0[index] / (sum / divisor), 1 - amp, 1 + amp);
+        }
+        if ((y & 3) === 3) await new Promise(function (resolve) { setTimeout(resolve, 0); });
+      }
+      return map;
+    }
+
+    async function exactMirrorBoxRatioMap(g0, width, height, radius, amp) {
+      if (typeof Worker === "undefined") return exactMirrorBoxRatioMapMain(g0, width, height, radius, amp);
+      const url = URL.createObjectURL(new Blob([exactMirrorBoxWorkerSource()], { type: "text/javascript" }));
+      let worker = null;
+      try {
+        worker = new Worker(url);
+        return await new Promise(function (resolve, reject) {
+          worker.onmessage = function (event) {
+            if (event.data && event.data.error) reject(new Error(event.data.error));
+            else resolve(new Float64Array(event.data.buffer));
+          };
+          worker.onerror = function (event) { reject(new Error(event.message || "グレインWorkerが失敗しました")); };
+          worker.postMessage({ buffer: g0.buffer, width: width, height: height, radius: radius, amp: amp }, [g0.buffer]);
+        });
+      } finally {
+        if (worker) worker.terminate();
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    async function buildGrainResource(image, grainConfig, identity) {
+      const width = image.width, height = image.height;
+      const radius = grainConfig.grainRadiusPx;
+      if (radius !== GRAIN_DEFAULTS.grainRadiusPx) {
+        throw new Error("grainRadiusPxはtoolVersion " + TOOL_VERSION + " の正規値 " + GRAIN_DEFAULTS.grainRadiusPx + " のみ対応です");
+      }
+      const g0 = new Float64Array(width * height);
+      for (let index = 0; index < g0.length; index += 1) {
+        const offset = index * 4;
+        g0[index] = luminance(image.data[offset], image.data[offset + 1], image.data[offset + 2]);
+      }
+      const map = await exactMirrorBoxRatioMap(g0, width, height, radius, grainConfig.grainAmp);
+      await new Promise(function (resolve) { setTimeout(resolve, 0); });
+      return { file: identity.file, sha256: identity.sha256, width: width, height: height, radius: radius, amp: grainConfig.grainAmp, map: map };
+    }
+
+    async function loadGrainResource(grainConfig) {
+      const manifest = INPUT_MANIFEST.grain;
+      const resource = await fetchImageResource(manifest.file, manifest.sha256);
+      if (state.grainResource
+        && state.grainResource.file === manifest.file
+        && state.grainResource.sha256 === resource.fileSha256
+        && state.grainResource.radius === grainConfig.grainRadiusPx
+        && state.grainResource.amp === grainConfig.grainAmp
+        && state.grainResource.width === resource.imageData.width
+        && state.grainResource.height === resource.imageData.height) return state.grainResource;
+      state.grainResource = await buildGrainResource(resource.imageData, grainConfig, { file: manifest.file, sha256: resource.fileSha256 });
+      return state.grainResource;
+    }
+
+    async function buildVerificationGrainResource(grainBytes, grainConfig) {
+      const manifest = INPUT_MANIFEST.grain;
+      if (!(grainBytes instanceof ArrayBuffer) || await sha256(grainBytes) !== manifest.sha256) throw new Error("verification grain SHA-256不一致");
+      const image = await blobToImageData(new Blob([grainBytes], { type: mimeForSource(manifest.file) }));
+      return buildGrainResource(image, grainConfig, { file: manifest.file, sha256: manifest.sha256 });
     }
 
     function hasLayerPixels(layer) {
@@ -770,27 +1157,15 @@
     }
 
     function ringGeometryContract() {
-      const radiusMm = LAYOUT.ringOuterMm / 2;
-      const stageVisibleBounds = {
-        left: LAYOUT.ringCenterXMm - radiusMm,
-        top: LAYOUT.ringCenterYMm - radiusMm,
-        right: LAYOUT.ringCenterXMm + radiusMm,
-        bottom: LAYOUT.ringCenterYMm + radiusMm
-      };
-      const drawRect = {
-        x: stageVisibleBounds.left * LAYOUT.pxPerMmStage,
-        y: stageVisibleBounds.top * LAYOUT.pxPerMmStage,
+      const drawSize = {
         w: LAYOUT.ringOuterMm * LAYOUT.pxPerMmStage,
         h: LAYOUT.ringOuterMm * LAYOUT.pxPerMmStage
       };
-      const expectedBounds = { left: 89, top: 10, right: 131, bottom: 52 };
-      const expectedDrawRect = { x: 534, y: 60, w: 252, h: 252 };
+      const expectedDrawSize = { w: 252, h: 252 };
       return {
-        stageVisibleBounds: stageVisibleBounds,
-        drawRect: drawRect,
-        pass: jsonEqual(stageVisibleBounds, expectedBounds) && jsonEqual(drawRect, expectedDrawRect),
-        expectedBounds: expectedBounds,
-        expectedDrawRect: expectedDrawRect
+        drawSize: drawSize,
+        pass: LAYOUT.ringOuterMm === 42 && LAYOUT.ringCenterXMm === LAYOUT.stageMm.w / 2 && jsonEqual(drawSize, expectedDrawSize),
+        expectedDrawSize: expectedDrawSize
       };
     }
 
@@ -813,7 +1188,7 @@
       const hole = centerTransparentHole(imageData);
       if (!hole.enclosed) failures.push("中央穴が外側の透明領域へ連結しています（丸カン切り抜き破損）");
       const geometry = ringGeometryContract();
-      if (!geometry.pass) failures.push("42mmステージ配置契約が不一致です");
+      if (!geometry.pass) failures.push("42mm丸カン描画寸法契約が不一致です");
       return {
         status: failures.length === 0 ? "pass" : "fail",
         failures: failures,
@@ -823,8 +1198,7 @@
         counts: stats.counts,
         border: stats.border,
         hole: hole,
-        stageVisibleBounds: geometry.stageVisibleBounds,
-        drawRect: geometry.drawRect
+        drawSize: geometry.drawSize
       };
     }
 
@@ -1036,6 +1410,44 @@
       return JSON.parse(JSON.stringify(value));
     }
 
+    function detachedPublicValue(value, seen) {
+      if (value === null || typeof value !== "object") return value;
+      const visited = seen || new WeakMap();
+      if (visited.has(value)) return visited.get(value);
+      if (value instanceof ImageData) {
+        const imageData = cloneImageData(value);
+        visited.set(value, imageData);
+        return Object.freeze(imageData);
+      }
+      if (value instanceof Blob) {
+        const blob = value.slice(0, value.size, value.type);
+        visited.set(value, blob);
+        return Object.freeze(blob);
+      }
+      if (value instanceof ArrayBuffer) {
+        const buffer = value.slice(0);
+        visited.set(value, buffer);
+        return buffer;
+      }
+      if (ArrayBuffer.isView(value)) {
+        const view = typeof value.slice === "function"
+          ? value.slice(0)
+          : new value.constructor(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+        visited.set(value, view);
+        return view;
+      }
+      if (Array.isArray(value)) {
+        const array = [];
+        visited.set(value, array);
+        value.forEach(function (item) { array.push(detachedPublicValue(item, visited)); });
+        return Object.freeze(array);
+      }
+      const object = {};
+      visited.set(value, object);
+      Object.keys(value).forEach(function (key) { object[key] = detachedPublicValue(value[key], visited); });
+      return Object.freeze(object);
+    }
+
     function jsonEqual(a, b) {
       return JSON.stringify(a) === JSON.stringify(b);
     }
@@ -1157,7 +1569,7 @@
       const entries = [];
       for (const key of CHARM_KEYS) {
         const result = results[key];
-        assertArchive(result && result.checks.slice(0, 7).every(function (check) { return check.status === "pass"; }), key + " の検査1〜7が未通過です");
+        assertArchive(result && result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; }), key + " の検査1〜7＋M/Fが未通過です");
         const prep = jsonClone(prepOverrides && prepOverrides[key] ? prepOverrides[key] : result.prep);
         entries.push(await archiveEntry("assets/charms/" + key + ".base.png", "image/png", result.artifacts.baseBlob));
         entries.push(await archiveEntry("assets/charms/" + key + ".masks.png", "image/png", result.artifacts.masksBlob));
@@ -1210,6 +1622,34 @@
       resetDerivedViews();
       renderBatch();
       if (message) setStatus(message, "idle");
+      updateInteractivity();
+    }
+
+    function invalidateColorlessResults(message) {
+      const released = new Set();
+      CHARM_KEYS.forEach(function (key) {
+        if (CHARM_SPECS[key].sourceMode !== "colorless") return;
+        const previous = state.batch[key];
+        if (previous && previous.result && !released.has(previous.result)) {
+          releaseBatchPreviewMemory(previous.result);
+          released.add(previous.result);
+        }
+        state.batch[key] = { status: "pending", verify: "pending" };
+      });
+      const currentIsColorless = !!state.result && CHARM_SPECS[state.result.key]
+        && CHARM_SPECS[state.result.key].sourceMode === "colorless";
+      if (currentIsColorless) {
+        if (!released.has(state.result)) releaseBatchPreviewMemory(state.result);
+        state.result = null;
+        resetDerivedViews();
+      }
+      state.lastArchive = null;
+      dom.exportBatchButton.disabled = true;
+      dom.exportGate.textContent = "LOCKED";
+      dom.exportGate.className = "tag";
+      renderBatch();
+      if (message) setStatus(message, "idle");
+      updateInteractivity();
     }
 
     function pointerToCanvas(event) {
@@ -1281,12 +1721,13 @@
         const t = step / steps;
         paintDisk(layer, Math.round(from.x + (to.x - from.x) * t), Math.round(from.y + (to.y - from.y) * t), radius, dom.brushMode.value);
       }
+      markManualEdited();
       dom.manualBadge.textContent = "編集済み";
       renderSource();
     }
 
     function startPainting(event) {
-      if (!state.manual || event.button !== 0) return;
+      if (!state.manual || state.loadedKey !== state.selectedKey || event.button !== 0) return;
       event.preventDefault();
       dom.sourceCanvas.setPointerCapture(event.pointerId);
       pushHistory(dom.manualLayer.value);
@@ -1298,6 +1739,7 @@
 
     function movePainting(event) {
       if (!state.painting) return;
+      if (state.loadedKey !== state.selectedKey) { stopPainting(event); return; }
       const point = pointerToCanvas(event);
       paintSegment(state.lastPoint, point);
       state.lastPoint = point;
@@ -1312,21 +1754,58 @@
     }
 
     async function exportManualLayer() {
-      const name = dom.manualLayer.value;
-      const blob = await imageDataToBlob(state.manual[name]);
-      downloadBlob(blob, state.selectedKey + ".manual-" + name + ".png");
+      if (!state.manual) throw new Error("manual layerが未読み込みです");
+      const operationToken = beginOperation("export-manual:" + state.selectedKey);
+      try {
+        const key = state.selectedKey;
+        const loadedKey = state.loadedKey;
+        const layerName = dom.manualLayer.value;
+        const workSize = state.work ? { w: state.work.w, h: state.work.h } : null;
+        const manualRevision = state.manualRevision;
+        const layer = state.manual[layerName] ? cloneImageData(state.manual[layerName]) : null;
+        if (!workSize || key !== loadedKey || !layer || layer.width !== workSize.w || layer.height !== workSize.h) {
+          throw new Error("選択中のチャームを読み込み、work寸法と一致するmanual layerを書き出してください");
+        }
+        const blob = await imageDataToBlob(layer);
+        assertOperationToken(operationToken);
+        if (state.selectedKey !== key || state.loadedKey !== loadedKey || state.manualRevision !== manualRevision
+          || !state.work || state.work.w !== workSize.w || state.work.h !== workSize.h
+          || !state.manual || !state.manual[layerName]
+          || state.manual[layerName].width !== workSize.w || state.manual[layerName].height !== workSize.h) {
+          throw new Error("manual layer書出し中に対象または内容が変更されました");
+        }
+        downloadBlob(blob, key + ".manual-" + layerName + ".png");
+      } finally {
+        endOperation(operationToken);
+      }
     }
 
     async function importManualLayer(file) {
       if (!file || !state.manual) return;
-      const imageData = await blobToImageData(file);
-      if (imageData.width !== state.work.w || imageData.height !== state.work.h) throw new Error("manual layerの寸法がbase候補と一致しません");
+      const operationToken = beginOperation("import-manual:" + state.selectedKey);
+      const key = state.selectedKey;
+      const loadedKey = state.loadedKey;
       const layerName = dom.manualLayer.value;
-      pushHistory(layerName);
-      state.manual[layerName] = imageData;
-      dom.manualBadge.textContent = "読込済み";
-      invalidateResult("手動補正PNGを読み込みました。再実行してください");
-      renderSource();
+      const workSize = state.work ? { w: state.work.w, h: state.work.h } : null;
+      try {
+        if (!workSize || key !== loadedKey) throw new Error("選択中のチャームを読み込んでからmanual layerを読み込んでください");
+        const imageData = await blobToImageData(file);
+        assertOperationToken(operationToken);
+        if (state.selectedKey !== key || state.loadedKey !== loadedKey || !state.work
+          || state.work.w !== workSize.w || state.work.h !== workSize.h || !state.manual) {
+          throw new Error("manual layer読込中に対象チャームが変更されました");
+        }
+        if (imageData.width !== workSize.w || imageData.height !== workSize.h) throw new Error("manual layerの寸法がbase候補と一致しません");
+        pushHistory(layerName);
+        state.manual[layerName] = imageData;
+        markManualEdited();
+        dom.manualLayer.value = layerName;
+        dom.manualBadge.textContent = "読込済み";
+        invalidateResult("手動補正PNGを読み込みました。再実行してください");
+        renderSource();
+      } finally {
+        endOperation(operationToken);
+      }
     }
 
     function clearManualLayer() {
@@ -1334,6 +1813,7 @@
       const layerName = dom.manualLayer.value;
       pushHistory(layerName);
       state.manual[layerName] = emptyLayer(state.work.w, state.work.h);
+      markManualEdited();
       dom.manualBadge.textContent = "消去済み";
       invalidateResult("手動補正を消去しました。再実行してください");
       renderSource();
@@ -1343,6 +1823,7 @@
       const last = state.history.pop();
       if (!last) return;
       state.manual[last.layer] = last.data;
+      markManualEdited();
       dom.manualLayer.value = last.layer;
       updateBrushModes();
       invalidateResult("直前の手動補正を取り消しました");
@@ -1350,16 +1831,378 @@
       updateInteractivity();
     }
 
-    function seedManualPresets(spec) {
-      if (!state.manual || !spec.keepCircles) return;
-      const keep = state.manual.keep;
-      spec.keepCircles.forEach(function (circle) {
-        const cx = Math.round(circle[0] * keep.width);
-        const cy = Math.round(circle[1] * keep.height);
-        const radius = Math.max(2, Math.round(circle[2] * Math.min(keep.width, keep.height)));
-        paintDisk(keep, cx, cy, radius, "keep");
+    function seedDeterministicManualLayers(spec, source) {
+      if (!state.manual || !spec.manualRecipe) return;
+      if (spec.sourceMode !== "colorless" || spec.toneMode !== "flat") throw new Error(spec.label + " manualRecipeはcolorless/flat専用です");
+      if (spec.manualRecipe.id !== HORSESHOE_COLORLESS_MANUAL.id) throw new Error(spec.label + " 未知のmanualRecipeです");
+      seedHorseshoeAlpha(source, spec.manualRecipe);
+      seedHorseshoeOwnerAndKeep(source, spec.manualRecipe);
+      dom.manualBadge.textContent = "新素材manual生成済み";
+    }
+
+    function classifyHorseshoeClosedWhite(passable, reachable, width, height, recipe) {
+      const roi = roiBounds(recipe.hangingHoleRoi, width, height);
+      const seedX = Math.round(recipe.hangingHoleSeed[0] * width);
+      const seedY = Math.round(recipe.hangingHoleSeed[1] * height);
+      const visited = new Uint8Array(width * height);
+      const queue = new Int32Array(width * height);
+      let selected = null, main = null;
+      for (let start = 0; start < visited.length; start += 1) {
+        if (visited[start] || !passable[start] || reachable[start]) continue;
+        let head = 0, tail = 0, minDistance = Infinity;
+        let minX = width, minY = height, maxX = -1, maxY = -1, firstIndex = start;
+        const pixels = [];
+        queue[tail++] = start; visited[start] = 1;
+        while (head < tail) {
+          const index = queue[head++]; pixels.push(index);
+          const x = index % width, y = (index - x) / width;
+          minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+          minDistance = Math.min(minDistance, (x - seedX) * (x - seedX) + (y - seedY) * (y - seedY));
+          if (x > 0) enqueue(index - 1);
+          if (x + 1 < width) enqueue(index + 1);
+          if (y > 0) enqueue(index - width);
+          if (y + 1 < height) enqueue(index + width);
+        }
+        const bbox = { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+        const candidate = { pixels: pixels, area: pixels.length, bbox: bbox, minDistance: minDistance, firstIndex: firstIndex };
+        if (!main || candidate.area > main.area
+          || (candidate.area === main.area && candidate.firstIndex < main.firstIndex)) main = candidate;
+        const insideRoi = bbox.x >= roi.x0 && bbox.y >= roi.y0
+          && bbox.x + bbox.w <= roi.x1 && bbox.y + bbox.h <= roi.y1;
+        if (!insideRoi) continue;
+        if (!selected || candidate.minDistance < selected.minDistance
+          || (candidate.minDistance === selected.minDistance && candidate.firstIndex < selected.firstIndex)) selected = candidate;
+        function enqueue(index) {
+          if (!visited[index] && passable[index] && !reachable[index]) { visited[index] = 1; queue[tail++] = index; }
+        }
+      }
+      if (!selected) throw new Error("horseshoe吊り穴の閉白成分をROI内で確定できません");
+      const holeRange = recipe.hangingHoleRange;
+      if (selected.area < holeRange.areaMin || selected.area > holeRange.areaMax
+        || selected.bbox.w < holeRange.widthMin || selected.bbox.w > holeRange.widthMax
+        || selected.bbox.h < holeRange.heightMin || selected.bbox.h > holeRange.heightMax) {
+        throw new Error("horseshoe吊り穴成分が素材固定レンジ外です: area=" + selected.area + " / bbox=" + JSON.stringify(selected.bbox));
+      }
+      if (!main) throw new Error("horseshoe主閉白成分を確定できません");
+      const designRange = recipe.designWhiteRange;
+      if (main.area < designRange.areaMin || main.area > designRange.areaMax
+        || main.bbox.w < designRange.widthMin || main.bbox.w > designRange.widthMax
+        || main.bbox.h < designRange.heightMin || main.bbox.h > designRange.heightMax) {
+        throw new Error("horseshoe主閉白成分が素材固定レンジ外です: area=" + main.area + " / bbox=" + JSON.stringify(main.bbox));
+      }
+      return { hangingHole: selected, main: main };
+    }
+
+    function componentFeatherBands(componentPixels, width, height) {
+      const core = new Uint8Array(width * height);
+      componentPixels.forEach(function (index) { core[index] = 1; });
+      const bands = new Uint8Array(core.length);
+      let frontier = core;
+      for (let band = 1; band <= 2; band += 1) {
+        const next = new Uint8Array(core.length);
+        for (let index = 0; index < frontier.length; index += 1) {
+          if (!frontier[index]) continue;
+          const x = index % width, y = (index - x) / width;
+          for (let oy = -1; oy <= 1; oy += 1) for (let ox = -1; ox <= 1; ox += 1) {
+            const xx = x + ox, yy = y + oy;
+            if (xx < 0 || yy < 0 || xx >= width || yy >= height) continue;
+            const candidate = yy * width + xx;
+            if (core[candidate] || bands[candidate]) continue;
+            bands[candidate] = band;
+            next[candidate] = 1;
+          }
+        }
+        frontier = next;
+      }
+      let innerCount = 0, outerCount = 0;
+      for (let index = 0; index < bands.length; index += 1) {
+        if (bands[index] === 1) innerCount += 1;
+        if (bands[index] === 2) outerCount += 1;
+      }
+      if (innerCount < 1 || outerCount < 1) throw new Error("horseshoe吊り穴の1〜2pxフェザー帯を生成できません");
+      return { bands: bands, innerCount: innerCount, outerCount: outerCount };
+    }
+
+    function seedHorseshoeAlpha(source, recipe) {
+      const width = source.width, height = source.height, count = width * height;
+      const background = sampleBackground(source);
+      const passable = new Uint8Array(count);
+      const reachable = new Uint8Array(count);
+      const rawAutoAlpha = new Uint8ClampedArray(count);
+      const queue = new Int32Array(count);
+      const threshold = recipe.backgroundDistance;
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        const distance = Math.hypot(source.data[offset] - background.r, source.data[offset + 1] - background.g, source.data[offset + 2] - background.b);
+        rawAutoAlpha[index] = Math.round(smoothstep(recipe.autoAlphaLow, recipe.autoAlphaHigh, distance) * 255);
+        if (distance <= threshold) passable[index] = 1;
+      }
+      let head = 0, tail = 0;
+      function enqueue(index) {
+        if (index < 0 || index >= count || reachable[index] || !passable[index]) return;
+        reachable[index] = 1;
+        queue[tail++] = index;
+      }
+      for (let x = 0; x < width; x += 1) { enqueue(x); enqueue((height - 1) * width + x); }
+      for (let y = 1; y + 1 < height; y += 1) { enqueue(y * width); enqueue(y * width + width - 1); }
+      while (head < tail) {
+        const index = queue[head++], x = index % width, y = (index - x) / width;
+        if (x > 0) enqueue(index - 1);
+        if (x + 1 < width) enqueue(index + 1);
+        if (y > 0) enqueue(index - width);
+        if (y + 1 < height) enqueue(index + width);
+      }
+      const components = classifyHorseshoeClosedWhite(passable, reachable, width, height, recipe);
+      const hangingHole = components.hangingHole;
+      const hangingHoleMask = new Uint8Array(count);
+      hangingHole.pixels.forEach(function (index) { hangingHoleMask[index] = 1; });
+      const holeFeather = componentFeatherBands(hangingHole.pixels, width, height);
+      const padding = recipe.designPaddingPx;
+      const design = {
+        x0: Math.max(0, components.main.bbox.x - padding),
+        y0: Math.max(0, components.main.bbox.y - padding),
+        x1: Math.min(width, components.main.bbox.x + components.main.bbox.w + padding),
+        y1: Math.min(height, components.main.bbox.y + components.main.bbox.h + padding)
+      };
+      const layer = state.manual.alpha;
+      for (let index = 0; index < count; index += 1) {
+        if (hangingHoleMask[index]) continue;
+        const x = index % width, y = (index - x) / width;
+        const closedWhite = passable[index] && !reachable[index];
+        const insideDesign = x >= design.x0 && x < design.x1 && y >= design.y0 && y < design.y1;
+        const featherBand = holeFeather.bands[index];
+        const value = featherBand === 1 ? clamp(rawAutoAlpha[index], 32, 127)
+          : featherBand === 2 ? clamp(rawAutoAlpha[index], 128, 223)
+          : closedWhite ? 255 : insideDesign ? rawAutoAlpha[index] : 0;
+        if (value === 0) continue;
+        const offset = index * 4;
+        layer.data[offset] = value;
+        layer.data[offset + 3] = 255;
+      }
+    }
+
+    function sourceDistance(source, background, x, y) {
+      const offset = rgbaIndex(x, y, source.width);
+      return Math.hypot(source.data[offset] - background.r, source.data[offset + 1] - background.g, source.data[offset + 2] - background.b);
+    }
+
+    function localBoundsFromCenter(width, height, center, halfSize) {
+      const cx = Math.round(center[0] * width), cy = Math.round(center[1] * height);
+      const half = Math.max(4, Math.round(halfSize * Math.min(width, height)));
+      return {
+        x0: Math.max(0, cx - half), y0: Math.max(0, cy - half),
+        x1: Math.min(width, cx + half + 1), y1: Math.min(height, cy + half + 1),
+        cx: cx, cy: cy
+      };
+    }
+
+    function selectLocalComponent(localMask, localWidth, localHeight, bounds, globalWidth, seedX, seedY, minimum, maximum, strategy) {
+      const visited = new Uint8Array(localMask.length);
+      const queue = new Int32Array(localMask.length);
+      let best = null;
+      for (let start = 0; start < localMask.length; start += 1) {
+        if (!localMask[start] || visited[start]) continue;
+        let head = 0, tail = 0, minDistance = Infinity;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        const pixels = [];
+        queue[tail++] = start; visited[start] = 1;
+        while (head < tail) {
+          const localIndex = queue[head++]; pixels.push(localIndex);
+          const lx = localIndex % localWidth, ly = (localIndex - lx) / localWidth;
+          const gx = bounds.x0 + lx, gy = bounds.y0 + ly;
+          minX = Math.min(minX, gx); minY = Math.min(minY, gy); maxX = Math.max(maxX, gx); maxY = Math.max(maxY, gy);
+          minDistance = Math.min(minDistance, (gx - seedX) * (gx - seedX) + (gy - seedY) * (gy - seedY));
+          for (let oy = -1; oy <= 1; oy += 1) for (let ox = -1; ox <= 1; ox += 1) {
+            if (!ox && !oy) continue;
+            const xx = lx + ox, yy = ly + oy;
+            if (xx < 0 || yy < 0 || xx >= localWidth || yy >= localHeight) continue;
+            const next = yy * localWidth + xx;
+            if (!visited[next] && localMask[next]) { visited[next] = 1; queue[tail++] = next; }
+          }
+        }
+        if (pixels.length < minimum || pixels.length > maximum) continue;
+        const candidate = {
+          localPixels: pixels,
+          minDistance: minDistance,
+          area: pixels.length,
+          bbox: { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 }
+        };
+        const better = strategy === "largest"
+          ? (!best || candidate.area > best.area || (candidate.area === best.area && candidate.minDistance < best.minDistance))
+          : (!best || candidate.minDistance < best.minDistance || (candidate.minDistance === best.minDistance && candidate.area > best.area));
+        if (better) {
+          best = candidate;
+        }
+      }
+      if (!best) throw new Error("manualRecipeの連結成分を確定できません");
+      best.pixels = best.localPixels.map(function (localIndex) {
+        const lx = localIndex % localWidth, ly = (localIndex - lx) / localWidth;
+        return (bounds.y0 + ly) * globalWidth + bounds.x0 + lx;
       });
-      dom.manualBadge.textContent = "preset適用";
+      return best;
+    }
+
+    function extractClosedStone(source, background, recipe, center) {
+      const bounds = localBoundsFromCenter(source.width, source.height, center, recipe.stoneHalfSize);
+      const localWidth = bounds.x1 - bounds.x0, localHeight = bounds.y1 - bounds.y0;
+      const passable = new Uint8Array(localWidth * localHeight);
+      const reachable = new Uint8Array(passable.length);
+      const queue = new Int32Array(passable.length);
+      for (let ly = 0; ly < localHeight; ly += 1) for (let lx = 0; lx < localWidth; lx += 1) {
+        if (sourceDistance(source, background, bounds.x0 + lx, bounds.y0 + ly) <= recipe.featureDistance) passable[ly * localWidth + lx] = 1;
+      }
+      let head = 0, tail = 0;
+      function enqueue(lx, ly) {
+        if (lx < 0 || ly < 0 || lx >= localWidth || ly >= localHeight) return;
+        const localIndex = ly * localWidth + lx;
+        if (!passable[localIndex] || reachable[localIndex]) return;
+        reachable[localIndex] = 1; queue[tail++] = localIndex;
+      }
+      for (let lx = 0; lx < localWidth; lx += 1) { enqueue(lx, 0); enqueue(lx, localHeight - 1); }
+      for (let ly = 1; ly + 1 < localHeight; ly += 1) { enqueue(0, ly); enqueue(localWidth - 1, ly); }
+      while (head < tail) {
+        const localIndex = queue[head++], lx = localIndex % localWidth, ly = (localIndex - lx) / localWidth;
+        enqueue(lx - 1, ly); enqueue(lx + 1, ly); enqueue(lx, ly - 1); enqueue(lx, ly + 1);
+      }
+      const enclosed = new Uint8Array(passable.length);
+      for (let index = 0; index < enclosed.length; index += 1) if (!reachable[index]) enclosed[index] = 1;
+      const component = selectLocalComponent(enclosed, localWidth, localHeight, bounds, source.width, bounds.cx, bounds.cy, 4700, 6100, "nearest");
+      if (component.bbox.w < 80 || component.bbox.w > 90 || component.bbox.h < 75 || component.bbox.h > 90) {
+        throw new Error("ラインストーン抽出bboxが契約外です: " + JSON.stringify(component.bbox));
+      }
+      return component;
+    }
+
+    function countMaskHoles(mask, width, bbox, minimumArea) {
+      const localWidth = bbox.w, localHeight = bbox.h;
+      const open = new Uint8Array(localWidth * localHeight);
+      for (let ly = 0; ly < localHeight; ly += 1) for (let lx = 0; lx < localWidth; lx += 1) {
+        if (!mask[(bbox.y + ly) * width + bbox.x + lx]) open[ly * localWidth + lx] = 1;
+      }
+      const reachable = new Uint8Array(open.length), queue = new Int32Array(open.length);
+      let head = 0, tail = 0;
+      function enqueue(lx, ly) {
+        if (lx < 0 || ly < 0 || lx >= localWidth || ly >= localHeight) return;
+        const index = ly * localWidth + lx;
+        if (!open[index] || reachable[index]) return;
+        reachable[index] = 1; queue[tail++] = index;
+      }
+      for (let lx = 0; lx < localWidth; lx += 1) { enqueue(lx, 0); enqueue(lx, localHeight - 1); }
+      for (let ly = 1; ly + 1 < localHeight; ly += 1) { enqueue(0, ly); enqueue(localWidth - 1, ly); }
+      while (head < tail) {
+        const index = queue[head++], lx = index % localWidth, ly = (index - lx) / localWidth;
+        enqueue(lx - 1, ly); enqueue(lx + 1, ly); enqueue(lx, ly - 1); enqueue(lx, ly + 1);
+      }
+      const visited = new Uint8Array(open.length);
+      let holes = 0;
+      for (let start = 0; start < open.length; start += 1) {
+        if (!open[start] || reachable[start] || visited[start]) continue;
+        head = 0; tail = 0; queue[tail++] = start; visited[start] = 1;
+        let area = 0;
+        while (head < tail) {
+          const index = queue[head++], lx = index % localWidth, ly = (index - lx) / localWidth; area += 1;
+          [[lx - 1, ly], [lx + 1, ly], [lx, ly - 1], [lx, ly + 1]].forEach(function (point) {
+            const xx = point[0], yy = point[1];
+            if (xx < 0 || yy < 0 || xx >= localWidth || yy >= localHeight) return;
+            const next = yy * localWidth + xx;
+            if (open[next] && !reachable[next] && !visited[next]) { visited[next] = 1; queue[tail++] = next; }
+          });
+        }
+        if (area > minimumArea) holes += 1;
+      }
+      return holes;
+    }
+
+    function extractLogoComponents(source, background, recipe) {
+      const roi = roiBounds(recipe.logoRoi, source.width, source.height);
+      const bounds = { x0: roi.x0, y0: roi.y0, x1: roi.x1, y1: roi.y1 };
+      const localWidth = bounds.x1 - bounds.x0, localHeight = bounds.y1 - bounds.y0;
+      const candidate = new Uint8Array(localWidth * localHeight);
+      for (let ly = 0; ly < localHeight; ly += 1) for (let lx = 0; lx < localWidth; lx += 1) {
+        if (sourceDistance(source, background, bounds.x0 + lx, bounds.y0 + ly) > recipe.featureDistance) candidate[ly * localWidth + lx] = 1;
+      }
+      const seedX = Math.round(recipe.logoSeed[0] * source.width), seedY = Math.round(recipe.logoSeed[1] * source.height);
+      const main = selectLocalComponent(candidate, localWidth, localHeight, bounds, source.width, seedX, seedY, 3800, 4600, "largest");
+      if (main.bbox.w < 115 || main.bbox.w > 122 || main.bbox.h < 90 || main.bbox.h > 99) throw new Error("ロゴ本体bboxが契約外です: " + JSON.stringify(main.bbox));
+      main.localPixels.forEach(function (localIndex) { candidate[localIndex] = 0; });
+      const dotX = Math.round(recipe.logoDotSeed[0] * source.width), dotY = Math.round(recipe.logoDotSeed[1] * source.height);
+      const dot = selectLocalComponent(candidate, localWidth, localHeight, bounds, source.width, dotX, dotY, 5, 100, "nearest");
+      if (dot.bbox.w > 10 || dot.bbox.h > 10 || dot.minDistance > 144) throw new Error("ロゴの独立ドットを確定できません: " + JSON.stringify(dot.bbox));
+      const mainMask = new Uint8Array(source.width * source.height);
+      main.pixels.forEach(function (index) { mainMask[index] = 1; });
+      const counterCount = countMaskHoles(mainMask, source.width, main.bbox, 200);
+      if (counterCount !== 2) throw new Error("アンパサンド内部カウンター数が2ではありません: " + counterCount);
+      return { main: main, dot: dot, pixels: main.pixels.concat(dot.pixels), counterCount: counterCount };
+    }
+
+    function seedHorseshoeOwnerAndKeep(source, recipe) {
+      const width = source.width, height = source.height, count = width * height;
+      const background = sampleBackground(source);
+      const owner = state.manual.owner, keep = state.manual.keep;
+      // Manual ownership is authoritative for every possible foreground pixel:
+      // start with leather R, then opt exact source-derived stitch/logo pixels
+      // into B/G. buildMasks ignores these values where final base alpha is 0.
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        owner.data[offset] = 255; owner.data[offset + 1] = 0; owner.data[offset + 2] = 0; owner.data[offset + 3] = 255;
+      }
+
+      const keepMask = new Uint8Array(count);
+      const stoneComponents = [];
+      recipe.stoneSeeds.forEach(function (center) {
+        const component = extractClosedStone(source, background, recipe, center);
+        stoneComponents.push(component);
+        component.pixels.forEach(function (index) {
+          keepMask[index] = 1;
+          const offset = index * 4;
+          keep.data[offset] = keep.data[offset + 1] = keep.data[offset + 2] = 0; keep.data[offset + 3] = 255;
+        });
+      });
+      const keepCount = stoneComponents.reduce(function (sum, component) { return sum + component.area; }, 0);
+      if (stoneComponents.length !== 6 || keepCount < 32000 || keepCount > 34000) throw new Error("horseshoe manual keep面積が契約外です: " + keepCount);
+
+      const logoMask = new Uint8Array(count);
+      const logo = extractLogoComponents(source, background, recipe);
+      logo.pixels.forEach(function (index) { logoMask[index] = 1; });
+
+      // Rebuild the deterministic matte used only to locate the two rope rows.
+      // The exported manual-owner remains independent of the runtime owner
+      // detector and overrides it completely in buildMasks.
+      const matte = buildMatte(source, state.manual.alpha, 12, 32);
+      const boundaryDistance = distanceFromTransparent(matte.alpha, width, height, 70);
+      const protectedMask = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (keepMask[index] || logoMask[index]) protectedMask[index] = 1;
+      const exclusion = dilateMask(protectedMask, width, height, recipe.stitch.exclusionDilatePasses);
+      const hole = roiBounds(recipe.hangingHoleRoi, width, height);
+      for (let y = hole.y0; y < hole.y1; y += 1) for (let x = hole.x0; x < hole.x1; x += 1) exclusion[y * width + x] = 1;
+      const rawStitch = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) {
+        const x = index % width, y = (index - x) / width;
+        if (matte.alpha[index] === 0 || boundaryDistance[index] < recipe.stitch.seedBoundaryMin || boundaryDistance[index] > recipe.stitch.seedBoundaryMax || exclusion[index]) continue;
+        if (sourceDistance(source, background, x, y) > recipe.featureDistance) rawStitch[index] = 1;
+      }
+      let stitchMask = filterComponents(rawStitch, width, height, 2, count);
+      stitchMask = dilateMask(stitchMask, width, height, recipe.stitch.dilatePasses);
+      let stitchCount = 0, forbiddenOverlap = 0;
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        // Final distance clipping explicitly restores the outer frame, inner-U
+        // frame and hanging-hole ring to the initial leather-R ownership.
+        const finalStitch = stitchMask[index] && !exclusion[index]
+          && boundaryDistance[index] >= recipe.stitch.finalBoundaryMin
+          && boundaryDistance[index] <= recipe.stitch.finalBoundaryMax;
+        if (finalStitch) {
+          owner.data[offset] = 0; owner.data[offset + 1] = 0; owner.data[offset + 2] = 255; stitchCount += 1;
+        }
+        if (logoMask[index]) {
+          owner.data[offset] = 0; owner.data[offset + 1] = 255; owner.data[offset + 2] = 0;
+        }
+        if ((finalStitch && (keepMask[index] || logoMask[index])) || (keepMask[index] && logoMask[index])) forbiddenOverlap += 1;
+      }
+      const logoCount = logo.pixels.length;
+      if (stitchCount < 72000 || stitchCount > 75000) throw new Error("horseshoe manual stitch面積が契約外です: " + stitchCount);
+      if (logoCount < 3805 || logoCount > 4700) throw new Error("horseshoe manual logo面積が契約外です: " + logoCount);
+      if (forbiddenOverlap !== 0) throw new Error("horseshoe manual所有の禁領域重複があります: " + forbiddenOverlap);
     }
 
     function sampleBackground(source) {
@@ -1433,10 +2276,13 @@
         const offset = index * 4;
         const distance = Math.hypot(source.data[offset] - background.r, source.data[offset + 1] - background.g, source.data[offset + 2] - background.b);
         alpha[index] = Math.round(smoothstep(low, high, distance) * 255);
-        if (manualAlpha.data[offset + 3] === 255) alpha[index] = manualAlpha.data[offset];
       }
       keepLargestForeground(alpha, source.width, source.height);
       fillTinyTransparentHoles(alpha, source.width, source.height, 36);
+      for (let index = 0; index < alpha.length; index += 1) {
+        const offset = index * 4;
+        if (manualAlpha.data[offset + 3] === 255) alpha[index] = manualAlpha.data[offset];
+      }
       return { alpha: alpha, background: background };
     }
 
@@ -1545,7 +2391,7 @@
       return { edgeCount: edgeCount, edgeBad: edgeBad };
     }
 
-    function buildBase(source, alpha, manualInpaint) {
+    function buildBase(source, alpha) {
       const data = new Uint8ClampedArray(source.data);
       for (let index = 0; index < alpha.length; index += 1) {
         const offset = index * 4;
@@ -1553,14 +2399,22 @@
       }
       const imageData = new ImageData(data, source.width, source.height);
       const nearest = defringeBaseRgb(imageData);
-      for (let index = 0; index < alpha.length; index += 1) {
+      const edgeStats = edgeStatsForBase(imageData, nearest);
+      return { imageData: imageData, nearest: nearest, edgeCount: edgeStats.edgeCount, edgeBad: edgeStats.edgeBad };
+    }
+
+    function applyManualInpaint(baseMeta, manualInpaint) {
+      const imageData = baseMeta.imageData;
+      for (let index = 0; index < imageData.width * imageData.height; index += 1) {
         const offset = index * 4;
         if (manualInpaint.data[offset + 3] === 255) {
           imageData.data[offset] = manualInpaint.data[offset]; imageData.data[offset + 1] = manualInpaint.data[offset + 1]; imageData.data[offset + 2] = manualInpaint.data[offset + 2];
         }
       }
-      const edgeStats = edgeStatsForBase(imageData, nearest);
-      return { imageData: imageData, nearest: nearest, edgeCount: edgeStats.edgeCount, edgeBad: edgeStats.edgeBad };
+      const edgeStats = edgeStatsForBase(imageData, baseMeta.nearest);
+      baseMeta.edgeCount = edgeStats.edgeCount;
+      baseMeta.edgeBad = edgeStats.edgeBad;
+      return baseMeta;
     }
 
     function roiBounds(roi, width, height) {
@@ -1717,6 +2571,169 @@
       return new ImageData(data, base.width, base.height);
     }
 
+    function recomputeFlatWorkMetrics(baseBeforeGrain, workMasks, spec, calibrationInput) {
+      const bboxPx = rectFromPredicate(baseBeforeGrain.width, baseBeforeGrain.height, function (x, y) {
+        const offset = rgbaIndex(x, y, workMasks.width);
+        return workMasks.data[offset + 3] >= 128 && workMasks.data[offset] >= 128;
+      });
+      const mode = calibrationInput.mode;
+      const widthMeasurePx = mode === "bbox" && bboxPx ? bboxPx.w : lineLength(calibrationInput.widthLine);
+      const heightMeasurePx = mode === "bbox" && bboxPx ? bboxPx.h : lineLength(calibrationInput.heightLine);
+      const pxPerMmWorkW = widthMeasurePx / spec.sizeMm.w;
+      const pxPerMmWorkH = heightMeasurePx / spec.sizeMm.h;
+      const coreLums = [];
+      for (let offset = 0; offset < baseBeforeGrain.data.length; offset += 4) {
+        if (baseBeforeGrain.data[offset + 3] === 255 && workMasks.data[offset + 3] >= 128 && workMasks.data[offset] === 255) {
+          coreLums.push(luminance(baseBeforeGrain.data[offset], baseBeforeGrain.data[offset + 1], baseBeforeGrain.data[offset + 2]));
+        }
+      }
+      const flatWhite = lowerMedian(coreLums);
+      if (!bboxPx || !coreLums.length || ![widthMeasurePx, heightMeasurePx, pxPerMmWorkW, pxPerMmWorkH, flatWhite].every(function (value) { return Number.isFinite(value) && value > 0; })) {
+        throw new Error("無着色素材の作業校正値またはflatWhiteを再計算できません");
+      }
+      return { bboxPx: bboxPx, widthMeasurePx: widthMeasurePx, heightMeasurePx: heightMeasurePx, pxPerMmWorkW: pxPerMmWorkW, pxPerMmWorkH: pxPerMmWorkH, flatWhite: flatWhite, corePxCount: coreLums.length };
+    }
+
+    function auditLowerMedian(values) {
+      if (!values.length) return NaN;
+      const sorted = values.slice().sort(function (a, b) { return a - b; });
+      return sorted[Math.floor((sorted.length - 1) / 2)];
+    }
+
+    function auditFlatWorkMetrics(baseBeforeGrain, workMasks, spec, calibrationInput) {
+      if (!baseBeforeGrain || !workMasks || baseBeforeGrain.width !== workMasks.width || baseBeforeGrain.height !== workMasks.height) throw new Error("F-2 audit画像寸法不一致");
+      let minX = baseBeforeGrain.width, minY = baseBeforeGrain.height, maxX = -1, maxY = -1;
+      const coreLums = [];
+      for (let y = 0; y < baseBeforeGrain.height; y += 1) {
+        for (let x = 0; x < baseBeforeGrain.width; x += 1) {
+          const offset = (y * baseBeforeGrain.width + x) * 4;
+          const ownedLeather = workMasks.data[offset + 3] >= 128 && workMasks.data[offset] >= 128;
+          if (ownedLeather) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); }
+          if (baseBeforeGrain.data[offset + 3] === 255 && workMasks.data[offset + 3] >= 128 && workMasks.data[offset] === 255) {
+            coreLums.push((.2126 * baseBeforeGrain.data[offset] + .7152 * baseBeforeGrain.data[offset + 1] + .0722 * baseBeforeGrain.data[offset + 2]) / 255);
+          }
+        }
+      }
+      if (maxX < minX || maxY < minY || !coreLums.length) throw new Error("F-2 audit対象画素がありません");
+      const bboxPx = { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+      let widthMeasurePx, heightMeasurePx;
+      if (calibrationInput.mode === "bbox") {
+        widthMeasurePx = bboxPx.w; heightMeasurePx = bboxPx.h;
+      } else if (calibrationInput.mode === "manual-line") {
+        const w = calibrationInput.widthLine, h = calibrationInput.heightLine;
+        if (!w || !h || w.length !== 2 || h.length !== 2) throw new Error("F-2 audit校正線不正");
+        widthMeasurePx = Math.hypot(w[1][0] - w[0][0], w[1][1] - w[0][1]);
+        heightMeasurePx = Math.hypot(h[1][0] - h[0][0], h[1][1] - h[0][1]);
+      } else throw new Error("F-2 audit校正モード不正");
+      const pxPerMmWorkW = widthMeasurePx / spec.sizeMm.w;
+      const pxPerMmWorkH = heightMeasurePx / spec.sizeMm.h;
+      const flatWhite = auditLowerMedian(coreLums);
+      if (![widthMeasurePx, heightMeasurePx, pxPerMmWorkW, pxPerMmWorkH, flatWhite].every(function (value) { return Number.isFinite(value) && value > 0; })) throw new Error("F-2 audit値が不正です");
+      return { bboxPx: bboxPx, widthMeasurePx: widthMeasurePx, heightMeasurePx: heightMeasurePx, pxPerMmWorkW: pxPerMmWorkW, pxPerMmWorkH: pxPerMmWorkH, flatWhite: flatWhite, corePxCount: coreLums.length };
+    }
+
+    function auditFlatBake(before, afterBake, masks) {
+      let bakedPxCount = 0, bakedNonGrayPxCount = 0, nonLeatherChangedPxCount = 0;
+      for (let offset = 0; offset < before.data.length; offset += 4) {
+        const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
+        if (leather) {
+          bakedPxCount += 1;
+          if (afterBake.data[offset] !== afterBake.data[offset + 1] || afterBake.data[offset] !== afterBake.data[offset + 2]) bakedNonGrayPxCount += 1;
+        } else if (before.data[offset] !== afterBake.data[offset] || before.data[offset + 1] !== afterBake.data[offset + 1] || before.data[offset + 2] !== afterBake.data[offset + 2]) nonLeatherChangedPxCount += 1;
+      }
+      return { bakedPxCount: bakedPxCount, bakedNonGrayPxCount: bakedNonGrayPxCount, nonLeatherChangedPxCount: nonLeatherChangedPxCount };
+    }
+
+    function auditDisplayColors(referenceIvory) {
+      return COLORS.map(function (color) {
+        const rgb = color.name === "アイボリー" ? { r: referenceIvory.r, g: referenceIvory.g, b: referenceIvory.b } : {
+          r: parseInt(color.hex.slice(1, 3), 16), g: parseInt(color.hex.slice(3, 5), 16), b: parseInt(color.hex.slice(5, 7), 16)
+        };
+        return { name: color.name, group: color.group, rgb: rgb };
+      });
+    }
+
+    function auditReferenceIvoryResource(base, masks, source) {
+      if (!base || !masks || base.width !== masks.width || base.height !== masks.height) throw new Error("F-3 audit画像寸法不一致");
+      const red = [], green = [], blue = [];
+      for (let offset = 0; offset < base.data.length; offset += 4) {
+        if (base.data[offset + 3] !== 255 || masks.data[offset + 3] < 128 || masks.data[offset] !== 255) continue;
+        red.push(base.data[offset]); green.push(base.data[offset + 1]); blue.push(base.data[offset + 2]);
+      }
+      if (!red.length) throw new Error("F-3 audit革コア画素がありません");
+      const referenceIvory = { r: auditLowerMedian(red), g: auditLowerMedian(green), b: auditLowerMedian(blue) };
+      return { source: JSON.parse(JSON.stringify(source)), referenceIvory: referenceIvory, displayColors: auditDisplayColors(referenceIvory), corePxCount: red.length };
+    }
+
+    async function applyColorlessGrain(base, masks, spec, baseMeta, calibrationInput, explicitConfig, explicitResource) {
+      if (spec.sourceMode !== "colorless") return null;
+      const grainScaleMm = explicitConfig ? explicitConfig.grainScaleMm : Number(dom.grainScaleMm.value);
+      const config = Object.assign({}, spec.grain, explicitConfig || {}, { grainScaleMm: grainScaleMm });
+      if (!Number.isInteger(config.grainBase) || config.grainBase < 1 || config.grainBase > 255
+        || !Number.isFinite(config.grainAmp) || config.grainAmp <= 0 || config.grainAmp > 1
+        || !Number.isInteger(config.grainRadiusPx) || config.grainRadiusPx <= 0
+        || !Number.isFinite(config.grainScaleMm) || config.grainScaleMm <= 0
+        || config.grainBase * (1 + config.grainAmp) > 255 || config.tileMode !== "mirror") throw new Error("グレイン設定が検査F-2契約に一致しません");
+      const before = cloneImageData(base);
+      const workMasks = cloneImageData(masks);
+      const workMetrics = recomputeFlatWorkMetrics(before, workMasks, spec, calibrationInput);
+      const pxPerMmWorkW = workMetrics.pxPerMmWorkW;
+      const pxPerMmWorkH = workMetrics.pxPerMmWorkH;
+      const grainScaleX = config.grainScaleMm * pxPerMmWorkW;
+      const grainScaleY = config.grainScaleMm * pxPerMmWorkH;
+      if (![pxPerMmWorkW, pxPerMmWorkH, grainScaleX, grainScaleY].every(function (value) { return Number.isFinite(value) && value > 0; })) throw new Error("グレイン軸別尺度が正の有限値ではありません");
+      const flatWhite = workMetrics.flatWhite;
+      setStatus(spec.label + " グレイン比率マップを生成中", "busy");
+      const resource = explicitResource || await loadGrainResource(config);
+      if (resource.sha256 !== INPUT_MANIFEST.grain.sha256 || resource.radius !== config.grainRadiusPx || resource.amp !== config.grainAmp) throw new Error("グレインリソースが設定と一致しません");
+      const afterBake = cloneImageData(base);
+      let bakedPxCount = 0, nonLeatherChangedPxCount = 0, bakedNonGrayPxCount = 0;
+      for (let y = 0; y < base.height; y += 1) {
+        for (let x = 0; x < base.width; x += 1) {
+          const offset = rgbaIndex(x, y, base.width);
+          const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
+          if (!leather) continue;
+          const shade = clamp(luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]) / flatWhite, 0, 1);
+          const u = Math.floor((x + .5) / grainScaleX), v = Math.floor((y + .5) / grainScaleY);
+          const grain = resource.map[mirrorIndex(v, resource.height) * resource.width + mirrorIndex(u, resource.width)];
+          const gray = Math.round(clamp(config.grainBase * shade * grain, 0, 255));
+          afterBake.data[offset] = afterBake.data[offset + 1] = afterBake.data[offset + 2] = gray;
+          bakedPxCount += 1;
+          if (afterBake.data[offset] !== afterBake.data[offset + 1] || afterBake.data[offset] !== afterBake.data[offset + 2]) bakedNonGrayPxCount += 1;
+        }
+      }
+      for (let offset = 0; offset < base.data.length; offset += 4) {
+        const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
+        if (!leather && (before.data[offset] !== afterBake.data[offset] || before.data[offset + 1] !== afterBake.data[offset + 1] || before.data[offset + 2] !== afterBake.data[offset + 2])) nonLeatherChangedPxCount += 1;
+      }
+      base.data.set(afterBake.data);
+      const nearest = defringeBaseRgb(base);
+      const edge = edgeStatsForBase(base, nearest);
+      return {
+        before: before,
+        workMasks: workMasks,
+        calibrationInput: jsonClone(calibrationInput),
+        workMetrics: workMetrics,
+        afterBake: afterBake,
+        f1a: { bakedPxCount: bakedPxCount, bakedNonGrayPxCount: bakedNonGrayPxCount, nonLeatherChangedPxCount: nonLeatherChangedPxCount },
+        baseMeta: { imageData: base, nearest: nearest, edgeCount: edge.edgeCount, edgeBad: edge.edgeBad, background: baseMeta.background },
+        record: {
+          file: resource.file,
+          sha256: resource.sha256,
+          grainBase: config.grainBase,
+          grainAmp: config.grainAmp,
+          grainRadiusPx: config.grainRadiusPx,
+          grainScaleMm: config.grainScaleMm,
+          grainScaleX: grainScaleX,
+          grainScaleY: grainScaleY,
+          pxPerMmWorkW: pxPerMmWorkW,
+          pxPerMmWorkH: pxPerMmWorkH,
+          flatWhite: flatWhite,
+          tileMode: config.tileMode
+        }
+      };
+    }
+
     function currentCalibrationInput() {
       const mode = dom.calibrationMode.value;
       return {
@@ -1724,6 +2741,45 @@
         widthLine: mode === "manual-line" ? [parsePoint(dom.widthP1.value), parsePoint(dom.widthP2.value)] : null,
         heightLine: mode === "manual-line" ? [parsePoint(dom.heightP1.value), parsePoint(dom.heightP2.value)] : null
       };
+    }
+
+    function cloneManualLayers(manual) {
+      if (!manual) throw new Error("手動マスクが未読み込みです");
+      return Object.fromEntries(["alpha", "owner", "keep", "inpaint"].map(function (name) {
+        return [name, cloneImageData(manual[name])];
+      }));
+    }
+
+    function makeProcessJob(operationToken) {
+      assertOperationToken(operationToken);
+      const key = state.selectedKey, spec = CHARM_SPECS[key];
+      if (!spec || state.loadedKey !== key || !state.sourceBytes || !state.sourceImageData || !state.work) {
+        throw new Error("選択中のチャームの元写真を再読み込みしてください");
+      }
+      const batchPeerPreps = [];
+      Object.keys(state.batch).forEach(function (batchKey) {
+        const prep = state.batch[batchKey] && state.batch[batchKey].result && state.batch[batchKey].result.prep;
+        if (prep) batchPeerPreps.push(jsonClone(prep));
+      });
+      return Object.freeze({
+        operationToken: operationToken,
+        key: key,
+        spec: deepFreeze(jsonClone(spec)),
+        manualRevision: state.manualRevision,
+        sourceBytes: state.sourceBytes.slice(0),
+        sourceImageData: cloneImageData(state.sourceImageData),
+        manual: cloneManualLayers(state.manual),
+        work: jsonClone(state.work),
+        calibrationInput: jsonClone(currentCalibrationInput()),
+        thresholds: Object.freeze({
+          bgLow: Number(dom.bgLow.value),
+          bgHigh: Number(dom.bgHigh.value),
+          logoThreshold: Number(dom.logoThreshold.value),
+          stitchContrast: Number(dom.stitchContrast.value) / 100
+        }),
+        grainScaleMm: Number(dom.grainScaleMm.value),
+        batchPeerPreps: batchPeerPreps
+      });
     }
 
     function computeDerived(base, masks, spec, baseMeta, calibrationInput) {
@@ -1774,7 +2830,7 @@
       });
     }
 
-    function resampleAspect1d(base, masks, axis, scale) {
+    function resampleAspect1d(base, masks, axis, scale, sourceMode) {
       const srcWidth = base.width, srcHeight = base.height;
       const dstWidth = axis === "W" ? Math.round(srcWidth * scale) : srcWidth;
       const dstHeight = axis === "H" ? Math.round(srcHeight * scale) : srcHeight;
@@ -1804,7 +2860,9 @@
           const offset0 = rgbaIndex(x0, y0, srcWidth);
           const offset1 = rgbaIndex(x1, y1, srcWidth);
           for (let channel = 0; channel < 3; channel += 1) {
-            baseOut[dstOffset + channel] = clamp(Math.round((1 - t) * base.data[offset0 + channel] + t * base.data[offset1 + channel]), 0, 255);
+            baseOut[dstOffset + channel] = sourceMode === "colorless"
+              ? base.data[nearestOffset + channel]
+              : clamp(Math.round((1 - t) * base.data[offset0 + channel] + t * base.data[offset1 + channel]), 0, 255);
           }
           baseOut[dstOffset + 3] = base.data[nearestOffset + 3];
           for (let channel = 0; channel < 4; channel += 1) masksOut[dstOffset + channel] = masks.data[nearestOffset + channel];
@@ -1838,7 +2896,7 @@
       if (shouldApply) {
         axis = pre.pxPerMmW > pre.pxPerMmH ? "W" : "H";
         scale = axis === "W" ? pre.pxPerMmH / pre.pxPerMmW : pre.pxPerMmW / pre.pxPerMmH;
-        const transformed = resampleAspect1d(base, masks, axis, scale);
+        const transformed = resampleAspect1d(base, masks, axis, scale, spec.sourceMode);
         assetBase = transformed.base;
         assetMasks = transformed.masks;
         effectiveScale = transformed.effectiveScale;
@@ -1886,6 +2944,71 @@
       return { r: clamp(r), g: clamp(g), b: clamp(b) };
     }
 
+    function srgbChannelToLinear(value) {
+      const c = value / 255;
+      return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+    }
+
+    function linearChannelToSrgb(value) {
+      const c = value <= .0031308 ? 12.92 * value : 1.055 * Math.pow(value, 1 / 2.4) - .055;
+      return c * 255;
+    }
+
+    function labF(value) {
+      const delta = 6 / 29;
+      return value > delta * delta * delta ? Math.cbrt(value) : value / (3 * delta * delta) + 4 / 29;
+    }
+
+    function labFinv(value) {
+      const delta = 6 / 29;
+      return value > delta ? value * value * value : 3 * delta * delta * (value - 4 / 29);
+    }
+
+    function srgbToLab(color) {
+      const r = srgbChannelToLinear(color.r), g = srgbChannelToLinear(color.g), b = srgbChannelToLinear(color.b);
+      const x = (r * .4124564 + g * .3575761 + b * .1804375) * 100;
+      const y = (r * .2126729 + g * .7151522 + b * .0721750) * 100;
+      const z = (r * .0193339 + g * .1191920 + b * .9503041) * 100;
+      const fx = labF(x / 95.047), fy = labF(y / 100), fz = labF(z / 108.883);
+      return { L: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
+    }
+
+    function labToSrgbRaw(L, a, b) {
+      const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+      const x = 95.047 * labFinv(fx) / 100;
+      const y = 100 * labFinv(fy) / 100;
+      const z = 108.883 * labFinv(fz) / 100;
+      const r = 3.2404542 * x - 1.5371385 * y - .4985314 * z;
+      const g = -.9692660 * x + 1.8760108 * y + .0415560 * z;
+      const blue = .0556434 * x - .2040259 * y + 1.0572252 * z;
+      return { r: linearChannelToSrgb(r), g: linearChannelToSrgb(g), b: linearChannelToSrgb(blue) };
+    }
+
+    function rgbInGamut(color) {
+      return [color.r, color.g, color.b].every(function (value) { return Number.isFinite(value) && value >= 0 && value <= 255; });
+    }
+
+    function flatLeatherTone(base, displayColor, baseLum, diagnostics) {
+      const lum = luminance(base.r, base.g, base.b);
+      const ratio = clamp(lum / Math.max(baseLum, .001), .35, 1.60);
+      const lab = srgbToLab(displayColor);
+      const nextL = clamp(lab.L * ratio, 0, 100);
+      let rgb = labToSrgbRaw(nextL, lab.a, lab.b);
+      if (!rgbInGamut(rgb)) {
+        const chroma = Math.hypot(lab.a, lab.b), hue = Math.atan2(lab.b, lab.a);
+        let low = 0, high = chroma;
+        for (let iteration = 0; iteration < 20; iteration += 1) {
+          const mid = (low + high) / 2;
+          const candidate = labToSrgbRaw(nextL, Math.cos(hue) * mid, Math.sin(hue) * mid);
+          if (rgbInGamut(candidate)) low = mid; else high = mid;
+        }
+        rgb = labToSrgbRaw(nextL, Math.cos(hue) * low, Math.sin(hue) * low);
+        if (diagnostics) diagnostics.gamutCompressionCount = (diagnostics.gamutCompressionCount || 0) + 1;
+      }
+      if (diagnostics) diagnostics.ratio = ratio;
+      return { r: Math.round(clamp(rgb.r, 0, 255)), g: Math.round(clamp(rgb.g, 0, 255)), b: Math.round(clamp(rgb.b, 0, 255)) };
+    }
+
     function metalTone(base, mode) {
       const lum = luminance(base.r, base.g, base.b);
       const highlight = mode === "silver" ? { r: 243, g: 246, b: 252 } : { r: 236, g: 223, b: 192 };
@@ -1905,14 +3028,16 @@
       return { r: clamp(color.r * factor), g: clamp(color.g * factor), b: clamp(color.b * factor) };
     }
 
-    function recolor(base, masks, derived, target, logoSelection, stitchSelection) {
+    function recolor(base, masks, derived, target, logoSelection, stitchSelection, spec) {
       const output = new ImageData(new Uint8ClampedArray(base.data.length), base.width, base.height);
       for (let offset = 0; offset < base.data.length; offset += 4) {
         const baseAlpha = base.data[offset + 3]; output.data[offset + 3] = baseAlpha;
         if (!baseAlpha) continue;
         if (masks.data[offset + 3] < 128) { output.data[offset] = base.data[offset]; output.data[offset + 1] = base.data[offset + 1]; output.data[offset + 2] = base.data[offset + 2]; continue; }
         const basePixel = { r: base.data[offset], g: base.data[offset + 1], b: base.data[offset + 2] };
-        const leather = photoLeatherTone(basePixel, target, derived.baseLum, 1.0);
+        const leather = spec && spec.toneMode === "flat"
+          ? flatLeatherTone(basePixel, target, derived.baseLum)
+          : photoLeatherTone(basePixel, target, derived.baseLum, 1.0);
         const logo = metalTone(basePixel, logoSelection);
         const stitch = stitchColor(basePixel, stitchSelection);
         const wr = masks.data[offset] / 255, wg = masks.data[offset + 1] / 255, wb = masks.data[offset + 2] / 255;
@@ -1931,6 +3056,91 @@
 
     function makeCheck(pass, detail, values) {
       return { status: pass ? "pass" : "fail", detail: detail, values: values || {} };
+    }
+
+    function computeManifestCheck(key, spec, sourceHash, grainContext) {
+      const manifest = INPUT_MANIFEST[key];
+      const sourceFile = spec.source.replace("../", "");
+      const sourceMatch = !!manifest && manifest.sha256 !== null && sourceFile === manifest.file && sourceHash === manifest.sha256 && spec.sourceMode === manifest.sourceMode;
+      const modeMatch = (spec.sourceMode === "photo" && spec.toneMode === "photo") || (spec.sourceMode === "colorless" && spec.toneMode === "flat");
+      const grainMatch = spec.sourceMode !== "colorless" || !!grainContext && grainContext.record.file === INPUT_MANIFEST.grain.file && grainContext.record.sha256 === INPUT_MANIFEST.grain.sha256;
+      return makeCheck(sourceMatch && modeMatch && grainMatch,
+        "source=" + (sourceMatch ? "match" : "mismatch") + " / mode=" + (modeMatch ? "match" : "mismatch") + " / grain=" + (grainMatch ? "match" : "mismatch"),
+        { sourceMatch: sourceMatch, modeMatch: modeMatch, grainMatch: grainMatch, sourceMode: spec.sourceMode, toneMode: spec.toneMode, manifest: manifest, actual: { file: sourceFile, sha256: sourceHash } });
+    }
+
+    function displayColorsEqual(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function computeFlatCheck(spec, base, masks, grainContext, options) {
+      if (spec.sourceMode !== "colorless") return makeCheck(true, "photo素材のため対象外", { applicable: false });
+      const settings = options || {};
+      const failures = [];
+      if (!grainContext) failures.push("grain context missing");
+      const record = grainContext && grainContext.record;
+      let f1a = null;
+      try {
+        if (!grainContext) throw new Error("grain context missing");
+        f1a = auditFlatBake(grainContext.before, grainContext.afterBake, grainContext.workMasks);
+      } catch (error) {
+        failures.push("F-1(a) audit: " + error.message);
+      }
+      if (!f1a || f1a.bakedPxCount < 1 || f1a.bakedNonGrayPxCount !== 0 || f1a.nonLeatherChangedPxCount !== 0
+        || !displayColorsEqual(f1a, grainContext && grainContext.f1a)) failures.push("F-1(a) range/gray mismatch");
+      let finalCoreCount = 0, finalCoreNonGray = 0;
+      for (let offset = 0; offset < base.data.length; offset += 4) {
+        if (base.data[offset + 3] !== 255 || masks.data[offset + 3] < 128 || masks.data[offset] < 128) continue;
+        finalCoreCount += 1;
+        if (base.data[offset] !== base.data[offset + 1] || base.data[offset] !== base.data[offset + 2]) finalCoreNonGray += 1;
+      }
+      if (finalCoreCount < 1 || finalCoreNonGray !== 0) failures.push("F-1(b) final core is not neutral");
+      let recomputedWork = null;
+      try {
+        recomputedWork = auditFlatWorkMetrics(grainContext.before, grainContext.workMasks, spec, grainContext.calibrationInput);
+      } catch (error) {
+        failures.push("F-2 recompute: " + error.message);
+      }
+      if (!record || record.file !== INPUT_MANIFEST.grain.file || record.sha256 !== INPUT_MANIFEST.grain.sha256
+        || !Number.isInteger(record.grainBase) || record.grainBase < 1 || record.grainBase > 255
+        || !Number.isFinite(record.grainAmp) || record.grainAmp <= 0 || record.grainAmp > 1
+        || !Number.isInteger(record.grainRadiusPx) || record.grainRadiusPx <= 0
+        || !Number.isFinite(record.grainScaleMm) || record.grainScaleMm <= 0
+        || !recomputedWork
+        || !numbersEqual(record.pxPerMmWorkW, recomputedWork.pxPerMmWorkW)
+        || !numbersEqual(record.pxPerMmWorkH, recomputedWork.pxPerMmWorkH)
+        || !numbersEqual(record.flatWhite, recomputedWork.flatWhite)
+        || !numbersEqual(record.grainScaleX, record.grainScaleMm * recomputedWork.pxPerMmWorkW)
+        || !numbersEqual(record.grainScaleY, record.grainScaleMm * recomputedWork.pxPerMmWorkH)
+        || ![record.pxPerMmWorkW, record.pxPerMmWorkH, record.flatWhite].every(function (value) { return Number.isFinite(value) && value > 0; })
+        || record.grainBase * (1 + record.grainAmp) > 255 || record.tileMode !== "mirror") failures.push("F-2 grain record mismatch");
+      const expectedColorlessCount = CHARM_KEYS.filter(function (key) { return CHARM_SPECS[key].sourceMode === "colorless"; }).length;
+      const grainScalePeers = settings.grainScalePeers || (record ? [record.grainScaleMm] : []);
+      if (!record || grainScalePeers.length !== expectedColorlessCount
+        || !grainScalePeers.every(function (value) { return numbersEqual(value, record.grainScaleMm); })) failures.push("F-2 grainScaleMm peer mismatch");
+      const reference = settings.referenceResource;
+      const expectedReferenceSource = settings.expectedReferenceSource || (reference && reference.source);
+      let recomputedReference = null;
+      try {
+        if (!reference) throw new Error("reference resource missing");
+        recomputedReference = auditReferenceIvoryResource(reference.baseImageData, reference.masksImageData, reference.source);
+      } catch (error) {
+        failures.push("F-3 recompute: " + error.message);
+      }
+      if (!reference || !recomputedReference || !displayColorsEqual(reference.source, expectedReferenceSource)
+        || !displayColorsEqual(reference.referenceIvory, recomputedReference.referenceIvory)
+        || reference.corePxCount !== recomputedReference.corePxCount) failures.push("F-3 referenceIvory mismatch");
+      const displayColorPeers = settings.displayColorPeers || (reference ? [reference.displayColors] : []);
+      const ivoryEntry = reference && reference.displayColors.find(function (color) { return color.name === "アイボリー"; });
+      if (!reference || !recomputedReference || reference.displayColors.length !== 24
+        || !displayColorsEqual(reference.displayColors, recomputedReference.displayColors)
+        || !reference.displayColors.every(function (color) { return [color.rgb.r, color.rgb.g, color.rgb.b].every(function (value) { return Number.isInteger(value) && value >= 0 && value <= 255; }); })
+        || !ivoryEntry || !displayColorsEqual(ivoryEntry.rgb, reference.referenceIvory)
+        || displayColorPeers.length !== expectedColorlessCount
+        || !displayColorPeers.every(function (colors) { return displayColorsEqual(colors, reference.displayColors); })) failures.push("F-4 displayColors mismatch");
+      return makeCheck(failures.length === 0,
+        "F-1 core=" + finalCoreCount + "/nonGray=" + finalCoreNonGray + " / F-2 grain / F-3 ivory / F-4 colors" + (failures.length ? " / " + failures.join("; ") : ""),
+        { applicable: true, f1a: f1a, finalCoreCount: finalCoreCount, finalCoreNonGray: finalCoreNonGray, grain: record, grainScalePeerCount: grainScalePeers.length, grainScalePeers: grainScalePeers, recomputedWork: recomputedWork, referenceIvory: reference && reference.referenceIvory, referenceCorePxCount: reference && reference.corePxCount, displayColorCount: reference && reference.displayColors.length, displayColorPeerCount: displayColorPeers.length, expectedColorlessCount: expectedColorlessCount, failures: failures });
     }
 
     function numbersEqual(a, b) {
@@ -2002,10 +3212,10 @@
       return layers ? countLayerPixels(layers.inpaint) : 0;
     }
 
-    async function buildManualRecords(key) {
+    async function buildManualRecords(key, manual) {
       const records = {};
       for (const name of ["alpha", "owner", "keep", "inpaint"]) {
-        const layer = state.manual[name];
+        const layer = manual[name];
         if (!hasLayerPixels(layer)) continue;
         const blob = await imageDataToBlob(layer);
         records[name] = {
@@ -2117,8 +3327,7 @@
         makeCheck(derived.edgePxCount >= 1 && edgeBadRatio < .005, "edge " + derived.edgePxCount + " px / d>32 " + derived.edgeBadPxCount + " px", { edgePxCount: derived.edgePxCount, badPxCount: derived.edgeBadPxCount, badRatio: edgeBadRatio }),
         makeCheck(stitchPass, spec.stitchMode + " / B " + derived.stitchPxCount + " px / diff " + stitchDiff + " px" + (fallbackGate && fallbackGate.failures.length ? " / " + fallbackGate.failures.join("; ") : ""), { mode: spec.stitchMode, stitchPxCount: derived.stitchPxCount, diffPxCount: stitchDiff, maskDiffPxCount: maskStitchDiff, threadColor: spec.threadColor, stitchPaths: stitchPaths, fallback: fallbackGate, manualInpaintPxCount: countManualInpaint(manual) }),
         makeCheck(spec.attachmentMode === "none", "attachment=" + spec.attachmentMode + " / keep " + derived.keepPxCount + " px" + (key !== "horseshoe" && derived.keepPxCount > 0 ? " (要目視確認)" : ""), { attachmentMode: spec.attachmentMode, keepPxCount: derived.keepPxCount, warning: key !== "horseshoe" && derived.keepPxCount > 0 }),
-        makeCheck(transferBytes <= 900 * 1024, Math.round(transferBytes / 1024) + " KB / 900 KB", { baseBytes: baseBlob.size, masksBytes: masksBlob.size, totalBytes: transferBytes }),
-        { status: "pending", detail: "書き出し済みアーカイブの再読込待ち", values: {} }
+        makeCheck(transferBytes <= 900 * 1024, Math.round(transferBytes / 1024) + " KB / 900 KB", { baseBytes: baseBlob.size, masksBytes: masksBlob.size, totalBytes: transferBytes })
       ];
     }
 
@@ -2148,20 +3357,51 @@
       };
     }
 
+    function publicV4DerivedRecord(derived, correction, spec, grainContext, referenceResource) {
+      const record = publicDerivedRecord(derived, correction);
+      record.toneMode = spec.toneMode;
+      if (spec.sourceMode === "colorless") {
+        const grain = grainContext.record;
+        record.grainScaleX = grain.grainScaleX;
+        record.grainScaleY = grain.grainScaleY;
+        record.pxPerMmWorkW = grain.pxPerMmWorkW;
+        record.pxPerMmWorkH = grain.pxPerMmWorkH;
+        record.flatWhite = grain.flatWhite;
+        record.referenceIvory = jsonClone(referenceResource.referenceIvory);
+        record.displayColors = jsonClone(referenceResource.displayColors);
+      }
+      return record;
+    }
+
     function publicChecksRecord(checks) {
-      return Object.fromEntries(checks.slice(0, 7).map(function (check, index) {
-        return [String(index + 1), { status: check.status, detail: check.detail, values: check.values }];
+      const keys = ["1", "2", "3", "4", "5", "6", "7", "M", "F"];
+      return Object.fromEntries(keys.map(function (key, index) {
+        const check = checks[index];
+        return [key, { status: check.status, detail: check.detail, values: check.values }];
       }));
     }
 
-    async function buildChecksAndConfig(key, spec, base, masks, derived, baseMeta, whiteOutput, blackOutput, correction) {
+    async function buildChecksAndConfig(job, base, masks, derived, baseMeta, whiteOutput, blackOutput, correction, grainContext, referenceResource) {
+      const key = job.key, spec = job.spec;
       const baseBlob = await imageDataToBlob(base);
       const masksBlob = await imageDataToBlob(masks);
-      const manualRecords = await buildManualRecords(key);
-      const sourceHash = await sha256(state.sourceBytes);
-      const baseHash = await decodedRgbaHash(baseBlob);
+      const decodedBase = await blobToImageData(baseBlob);
+      const manualRecords = await buildManualRecords(key, job.manual);
+      const sourceHash = await sha256(job.sourceBytes);
+      const baseHash = await sha256(decodedBase.data);
       const masksHash = await decodedRgbaHash(masksBlob);
-      const checks = computeChecks1to7(key, spec, baseBlob, masksBlob, masks, derived, whiteOutput, blackOutput, correction, state.manual);
+      const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, masks, derived, whiteOutput, blackOutput, correction, job.manual);
+      const manifestCheck = computeManifestCheck(key, spec, sourceHash, grainContext);
+      const displayColorPeers = referenceResource ? [referenceResource.displayColors] : [];
+      const grainScalePeers = grainContext ? [grainContext.record.grainScaleMm] : [];
+      job.batchPeerPreps.forEach(function (prep) {
+        if (prep.charmKey !== key && prep.inputs.sourceMode === "colorless" && prep.derived && prep.derived.displayColors) {
+          displayColorPeers.push(prep.derived.displayColors);
+          grainScalePeers.push(prep.inputs.grain.grainScaleMm);
+        }
+      });
+      const flatCheck = computeFlatCheck(spec, base, masks, grainContext, { referenceResource: referenceResource, expectedReferenceSource: referenceResource && referenceResource.source, displayColorPeers: displayColorPeers, grainScalePeers: grainScalePeers });
+      const checks = checks1to7.concat([manifestCheck, flatCheck, { status: "pending", detail: "書き出し済みアーカイブの再読込待ち", values: {} }]);
       const stitchDiff = countRgbDiff(whiteOutput, blackOutput);
       const browser = browserInfo();
 
@@ -2173,17 +3413,17 @@
         label: spec.label,
         source: { file: spec.source.replace("../", ""), sha256: sourceHash },
         pipeline: {
-          rotationDeg: state.work.rotation,
-          crop: state.work.crop,
-          workSize: { w: state.work.w, h: state.work.h },
+          rotationDeg: job.work.rotation,
+          crop: job.work.crop,
+          workSize: { w: job.work.w, h: job.work.h },
           assetSize: { w: base.width, h: base.height },
-          scale: { x: state.work.scaleX, y: state.work.scaleY },
+          scale: { x: job.work.scaleX, y: job.work.scaleY },
           logoRoiSource: spec.logoRoiSource || null,
-          logoRoiWork: state.work.logoRoi,
-          background: { low: Number(dom.bgLow.value), high: Number(dom.bgHigh.value), sampledRgb: baseMeta.background },
-          logoThreshold: Number(dom.logoThreshold.value),
-          stitchContrast: Number(dom.stitchContrast.value) / 100,
-          order: ["transform", "auto-alpha", "manual-alpha", "defringe", "auto-owner", "manual-owner", "manual-keep", "manual-inpaint", "derived-work", "aspect-correction-geometry", "aspect-correction-redefringe", "derived-asset", "checks"]
+          logoRoiWork: job.work.logoRoi,
+          background: { low: job.thresholds.bgLow, high: job.thresholds.bgHigh, sampledRgb: baseMeta.background },
+          logoThreshold: job.thresholds.logoThreshold,
+          stitchContrast: job.thresholds.stitchContrast,
+          order: ["transform", "auto-alpha", "manual-alpha", "defringe", "auto-owner", "manual-owner", "manual-keep", "manual-inpaint", "grain-bake-if-colorless", "grain-redefringe-if-colorless", "derived-work", "aspect-correction-geometry", "aspect-correction-redefringe", "derived-asset", "checks"]
         },
         manual: publicManualRecords(manualRecords),
         inputs: {
@@ -2193,13 +3433,25 @@
           stitchMode: spec.stitchMode,
           stitchPathsWork: correction.stitchPathsWork,
           attachmentMode: spec.attachmentMode,
+          sourceMode: spec.sourceMode,
           calibration: {
             mode: correction.preDerived.calibration.mode,
             widthLine: correction.preDerived.calibration.widthLine,
-            heightLine: correction.preDerived.calibration.heightLine
-          }
+            heightLine: correction.preDerived.calibration.heightLine,
+            reason: spec.calibration.reason
+          },
+          grain: spec.sourceMode === "colorless" ? {
+            file: grainContext.record.file,
+            sha256: grainContext.record.sha256,
+            grainBase: grainContext.record.grainBase,
+            grainAmp: grainContext.record.grainAmp,
+            grainRadiusPx: grainContext.record.grainRadiusPx,
+            grainScaleMm: grainContext.record.grainScaleMm,
+            tileMode: grainContext.record.tileMode
+          } : null,
+          referenceIvorySource: spec.sourceMode === "colorless" ? jsonClone(referenceResource.source) : null
         },
-        derived: publicDerivedRecord(derived, correction),
+        derived: publicV4DerivedRecord(derived, correction, spec, grainContext, referenceResource),
         expectedOutput: {
           base: { file: "assets/charms/" + key + ".base.png", width: base.width, height: base.height, decodedRgbaSha256: baseHash, byteLength: baseBlob.size },
           masks: { file: "assets/charms/" + key + ".masks.png", width: masks.width, height: masks.height, decodedRgbaSha256: masksHash, byteLength: masksBlob.size }
@@ -2218,6 +3470,7 @@
     function validatePrepCalibration(calibration, key, workSize) {
       assertArchive(calibration && typeof calibration === "object" && !Array.isArray(calibration), key + " calibration入力が不正です");
       assertArchive(calibration.mode === "bbox" || calibration.mode === "manual-line", key + " calibration.modeが不正です");
+      assertArchive(typeof calibration.reason === "string" && calibration.reason.trim().length > 0 && calibration.reason.length <= 4096, key + " calibration.reasonは1〜4096文字が必要です");
       if (key === "osanpo") assertArchive(calibration.mode === "manual-line", "osanpoはmanual-line必須です");
       if (calibration.mode === "bbox") {
         assertArchive(calibration.widthLine === null && calibration.heightLine === null, key + " bbox校正線はnull必須です");
@@ -2247,6 +3500,7 @@
 
     function verificationSpecFromPrep(prep, key, archiveBrowser) {
       const expected = CHARM_SPECS[key];
+      const manifest = INPUT_MANIFEST[key];
       assertArchive(prep && typeof prep === "object" && !Array.isArray(prep), key + " prepがオブジェクトではありません");
       assertArchive(prep.schemaVersion === SCHEMA_VERSION && prep.toolVersion === TOOL_VERSION, key + " prepのschema/toolが一致しません");
       assertArchive(prep.charmKey === key && prep.label === expected.label, key + " prepのkey/labelが一致しません");
@@ -2259,7 +3513,7 @@
         const allMatches = prep.verify.inputMatch === true && prep.verify.outputMatch === true && prep.verify.regenerationMatch === true;
         assertArchive((prep.verify.status === "pass") === allMatches, key + " verify statusと三者照合値が一致しません");
       }
-      assertArchive(prep.source && prep.source.file === expected.source.replace("../", "") && /^[0-9a-f]{64}$/.test(prep.source.sha256), key + " source記録が不正です");
+      assertArchive(prep.source && manifest && manifest.sha256 && prep.source.file === manifest.file && prep.source.sha256 === manifest.sha256, key + " source記録が正規入力マニフェストと不一致です");
       assertArchive(prep.inputs && typeof prep.inputs === "object", key + " inputsがありません");
       assertFiniteRecord(prep.inputs.sizeMm, ["w", "h"], key + " sizeMm");
       assertArchive(prep.inputs.sizeMm.w > 0 && prep.inputs.sizeMm.h > 0, key + " sizeMmは正値必須です");
@@ -2268,6 +3522,21 @@
       assertArchive(prep.inputs.threadColor === null || prep.inputs.threadColor === "dark" || prep.inputs.threadColor === "light", key + " threadColorが不正です");
       assertArchive(["detect", "none", "fallback"].includes(prep.inputs.stitchMode), key + " stitchModeが不正です");
       assertArchive(prep.inputs.attachmentMode === "none" || prep.inputs.attachmentMode === "photo", key + " attachmentModeが不正です");
+      assertArchive(prep.inputs.sourceMode === manifest.sourceMode && prep.inputs.sourceMode === expected.sourceMode, key + " sourceModeがマニフェストと不一致です");
+      assertArchive(prep.derived && prep.derived.toneMode === expected.toneMode
+        && ((prep.inputs.sourceMode === "photo" && prep.derived.toneMode === "photo") || (prep.inputs.sourceMode === "colorless" && prep.derived.toneMode === "flat")), key + " sourceMode/toneMode対応が不正です");
+      if (prep.inputs.sourceMode === "colorless") {
+        const grain = prep.inputs.grain;
+        assertArchive(grain && grain.file === INPUT_MANIFEST.grain.file && grain.sha256 === INPUT_MANIFEST.grain.sha256, key + " grain入力がマニフェストと不一致です");
+        assertArchive(Number.isInteger(grain.grainBase) && grain.grainBase >= 1 && grain.grainBase <= 255
+          && Number.isFinite(grain.grainAmp) && grain.grainAmp > 0 && grain.grainAmp <= 1
+          && grain.grainRadiusPx === GRAIN_DEFAULTS.grainRadiusPx
+          && Number.isFinite(grain.grainScaleMm) && grain.grainScaleMm > 0
+          && grain.grainBase * (1 + grain.grainAmp) <= 255 && grain.tileMode === "mirror", key + " grain入力値が不正です");
+        assertArchive(prep.inputs.referenceIvorySource && prep.inputs.referenceIvorySource.base && prep.inputs.referenceIvorySource.masks, key + " referenceIvorySourceがありません");
+      } else {
+        assertArchive(prep.inputs.grain === null && prep.inputs.referenceIvorySource === null, key + " photo素材にflat専用入力があります");
+      }
 
       const pipeline = prep.pipeline;
       assertArchive(pipeline && typeof pipeline === "object", key + " pipelineがありません");
@@ -2297,7 +3566,7 @@
       assertFiniteRecord(pipeline.background.sampledRgb, ["r", "g", "b"], key + " sampledRgb");
       assertArchive(Number.isFinite(pipeline.logoThreshold) && pipeline.logoThreshold >= 0 && pipeline.logoThreshold <= 100, key + " logoThresholdが不正です");
       assertArchive(Number.isFinite(pipeline.stitchContrast) && pipeline.stitchContrast >= 0 && pipeline.stitchContrast <= 1, key + " stitchContrastが不正です");
-      const order = ["transform", "auto-alpha", "manual-alpha", "defringe", "auto-owner", "manual-owner", "manual-keep", "manual-inpaint", "derived-work", "aspect-correction-geometry", "aspect-correction-redefringe", "derived-asset", "checks"];
+      const order = ["transform", "auto-alpha", "manual-alpha", "defringe", "auto-owner", "manual-owner", "manual-keep", "manual-inpaint", "grain-bake-if-colorless", "grain-redefringe-if-colorless", "derived-work", "aspect-correction-geometry", "aspect-correction-redefringe", "derived-asset", "checks"];
       assertArchive(jsonEqual(pipeline.order, order), key + " pipeline.orderが一致しません");
       validatePrepCalibration(prep.inputs.calibration, key, pipeline.workSize);
       validatePrepStitchPaths(prep.inputs.stitchPathsWork, key, pipeline.workSize);
@@ -2313,7 +3582,7 @@
       assertArchive(prep.expectedOutput.base.width === pipeline.assetSize.w && prep.expectedOutput.base.height === pipeline.assetSize.h
         && prep.expectedOutput.masks.width === pipeline.assetSize.w && prep.expectedOutput.masks.height === pipeline.assetSize.h, key + " assetSizeとexpectedOutput寸法が一致しません");
       assertArchive(prep.derived && typeof prep.derived === "object" && prep.checks && typeof prep.checks === "object" && !Array.isArray(prep.checks), key + " derived/checksがありません");
-      assertArchive(jsonEqual(Object.keys(prep.checks).sort(), ["1", "2", "3", "4", "5", "6", "7"]), key + " checksは1〜7の完全列挙が必要です");
+      assertArchive(jsonEqual(Object.keys(prep.checks).sort(), ["1", "2", "3", "4", "5", "6", "7", "F", "M"]), key + " checksは1〜7・M・Fの完全列挙が必要です");
       Object.keys(prep.checks).forEach(function (checkKey) {
         const check = prep.checks[checkKey];
         assertArchive(check && check.status === "pass" && typeof check.detail === "string" && check.values && typeof check.values === "object", key + " checks." + checkKey + "がPASS記録ではありません");
@@ -2330,7 +3599,10 @@
         stitchMode: prep.inputs.stitchMode,
         stitchPathsWork: cloneStitchPaths(prep.inputs.stitchPathsWork),
         calibration: jsonClone(prep.inputs.calibration),
-        logoRoiWork: jsonClone(pipeline.logoRoiWork)
+        logoRoiWork: jsonClone(pipeline.logoRoiWork),
+        sourceMode: prep.inputs.sourceMode,
+        toneMode: prep.derived.toneMode,
+        grain: prep.inputs.grain ? jsonClone(prep.inputs.grain) : null
       };
     }
 
@@ -2359,11 +3631,39 @@
       return true;
     }
 
-    async function loadVerifiedInputs(parsed, prep, key) {
+    async function buildArchiveFlatVerificationContext(parsed) {
+      const frenchiePrep = parsed.preps.frenchie;
+      if (!frenchiePrep) throw new Error("frenchie prepがありません");
+      const outputs = await verifyArchivedOutputs(parsed, frenchiePrep, "frenchie");
+      const source = {
+        base: { file: frenchiePrep.expectedOutput.base.file, decodedRgbaSha256: outputs.base.hash },
+        masks: { file: frenchiePrep.expectedOutput.masks.file, decodedRgbaSha256: outputs.masks.hash }
+      };
+      const referenceResource = buildReferenceIvoryResource(outputs.base.imageData, outputs.masks.imageData, source);
+      const colorlessPreps = Object.values(parsed.preps).filter(function (prep) { return prep.inputs && prep.inputs.sourceMode === "colorless"; });
+      const displayColorPeers = colorlessPreps.map(function (prep) { return prep.derived && prep.derived.displayColors; });
+      const grainScalePeers = colorlessPreps.map(function (prep) { return prep.inputs && prep.inputs.grain && prep.inputs.grain.grainScaleMm; });
+      if (!displayColorPeers.length || displayColorPeers.some(function (colors) { return !colors; })) throw new Error("colorless displayColors記録が不足しています");
+      if (grainScalePeers.some(function (value) { return !Number.isFinite(value) || value <= 0 || !numbersEqual(value, grainScalePeers[0]); })) throw new Error("colorless grainScaleMm記録が一致しません");
+      return { referenceResource: referenceResource, expectedReferenceSource: source, displayColorPeers: displayColorPeers, grainScalePeers: grainScalePeers };
+    }
+
+    async function loadVerifiedInputs(parsed, prep, key, flatVerification) {
+      const manifest = INPUT_MANIFEST[key];
+      if (!manifest || manifest.sha256 === null || prep.inputs.sourceMode !== manifest.sourceMode || prep.source.file !== manifest.file || prep.source.sha256 !== manifest.sha256) throw new Error(key + " 正規入力マニフェスト不一致");
       const response = await fetch("../" + prep.source.file, { cache: "no-store" });
-      if (!response.ok) throw new Error(key + " source JPEG HTTP " + response.status);
+      if (!response.ok) throw new Error(key + " source HTTP " + response.status);
       const sourceBytes = await response.arrayBuffer();
-      if (await sha256(sourceBytes) !== prep.source.sha256) throw new Error(key + " source JPEG SHA-256不一致");
+      if (await sha256(sourceBytes) !== manifest.sha256) throw new Error(key + " source SHA-256不一致");
+      let grainBytes = null;
+      if (prep.inputs.sourceMode === "colorless") {
+        const grainResponse = await fetch("../" + INPUT_MANIFEST.grain.file, { cache: "no-store" });
+        if (!grainResponse.ok) throw new Error(key + " grain HTTP " + grainResponse.status);
+        grainBytes = await grainResponse.arrayBuffer();
+        if (await sha256(grainBytes) !== INPUT_MANIFEST.grain.sha256 || prep.inputs.grain.sha256 !== INPUT_MANIFEST.grain.sha256) throw new Error(key + " grain SHA-256不一致");
+        if (!flatVerification) throw new Error(key + " flat verification contextがありません");
+        for (const kind of ["base", "masks"]) if (!displayColorsEqual(prep.inputs.referenceIvorySource[kind], flatVerification.expectedReferenceSource[kind])) throw new Error(key + " referenceIvorySource." + kind + " 記録不一致");
+      }
       const manual = {};
       const workSize = prep.pipeline.workSize;
       for (const name of ["alpha", "owner", "keep", "inpaint"]) {
@@ -2377,7 +3677,7 @@
         if (countLayerPixels(layer) !== record.pixelCount) throw new Error(record.file + " のpixelCountが一致しません");
         manual[name] = layer;
       }
-      return { sourceBytes: sourceBytes, manual: manual };
+      return { sourceBytes: sourceBytes, grainBytes: grainBytes, manual: manual };
     }
 
     async function verifyArchivedOutputs(parsed, prep, key) {
@@ -2397,9 +3697,9 @@
     }
 
     async function transformSourceFromPrep(sourceBytes, prep, key) {
-      const bitmap = await createImageBitmap(new Blob([sourceBytes], { type: "image/jpeg" }));
+      const bitmap = await createImageBitmap(new Blob([sourceBytes], { type: mimeForSource(prep.source.file) }));
       try {
-        assertArchive(bitmap.width > 0 && bitmap.height > 0 && bitmap.width <= 10000 && bitmap.height <= 10000, key + " source JPEG寸法が不正です");
+        assertArchive(bitmap.width > 0 && bitmap.height > 0 && bitmap.width <= 10000 && bitmap.height <= 10000, key + " source寸法が不正です");
         const crop = normalizeSourceRect(prep.pipeline.crop, bitmap.width, bitmap.height, key + " crop");
         const work = prep.pipeline.workSize;
         const canvas = document.createElement("canvas");
@@ -2411,34 +3711,46 @@
       }
     }
 
-    async function regenerateFromPrep(parsed, prep, key, spec, inputs, archivedOutputs) {
+    async function regenerateFromPrep(parsed, prep, key, spec, inputs, archivedOutputs, flatVerification) {
       const source = await transformSourceFromPrep(inputs.sourceBytes, prep, key);
       const pipeline = prep.pipeline;
       const matte = buildMatte(source, inputs.manual.alpha, pipeline.background.low, pipeline.background.high);
       if (!jsonEqual(matte.background, pipeline.background.sampledRgb)) throw new Error(key + " sampledRgb再生成不一致");
-      const baseMeta = buildBase(source, matte.alpha, inputs.manual.inpaint);
+      let baseMeta = buildBase(source, matte.alpha);
       baseMeta.background = matte.background;
       const masks = buildMasks(baseMeta.imageData, matte.alpha, spec, inputs.manual.owner, inputs.manual.keep, pipeline.logoRoiWork, pipeline.logoThreshold, pipeline.stitchContrast);
+      applyManualInpaint(baseMeta, inputs.manual.inpaint);
       const calibrationInput = jsonClone(prep.inputs.calibration);
+      let grainContext = null;
+      if (spec.sourceMode === "colorless") {
+        if (!flatVerification) throw new Error(key + " flat verification contextがありません");
+        const verificationGrain = await buildVerificationGrainResource(inputs.grainBytes, prep.inputs.grain);
+        grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibrationInput, prep.inputs.grain, verificationGrain);
+        baseMeta = grainContext.baseMeta;
+      }
       const preDerived = computeDerived(baseMeta.imageData, masks, spec, baseMeta, calibrationInput);
       const correction = applyAspectCorrection(baseMeta.imageData, masks, spec, preDerived, baseMeta, calibrationInput);
+      correction.grainContext = grainContext;
       const derived = correction.derived;
-      const whiteOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "white");
-      const blackOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "black");
+      const whiteOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "white", spec);
+      const blackOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "black", spec);
       const baseBlob = await imageDataToBlob(correction.base);
       const masksBlob = await imageDataToBlob(correction.masks);
       const decodedBase = await blobToImageData(baseBlob);
       const decodedMasks = await blobToImageData(masksBlob);
-      const checks = computeChecks1to7(key, spec, baseBlob, masksBlob, correction.masks, derived, whiteOutput, blackOutput, correction, inputs.manual);
-      if (!checks.slice(0, 7).every(function (check) { return check.status === "pass"; })) throw new Error(key + " 再生成した検査1〜7にFAILがあります");
+      const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, correction.masks, derived, whiteOutput, blackOutput, correction, inputs.manual);
+      const manifestCheck = computeManifestCheck(key, spec, await sha256(inputs.sourceBytes), grainContext);
+      const flatCheck = computeFlatCheck(spec, correction.base, correction.masks, grainContext, flatVerification || {});
+      const checks = checks1to7.concat([manifestCheck, flatCheck]);
+      if (!checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) throw new Error(key + " 再生成した検査1〜7＋M/FにFAILがあります");
       const mismatches = [];
       if (!imageDataEqual(decodedBase, archivedOutputs.base.imageData)) mismatches.push("base decoded RGBA");
       if (!imageDataEqual(decodedMasks, archivedOutputs.masks.imageData)) mismatches.push("masks decoded RGBA");
       if (await sha256(decodedBase.data) !== prep.expectedOutput.base.decodedRgbaSha256) mismatches.push("base decoded hash");
       if (await sha256(decodedMasks.data) !== prep.expectedOutput.masks.decodedRgbaSha256) mismatches.push("masks decoded hash");
       if (baseBlob.size !== prep.expectedOutput.base.byteLength || masksBlob.size !== prep.expectedOutput.masks.byteLength) mismatches.push("PNG byteLength");
-      if (!jsonEqual(publicDerivedRecord(derived, correction), prep.derived)) mismatches.push("derived record");
-      if (!jsonEqual(publicChecksRecord(checks), prep.checks)) mismatches.push("checks 1-7 record");
+      if (!jsonEqual(publicV4DerivedRecord(derived, correction, spec, grainContext, flatVerification && flatVerification.referenceResource), prep.derived)) mismatches.push("derived record");
+      if (!jsonEqual(publicChecksRecord(checks), prep.checks)) mismatches.push("checks 1-7/M/F record");
       if (!jsonEqual(correction.workSize, pipeline.workSize) || !jsonEqual(correction.assetSize, pipeline.assetSize)) mismatches.push("work/asset size");
       if (!jsonEqual(correction.stitchPathsWork, prep.inputs.stitchPathsWork) || !jsonEqual(correction.stitchPathsAsset, prep.derived.stitchPathsAsset)) mismatches.push("stitch paths");
       if (mismatches.length) throw new Error(key + " 再生成不一致: " + mismatches.join(", "));
@@ -2447,18 +3759,23 @@
 
     async function verifyParsedArchive(parsed) {
       const results = [];
+      let flatVerification = null, flatVerificationError = null;
+      if (CHARM_KEYS.some(function (key) { return CHARM_SPECS[key].sourceMode === "colorless"; })) {
+        try { flatVerification = await buildArchiveFlatVerificationContext(parsed); } catch (error) { flatVerificationError = error.message; }
+      }
       for (const key of CHARM_KEYS) {
         const prep = parsed.preps[key];
         const reasons = [];
         let spec = null, inputs = null, outputs = null;
         let inputMatch = false, outputMatch = false, regenerationMatch = false;
         try { spec = verificationSpecFromPrep(prep, key, parsed.archive.browser); } catch (error) { reasons.push(error.message); }
+        if (spec && spec.sourceMode === "colorless" && flatVerificationError) reasons.push("flat context: " + flatVerificationError);
         if (spec) {
-          try { inputs = await loadVerifiedInputs(parsed, prep, key); inputMatch = true; } catch (error) { reasons.push("input: " + error.message); }
+          try { inputs = await loadVerifiedInputs(parsed, prep, key, flatVerification); inputMatch = true; } catch (error) { reasons.push("input: " + error.message); }
         }
         try { outputs = await verifyArchivedOutputs(parsed, prep, key); outputMatch = true; } catch (error) { reasons.push("output: " + error.message); }
         if (spec && inputs && outputs) {
-          try { await regenerateFromPrep(parsed, prep, key, spec, inputs, outputs); regenerationMatch = true; } catch (error) { reasons.push("regeneration: " + error.message); }
+          try { await regenerateFromPrep(parsed, prep, key, spec, inputs, outputs, flatVerification); regenerationMatch = true; } catch (error) { reasons.push("regeneration: " + error.message); }
         } else reasons.push("regeneration: 入力または出力照合が不合格のため未実行");
         const pass = inputMatch && outputMatch && regenerationMatch;
         results.push({ key: key, status: pass ? "pass" : "fail", inputMatch: inputMatch, outputMatch: outputMatch, regenerationMatch: regenerationMatch, reasons: reasons });
@@ -2466,64 +3783,250 @@
       return { status: results.every(function (item) { return item.status === "pass"; }) ? "pass" : "fail", results: results };
     }
 
-    function updateVerificationUi(report, preps) {
-      report.results.forEach(function (item) {
-        const prep = preps[item.key];
-        const batch = state.batch[item.key] || { status: "pending" };
-        batch.verify = item.status;
-        if (prep && prep.checks) batch.status = Object.values(prep.checks).every(function (check) { return check.status === "pass"; }) ? "pass" : "fail";
-        if (prep && prep.derived && prep.derived.fgBboxPx) batch.foreground = prep.derived.fgBboxPx.w + "×" + prep.derived.fgBboxPx.h;
-        if (batch.result) {
-          batch.result.checks[7] = makeCheck(item.status === "pass", item.status === "pass" ? "入力・出力・独立再生成が一致" : item.reasons.join(" / "), {
-            inputMatch: item.inputMatch, outputMatch: item.outputMatch, regenerationMatch: item.regenerationMatch, reasons: item.reasons
-          });
-          if (prep) batch.result.prep = prep;
-        }
-        state.batch[item.key] = batch;
+    function prepIdentityWithoutVerify(prep) {
+      const copy = jsonClone(prep);
+      delete copy.verify;
+      return JSON.stringify(copy);
+    }
+
+    function verificationDiagnosticForKey(results, key) {
+      return (results || []).find(function (item) { return item.key === key; }) || null;
+    }
+
+    function officialVerificationResults(results, pass, errors) {
+      if (pass) return jsonClone(results || []);
+      const source = results && results.length ? results : CHARM_KEYS.map(function (key) { return { key: key, reasons: [] }; });
+      return source.map(function (item) {
+        const reasons = (item.reasons || []).concat(errors || []);
+        if (!reasons.length) reasons.push("アーカイブ全体の再検証が不合格です");
+        return {
+          key: item.key,
+          status: "fail",
+          inputMatch: false,
+          outputMatch: false,
+          regenerationMatch: false,
+          reasons: Array.from(new Set(reasons))
+        };
       });
+    }
+
+    function pendingVerificationRecord() {
+      return {
+        status: "pending",
+        checkedAt: null,
+        inputMatch: false,
+        outputMatch: false,
+        regenerationMatch: false
+      };
+    }
+
+    function failedVerificationResult(result, failureDetail, values, replacements) {
+      if (!result) return null;
+      if (replacements.has(result)) return replacements.get(result);
+      const checks = result.checks.slice();
+      checks[VERIFY_CHECK_INDEX] = makeCheck(false, failureDetail, Object.assign({
+        inputMatch: false,
+        outputMatch: false,
+        regenerationMatch: false
+      }, values || {}));
+      const prep = jsonClone(result.prep);
+      prep.verify = pendingVerificationRecord();
+      const replacement = Object.assign({}, result, { checks: checks, prep: prep });
+      replacements.set(result, replacement);
+      return replacement;
+    }
+
+    function recordEarlyVerificationFailure(errors, operationToken) {
+      const failureDetail = errors.join(" / ") || "アーカイブの検証を開始できませんでした";
+      const currentMatches = Object.fromEntries(CHARM_KEYS.map(function (key) { return [key, false]; }));
+      const report = {
+        status: "fail",
+        results: officialVerificationResults([], false, errors),
+        firstPassResults: [],
+        finalResults: null,
+        errors: errors.slice(),
+        archiveText: null,
+        finalReverification: "not-run",
+        checkedAt: null,
+        currentArtifacts: { allCurrentMatched: false, currentMatches: currentMatches }
+      };
+
+      // Build the complete replacement state before publishing any part of it.
+      // This keeps the previous PASS state intact if preparation unexpectedly
+      // throws, and makes the final assignment synchronous and all-at-once.
+      const replacementByResult = new Map();
+      function failedResult(result) {
+        return failedVerificationResult(result, failureDetail, {
+          firstPass: null,
+          finalPass: null,
+          finalReverification: "not-run",
+          reasons: errors.slice()
+        }, replacementByResult);
+      }
+      const nextBatch = Object.fromEntries(CHARM_KEYS.map(function (key) {
+        const previous = state.batch[key] || { status: "pending", verify: "pending" };
+        return [key, Object.assign({}, previous, {
+          verify: "fail",
+          result: failedResult(previous.result || null)
+        })];
+      }));
+      const nextSelectedResult = failedResult(state.result);
+
+      assertOperationToken(operationToken);
+      Object.assign(state, { batch: nextBatch, result: nextSelectedResult, lastArchive: report });
       renderBatch();
       const selected = state.batch[state.selectedKey];
-      if (selected && selected.result) {
-        state.result = selected.result;
+      if (selected && selected.result && state.result === selected.result) {
         renderChecks(selected.result.checks);
         dom.configPreview.textContent = JSON.stringify(selected.result.prep, null, 2);
       }
+      dom.exportGate.textContent = "VERIFY FAIL";
+      dom.exportGate.className = "tag fail";
+      return report;
+    }
+
+    async function currentResultMatchesVerifiedPrep(result, prep) {
+      if (!result || !result.prep || !result.artifacts || !prep || !prep.expectedOutput
+        || prepIdentityWithoutVerify(result.prep) !== prepIdentityWithoutVerify(prep)) return false;
+      const outputs = ["base", "masks"];
+      for (const kind of outputs) {
+        const blob = result.artifacts[kind + "Blob"];
+        const expected = prep.expectedOutput[kind];
+        if (!blob || !expected) return false;
+        const snapshot = await decodeArtifactSnapshot(blob);
+        if (!artifactSnapshotMatchesExpected(snapshot, expected)) return false;
+      }
+      const manualNames = Object.keys(prep.manual).sort();
+      if (!jsonEqual(manualNames, Object.keys(result.artifacts.manualRecords).sort())) return false;
+      for (const name of manualNames) {
+        const artifact = result.artifacts.manualRecords[name];
+        if (!artifact || artifact.file !== prep.manual[name].file
+          || await sha256(await artifact.blob.arrayBuffer()) !== prep.manual[name].sha256) return false;
+      }
+      return true;
+    }
+
+    async function updateVerificationUi(report, preps, operationToken) {
+      const currentMatches = {};
+      const archiveFullyVerified = report.status === "pass" && report.finalReverification === "pass";
+      const verificationFailure = report.errors.join(" / ") || "アーカイブ検証が不合格です";
+      const originalBatch = state.batch;
+      const originalResult = state.result;
+      const replacementByResult = new Map();
+      const nextBatch = {};
+      for (const item of report.results) {
+        const prep = preps[item.key];
+        const previous = originalBatch[item.key] || { status: "pending", verify: "pending" };
+        const result = previous.result || null;
+        let matches = false;
+        try { matches = !!prep && await currentResultMatchesVerifiedPrep(result, prep); }
+        catch (error) { matches = false; }
+        assertOperationToken(operationToken);
+        currentMatches[item.key] = matches;
+        let nextResult = result;
+        const next = Object.assign({}, previous);
+        if (archiveFullyVerified) {
+          next.verify = matches ? item.status : "stale";
+          if (matches && prep.checks) next.status = Object.values(prep.checks).every(function (check) { return check.status === "pass"; }) ? "pass" : "fail";
+          if (matches && prep.derived && prep.derived.fgBboxPx) next.foreground = prep.derived.fgBboxPx.w + "×" + prep.derived.fgBboxPx.h;
+          if (matches && result) {
+            const checks = result.checks.slice();
+            checks[VERIFY_CHECK_INDEX] = makeCheck(item.status === "pass", item.status === "pass" ? "入力・出力・独立再生成が一致" : item.reasons.join(" / "), {
+              inputMatch: item.inputMatch, outputMatch: item.outputMatch, regenerationMatch: item.regenerationMatch, reasons: item.reasons
+            });
+            nextResult = Object.assign({}, result, { checks: checks, prep: jsonClone(prep) });
+            replacementByResult.set(result, nextResult);
+          }
+        } else {
+          next.verify = "fail";
+          const firstPass = verificationDiagnosticForKey(report.firstPassResults, item.key);
+          const finalPass = verificationDiagnosticForKey(report.finalResults, item.key);
+          nextResult = failedVerificationResult(result, verificationFailure, {
+            firstPass: firstPass ? {
+              status: firstPass.status, inputMatch: firstPass.inputMatch,
+              outputMatch: firstPass.outputMatch, regenerationMatch: firstPass.regenerationMatch,
+              reasons: firstPass.reasons
+            } : null,
+            finalPass: finalPass ? {
+              status: finalPass.status, inputMatch: finalPass.inputMatch,
+              outputMatch: finalPass.outputMatch, regenerationMatch: finalPass.regenerationMatch,
+              reasons: finalPass.reasons
+            } : null,
+            finalReverification: report.finalReverification,
+            reasons: item.reasons.concat(report.errors)
+          }, replacementByResult);
+        }
+        next.result = nextResult;
+        nextBatch[item.key] = next;
+      }
+      const originalResultReplacement = replacementByResult.get(originalResult);
+      let nextSelectedResult = originalResultReplacement || originalResult;
+      const selected = nextBatch[state.selectedKey];
+      if (archiveFullyVerified && selected && selected.result && currentMatches[state.selectedKey]) {
+        nextSelectedResult = selected.result;
+      } else if (!archiveFullyVerified && originalResult && !originalResultReplacement) {
+        const item = verificationDiagnosticForKey(report.results, originalResult.key) || { reasons: [] };
+        nextSelectedResult = failedVerificationResult(originalResult, verificationFailure, {
+          firstPass: verificationDiagnosticForKey(report.firstPassResults, originalResult.key),
+          finalPass: verificationDiagnosticForKey(report.finalResults, originalResult.key),
+          finalReverification: report.finalReverification,
+          reasons: item.reasons.concat(report.errors)
+        }, replacementByResult);
+      }
       const allPass = report.status === "pass";
-      dom.exportGate.textContent = allPass ? "1–8 PASS" : "VERIFY FAIL";
-      dom.exportGate.className = "tag " + (allPass ? "pass" : "fail");
+      const allCurrentMatched = CHARM_KEYS.every(function (key) { return currentMatches[key]; });
+      const binding = { allCurrentMatched: allCurrentMatched, currentMatches: currentMatches };
+      report.currentArtifacts = binding;
+      assertOperationToken(operationToken);
+      Object.assign(state, { batch: nextBatch, result: nextSelectedResult, lastArchive: report });
+      renderBatch();
+      if (state.result && state.result.key === state.selectedKey) {
+        renderChecks(state.result.checks);
+        dom.configPreview.textContent = JSON.stringify(state.result.prep, null, 2);
+      }
+      dom.exportGate.textContent = allPass && allCurrentMatched ? "1–8 PASS" : allPass ? "ARCHIVE PASS / CURRENT STALE" : "VERIFY FAIL";
+      dom.exportGate.className = "tag " + (allPass && allCurrentMatched ? "pass" : allPass ? "" : "fail");
+      return binding;
     }
 
     async function exportArchive(options) {
-      const settings = options || {};
-      const results = {};
-      CHARM_KEYS.forEach(function (key) {
-        const batch = state.batch[key];
-        if (!batch || !batch.result || !batch.result.checks.slice(0, 7).every(function (check) { return check.status === "pass"; })) throw new Error(key + " の検査1〜7が未通過です");
-        results[key] = batch.result;
-      });
-      const pendingPreps = {};
-      CHARM_KEYS.forEach(function (key) {
-        pendingPreps[key] = jsonClone(results[key].prep);
-        pendingPreps[key].verify = { status: "pending", checkedAt: null, inputMatch: false, outputMatch: false, regenerationMatch: false };
-      });
-      const archive = await buildArchiveFromResults(results, pendingPreps);
-      const text = serializeArchiveObject(archive);
-      await parseArchive(text);
-      state.lastArchive = { status: "pending", text: text };
-      if (settings.download) downloadBlob(new Blob([text], { type: "application/json" }), "charm-assets-candidate.archive.json");
-      return text;
+      const operationToken = beginOperation("export-archive");
+      try {
+        const settings = options || {};
+        const results = {};
+        CHARM_KEYS.forEach(function (key) {
+          const batch = state.batch[key];
+          if (!batch || !batch.result || !batch.result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) throw new Error(key + " の検査1〜7＋M/Fが未通過です");
+          results[key] = batch.result;
+        });
+        const pendingPreps = {};
+        CHARM_KEYS.forEach(function (key) {
+          pendingPreps[key] = jsonClone(results[key].prep);
+          pendingPreps[key].verify = { status: "pending", checkedAt: null, inputMatch: false, outputMatch: false, regenerationMatch: false };
+        });
+        const archive = await buildArchiveFromResults(results, pendingPreps);
+        assertOperationToken(operationToken);
+        const text = serializeArchiveObject(archive);
+        await parseArchive(text);
+        assertOperationToken(operationToken);
+        state.lastArchive = { status: "pending", text: text };
+        if (settings.download) downloadBlob(new Blob([text], { type: "application/json" }), "charm-assets-candidate.archive.json");
+        return text;
+      } finally {
+        endOperation(operationToken);
+      }
     }
 
     function allBatchPass1to7() {
       return CHARM_KEYS.every(function (key) {
         const batch = state.batch[key];
-        return batch && batch.result && batch.result.checks.slice(0, 7).every(function (check) { return check.status === "pass"; });
+        return batch && batch.result && batch.result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
       });
     }
 
     function exportCurrentAssets() {
       const result = state.result;
-      if (!result || !result.checks.slice(0, 7).every(function (check) { return check.status === "pass"; })) throw new Error("選択素材の検査1〜7が未通過です");
+      if (!result || !result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) throw new Error("選択素材の検査1〜7＋M/Fが未通過です");
       downloadBlob(result.artifacts.baseBlob, result.prep.expectedOutput.base.file.split("/").pop());
       downloadBlob(result.artifacts.masksBlob, result.prep.expectedOutput.masks.file.split("/").pop());
       downloadBlob(new Blob([JSON.stringify(result.prep, null, 2)], { type: "application/json" }), result.key + ".prep.json");
@@ -2534,44 +4037,198 @@
     }
 
     async function verifyArchive(input, options) {
-      const settings = options || {};
-      let parsed;
-      try { parsed = await parseArchive(input); } catch (error) { return { status: "fail", results: [], errors: [error.message], archiveText: null, finalReverification: "not-run" }; }
-      const currentBrowser = browserInfo();
-      if (!jsonEqual(parsed.archive.browser, currentBrowser)) {
-        return { status: "fail", results: [], errors: ["archive: 算出ブラウザが一致しません。同一ブラウザ・同一バージョンで再実行してください"], archiveText: null, finalReverification: "not-run" };
-      }
-      const first = await verifyParsedArchive(parsed);
-      const checkedAt = new Date().toISOString();
-      const updatedPreps = {};
-      first.results.forEach(function (item) {
-        const prep = jsonClone(parsed.preps[item.key]);
-        prep.verify = {
-          status: item.status,
-          checkedAt: checkedAt,
-          inputMatch: item.inputMatch,
-          outputMatch: item.outputMatch,
-          regenerationMatch: item.regenerationMatch,
-          browser: currentBrowser
+      const operationToken = beginOperation("verify-archive");
+      try {
+        const settings = options || {};
+        let parsed;
+        try { parsed = await parseArchive(input); } catch (error) {
+          return recordEarlyVerificationFailure([error.message], operationToken);
+        }
+        assertOperationToken(operationToken);
+        const currentBrowser = browserInfo();
+        if (!jsonEqual(parsed.archive.browser, currentBrowser)) {
+          return recordEarlyVerificationFailure(["archive: 算出ブラウザが一致しません。同一ブラウザ・同一バージョンで再実行してください"], operationToken);
+        }
+        const first = await verifyParsedArchive(parsed);
+        const firstPassResults = jsonClone(first.results);
+        assertOperationToken(operationToken);
+        const checkedAt = new Date().toISOString();
+        const updatedPreps = {};
+        first.results.forEach(function (item) {
+          const prep = jsonClone(parsed.preps[item.key]);
+          prep.verify = {
+            status: item.status,
+            checkedAt: checkedAt,
+            inputMatch: item.inputMatch,
+            outputMatch: item.outputMatch,
+            regenerationMatch: item.regenerationMatch,
+            browser: currentBrowser
+          };
+          updatedPreps[item.key] = prep;
+        });
+        let rebuiltText = null;
+        let finalReverification = "not-run";
+        let finalResults = null;
+        const errors = [];
+        if (first.status === "pass") {
+          try {
+            const rebuilt = await rebuildParsedArchive(parsed, updatedPreps);
+            assertOperationToken(operationToken);
+            rebuiltText = serializeArchiveObject(rebuilt);
+            const finalParsed = await parseArchive(rebuiltText);
+            const final = await verifyParsedArchive(finalParsed);
+            finalResults = jsonClone(final.results);
+            assertOperationToken(operationToken);
+            const forceFinalFailure = settings.forceFinalReverificationFailure === true;
+            if (forceFinalFailure && !(new URLSearchParams(location.search).has("verify-test") && ["127.0.0.1", "localhost", "::1"].includes(location.hostname))) {
+              throw new Error("最終再検証の故障注入はlocalhostのverify-testモード専用です");
+            }
+            finalReverification = forceFinalFailure ? "fail" : final.status;
+            if (final.status !== "pass") errors.push("verify更新後の最終アーカイブ再検証が不合格です");
+            if (forceFinalFailure) errors.push("テスト用故障注入により最終アーカイブ再検証を不合格にしました");
+          } catch (error) {
+            const reason = "verify更新後の最終アーカイブ再検証で例外: " + error.message;
+            errors.push(reason);
+            finalReverification = "fail";
+            finalResults = officialVerificationResults([], false, [reason]);
+            rebuiltText = null;
+          }
+        } else {
+          errors.push("初回検証失敗・最終再検証未実行");
+        }
+        const status = first.status === "pass" && finalReverification === "pass" ? "pass" : "fail";
+        const officialSource = finalResults || firstPassResults;
+        const report = {
+          status: status,
+          results: officialVerificationResults(officialSource, status === "pass", errors),
+          firstPassResults: firstPassResults,
+          finalResults: finalResults,
+          errors: errors,
+          archiveText: status === "pass" ? rebuiltText : null,
+          finalReverification: finalReverification,
+          checkedAt: checkedAt
         };
-        updatedPreps[item.key] = prep;
-      });
-      const rebuilt = await rebuildParsedArchive(parsed, updatedPreps);
-      const rebuiltText = serializeArchiveObject(rebuilt);
-      let finalReverification = "not-run";
-      const errors = [];
-      if (first.status === "pass") {
-        const finalParsed = await parseArchive(rebuiltText);
-        const final = await verifyParsedArchive(finalParsed);
-        finalReverification = final.status;
-        if (final.status !== "pass") errors.push("verify更新後の最終アーカイブ再検証が不合格です");
+        await updateVerificationUi(report, updatedPreps, operationToken);
+        assertOperationToken(operationToken);
+        if (settings.download && status === "pass") downloadBlob(new Blob([rebuiltText], { type: "application/json" }), "charm-assets-verified.archive.json");
+        return report;
+      } finally {
+        endOperation(operationToken);
       }
-      const status = first.status === "pass" && finalReverification === "pass" ? "pass" : "fail";
-      const report = { status: status, results: first.results, errors: errors, archiveText: rebuiltText, finalReverification: finalReverification, checkedAt: checkedAt };
-      state.lastArchive = report;
-      updateVerificationUi(report, updatedPreps);
-      if (settings.download && status === "pass") downloadBlob(new Blob([rebuiltText], { type: "application/json" }), "charm-assets-verified.archive.json");
-      return report;
+    }
+
+    function keptPixelMismatchCount(base, masks, output) {
+      let mismatches = 0;
+      for (let offset = 0; offset < base.data.length; offset += 4) {
+        if (base.data[offset + 3] === 0 || masks.data[offset + 3] >= 128) continue;
+        if (base.data[offset] !== output.data[offset] || base.data[offset + 1] !== output.data[offset + 1] || base.data[offset + 2] !== output.data[offset + 2] || base.data[offset + 3] !== output.data[offset + 3]) mismatches += 1;
+      }
+      return mismatches;
+    }
+
+    function buildRegressionCanvas(result, spec, cases, columns, title) {
+      const imageMaxW = 220, imageMaxH = 265, padding = 12, labelHeight = 48;
+      const cellW = imageMaxW + padding * 2, cellH = imageMaxH + labelHeight + padding * 2;
+      const rows = Math.ceil(cases.length / columns);
+      const canvas = document.createElement("canvas");
+      setCanvasSize(canvas, columns * cellW, 54 + rows * cellH);
+      const ctx = getContext(canvas);
+      ctx.fillStyle = "#f4f1ea"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#27251f"; ctx.font = "600 24px Avenir Next, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(title, 18, 27);
+      const temp = document.createElement("canvas"); setCanvasSize(temp, result.base.width, result.base.height);
+      const tempCtx = getContext(temp);
+      const reportCases = [];
+      cases.forEach(function (item, index) {
+        const output = recolor(result.base, result.masks, result.derived, item.target, item.logo, item.stitch, spec);
+        const keptMismatchPx = keptPixelMismatchCount(result.base, result.masks, output);
+        const col = index % columns, row = Math.floor(index / columns), x = col * cellW, y = 54 + row * cellH;
+        ctx.fillStyle = "#fff"; ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
+        tempCtx.clearRect(0, 0, temp.width, temp.height); tempCtx.putImageData(output, 0, 0);
+        const scale = Math.min(imageMaxW / output.width, imageMaxH / output.height);
+        const drawW = Math.round(output.width * scale), drawH = Math.round(output.height * scale);
+        ctx.drawImage(temp, x + padding + Math.floor((imageMaxW - drawW) / 2), y + padding + Math.floor((imageMaxH - drawH) / 2), drawW, drawH);
+        ctx.fillStyle = "#27251f"; ctx.font = "600 13px Avenir Next, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillText(item.label, x + cellW / 2, y + padding + imageMaxH + 7, cellW - padding * 2);
+        ctx.fillStyle = "#746f63"; ctx.font = "11px ui-monospace, monospace";
+        ctx.fillText("keep mismatch: " + keptMismatchPx, x + cellW / 2, y + padding + imageMaxH + 26, cellW - padding * 2);
+        reportCases.push({ label: item.label, keptMismatchPx: keptMismatchPx });
+      });
+      return { canvas: canvas, cases: reportCases };
+    }
+
+    async function buildFlatRegressionSheets(options) {
+      const operationToken = beginOperation("flat-regression");
+      try {
+        const settings = options || {};
+        const result = state.result;
+        const key = state.selectedKey;
+        const spec = CHARM_SPECS[key];
+        if (!result || result.key !== key || !result.artifacts || !result.artifacts.baseBlob || !result.artifacts.masksBlob
+          || !result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })
+          || !spec || spec.sourceMode !== "colorless") throw new Error("検査1〜7＋M/Fを全通過したflat素材で回帰シートを作成してください");
+        const prepSnapshot = jsonClone(result.prep);
+        const baseSnapshot = await decodeArtifactSnapshot(result.artifacts.baseBlob);
+        const masksSnapshot = await decodeArtifactSnapshot(result.artifacts.masksBlob);
+        assertOperationToken(operationToken);
+        if (!artifactSnapshotMatchesExpected(baseSnapshot, prepSnapshot.expectedOutput.base)
+          || !artifactSnapshotMatchesExpected(masksSnapshot, prepSnapshot.expectedOutput.masks)) {
+          throw new Error("回帰対象のbase/masks寸法・RGBAハッシュ・バイト数がprep.jsonと一致しません");
+        }
+        const regressionResult = {
+          base: baseSnapshot.imageData,
+          masks: masksSnapshot.imageData,
+          derived: jsonClone(result.derived)
+        };
+        const reference = await loadReferenceIvoryResource();
+        assertOperationToken(operationToken);
+        const colors24 = reference.displayColors.map(function (color) {
+          return { label: color.name + " rgb(" + color.rgb.r + "," + color.rgb.g + "," + color.rgb.b + ")", target: color.rgb, logo: "silver", stitch: "white" };
+        });
+        const black = reference.displayColors.find(function (color) { return color.name === "ブラック"; });
+        const ivory = reference.displayColors.find(function (color) { return color.name === "アイボリー"; });
+        if (!black || !ivory) throw new Error("ブラックまたはアイボリーの表示色がありません");
+        const fixed8 = [];
+        [["ブラック", black.rgb], ["アイボリー", ivory.rgb]].forEach(function (leather) {
+          [["金", "gold"], ["銀", "silver"]].forEach(function (logo) {
+            [["白糸", "white"], ["黒糸", "black"]].forEach(function (stitch) {
+              fixed8.push({ label: leather[0] + " / ロゴ" + logo[0] + " / " + stitch[0], target: leather[1], logo: logo[1], stitch: stitch[1] });
+            });
+          });
+        });
+        const colorsSheet = buildRegressionCanvas(regressionResult, spec, colors24, 6, spec.label + " / DISPLAY_COLORS 24色（色味承認前）");
+        const fixedSheet = buildRegressionCanvas(regressionResult, spec, fixed8, 4, spec.label + " / 固定8ケース");
+        const colorsBlob = await canvasToBlob(colorsSheet.canvas, "image/png");
+        const fixedBlob = await canvasToBlob(fixedSheet.canvas, "image/png");
+        const baseHash = baseSnapshot.decodedRgbaSha256;
+        const masksHash = masksSnapshot.decodedRgbaSha256;
+        const prepIdentitySha256 = await sha256(utf8Bytes(prepIdentityWithoutVerify(prepSnapshot)));
+        assertOperationToken(operationToken);
+        const report = {
+          key: key,
+          schemaVersion: SCHEMA_VERSION,
+          toolVersion: TOOL_VERSION,
+          generatedAt: new Date().toISOString(),
+          browser: browserInfo(),
+          status: colorsSheet.cases.concat(fixedSheet.cases).every(function (item) { return item.keptMismatchPx === 0; }) ? "pass" : "fail",
+          colorReviewStatus: "deferred-client-review",
+          artifactIdentity: {
+            base: { file: prepSnapshot.expectedOutput.base.file, width: baseSnapshot.width, height: baseSnapshot.height, decodedRgbaSha256: baseHash, byteLength: baseSnapshot.byteLength },
+            masks: { file: prepSnapshot.expectedOutput.masks.file, width: masksSnapshot.width, height: masksSnapshot.height, decodedRgbaSha256: masksHash, byteLength: masksSnapshot.byteLength },
+            prepWithoutVerifySha256: prepIdentitySha256
+          },
+          colors24: colorsSheet.cases,
+          fixed8: fixedSheet.cases,
+          files: { colors24: key + "-colors24.png", fixed8: key + "-fixed8.png" }
+        };
+        if (settings.download) {
+          downloadBlob(colorsBlob, report.files.colors24);
+          downloadBlob(fixedBlob, report.files.fixed8);
+          downloadBlob(new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }), key + "-regression-report.json");
+        }
+        return { report: report, colorsBlob: colorsBlob, fixedBlob: fixedBlob };
+      } finally {
+        endOperation(operationToken);
+      }
     }
 
     function renderOnBackground(imageData, canvas, color) {
@@ -2616,51 +4273,73 @@
       dom.aspectStatus.textContent = "⑧′ アスペクト補正: " + (aspect.applied
         ? "適用 " + aspect.axis + " / ⑧′-1 幾何＋⑧′-2 再defringe / scale " + aspect.scale.toFixed(8) + " / effective " + aspect.effectiveScale.toFixed(8)
         : "未適用") + " / 歪み " + (aspect.preDistortion * 100).toFixed(3) + "% → " + (result.derived.calibration.distortion * 100).toFixed(3) + "%";
-      dom.workDims.textContent = state.work.w + "×" + state.work.h + " work → " + result.base.width + "×" + result.base.height + " asset px";
+      dom.workDims.textContent = result.work.w + "×" + result.work.h + " work → " + result.base.width + "×" + result.base.height + " asset px";
     }
 
-    async function processCurrent() {
-      if (!state.sourceImageData) throw new Error("元写真が未読み込みです");
-      if (state.transformDirty) throw new Error("クロップ変更後に元写真を再読み込みしてください");
-      const key = state.selectedKey, spec = CHARM_SPECS[key];
-      setStatus(key + " パイプライン実行中", "busy");
-      dom.processButton.disabled = true;
-      await new Promise(function (resolve) { requestAnimationFrame(resolve); });
+    async function processCurrent(ownerToken) {
+      const ownsOperation = ownerToken === undefined;
+      const operationToken = ownsOperation ? beginOperation("process:" + state.selectedKey) : ownerToken;
       try {
-        const matte = buildMatte(state.sourceImageData, state.manual.alpha, Number(dom.bgLow.value), Number(dom.bgHigh.value));
-        const baseMeta = buildBase(state.sourceImageData, matte.alpha, state.manual.inpaint);
+        assertOperationToken(operationToken);
+        if (!state.sourceImageData) throw new Error("元写真が未読み込みです");
+        if (state.transformDirty) throw new Error("クロップ変更後に元写真を再読み込みしてください");
+        const job = makeProcessJob(operationToken);
+        const key = job.key, spec = job.spec;
+        setStatus(key + " パイプライン実行中", "busy");
+        await new Promise(function (resolve) { requestAnimationFrame(resolve); });
+        assertOperationToken(operationToken);
+        const matte = buildMatte(job.sourceImageData, job.manual.alpha, job.thresholds.bgLow, job.thresholds.bgHigh);
+        let baseMeta = buildBase(job.sourceImageData, matte.alpha);
         baseMeta.background = matte.background;
-        const masks = buildMasks(baseMeta.imageData, matte.alpha, spec, state.manual.owner, state.manual.keep, state.work.logoRoi, Number(dom.logoThreshold.value), Number(dom.stitchContrast.value) / 100);
-        const calibrationInput = currentCalibrationInput();
+        const masks = buildMasks(baseMeta.imageData, matte.alpha, spec, job.manual.owner, job.manual.keep, job.work.logoRoi, job.thresholds.logoThreshold, job.thresholds.stitchContrast);
+        applyManualInpaint(baseMeta, job.manual.inpaint);
+        const calibrationInput = job.calibrationInput;
+        let grainContext = null;
+        let referenceResource = null;
+        if (spec.sourceMode === "colorless") {
+          referenceResource = await loadReferenceIvoryResource();
+          assertOperationToken(operationToken);
+          grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibrationInput, { grainScaleMm: job.grainScaleMm });
+          assertOperationToken(operationToken);
+          baseMeta = grainContext.baseMeta;
+        }
         const preDerived = computeDerived(baseMeta.imageData, masks, spec, baseMeta, calibrationInput);
         const correction = applyAspectCorrection(baseMeta.imageData, masks, spec, preDerived, baseMeta, calibrationInput);
+        correction.grainContext = grainContext;
         const derived = correction.derived;
-        const whiteOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "white");
-        const blackOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "black");
-        const ivoryOutput = recolor(correction.base, correction.masks, derived, { r: 238, g: 233, b: 222 }, "silver", "white");
-        const artifacts = await buildChecksAndConfig(key, spec, correction.base, correction.masks, derived, correction.baseMeta, whiteOutput, blackOutput, correction);
+        const whiteOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "white", spec);
+        const blackOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "black", spec);
+        const ivoryTarget = spec.toneMode === "flat" && referenceResource ? referenceResource.referenceIvory : { r: 238, g: 233, b: 222 };
+        const ivoryOutput = recolor(correction.base, correction.masks, derived, ivoryTarget, "silver", "white", spec);
+        const artifacts = await buildChecksAndConfig(job, correction.base, correction.masks, derived, correction.baseMeta, whiteOutput, blackOutput, correction, grainContext, referenceResource);
+        assertOperationToken(operationToken);
+        if (state.loadedKey !== key || state.selectedKey !== key || state.manualRevision !== job.manualRevision) {
+          throw new Error("処理中に選択チャームまたは手動補正が変更されました");
+        }
         const result = {
           key: key, base: correction.base, masks: correction.masks, derived: derived,
+          work: job.work,
           preDerived: preDerived,
           aspectCorrection: correction.aspectCorrection,
           stitchPathsWork: correction.stitchPathsWork,
           stitchPathsAsset: correction.stitchPathsAsset,
+          grainContext: grainContext,
           previews: { blackGoldWhite: whiteOutput, blackGoldBlack: blackOutput, ivorySilverWhite: ivoryOutput },
           checks: artifacts.checks, prep: artifacts.prep, artifacts: artifacts
         };
         state.result = result;
-        const pass = result.checks.slice(0, 7).every(function (check) { return check.status === "pass"; });
+        const pass = result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
         state.batch[key] = { status: pass ? "pass" : "fail", verify: "pending", foreground: derived.fgBboxPx ? derived.fgBboxPx.w + "×" + derived.fgBboxPx.h : "—", result: result };
         renderResult(result); renderBatch(); updateInteractivity();
         dom.exportCurrentButton.disabled = !pass;
         dom.exportBatchButton.disabled = !allBatchPass1to7();
         dom.verifyArchiveButton.disabled = false;
-        dom.exportGate.textContent = pass ? "1–7 PASS" : "LOCKED";
+        dom.exportGate.textContent = pass ? "1–7+M/F PASS" : "LOCKED";
         dom.exportGate.className = "tag " + (pass ? "pass" : "fail");
-        setStatus(key + (pass ? " 検査1–7 PASS" : " 検査不合格"), pass ? "ok" : "error");
+        setStatus(key + (pass ? " 検査1–7＋M/F PASS" : " 検査不合格"), pass ? "ok" : "error");
         return result;
       } finally {
-        dom.processButton.disabled = false;
+        if (ownsOperation) endOperation(operationToken);
       }
     }
 
@@ -2696,29 +4375,57 @@
     }
 
     async function runBatch() {
+      const operationToken = beginOperation("batch");
       const report = { status: "running", toolVersion: TOOL_VERSION, results: [] };
       const output = document.getElementById("automationResult");
-      if (output) output.textContent = JSON.stringify(report);
-      for (const key of CHARM_KEYS) {
-        try {
-          await loadSource(key);
-          const result = await processCurrent();
-          report.results.push(compactResult(result));
-        } catch (error) {
-          report.results.push({ key: key, error: error.message });
+      try {
+        CHARM_KEYS.forEach(function (key) {
+          const previous = state.batch[key];
+          if (previous && previous.result) releaseBatchPreviewMemory(previous.result);
+          state.batch[key] = { status: "pending", verify: "pending" };
+        });
+        state.result = null;
+        state.lastArchive = null;
+        resetDerivedViews();
+        dom.exportBatchButton.disabled = true;
+        dom.exportGate.textContent = "LOCKED";
+        dom.exportGate.className = "tag";
+        setStatus("全素材バッチを実行中", "busy");
+        renderBatch();
+        if (output) {
+          output.textContent = JSON.stringify(report);
+          delete output.dataset.complete;
         }
-        if (output) output.textContent = JSON.stringify(report);
+        for (const key of CHARM_KEYS) {
+          try {
+            await loadSource(key, operationToken);
+            assertOperationToken(operationToken);
+            const result = await processCurrent(operationToken);
+            assertOperationToken(operationToken);
+            report.results.push(compactResult(result));
+          } catch (error) {
+            state.batch[key] = { status: "fail", verify: "pending" };
+            report.results.push({ key: key, error: error.message });
+            renderBatch();
+          }
+          if (output) output.textContent = JSON.stringify(report);
+        }
+        report.status = report.results.every(function (entry) {
+          return !entry.error && entry.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
+        }) ? "pass" : "fail";
+        dom.exportBatchButton.disabled = report.status !== "pass";
+        dom.verifyArchiveButton.disabled = false;
+        dom.exportGate.textContent = report.status === "pass" ? "1–7+M/F PASS" : "BATCH FAIL";
+        dom.exportGate.className = "tag " + (report.status === "pass" ? "pass" : "fail");
+        setStatus(report.status === "pass" ? "非Swan 7種のバッチ検査1〜7＋M/F PASS" : "バッチ検査FAIL", report.status === "pass" ? "ok" : "error");
+        if (output) {
+          output.textContent = JSON.stringify(report);
+          output.dataset.complete = "true";
+        }
+        return report;
+      } finally {
+        endOperation(operationToken);
       }
-      report.status = report.results.every(function (entry) {
-        return !entry.error && entry.checks.slice(0, 7).every(function (check) { return check.status === "pass"; });
-      }) ? "pass" : "fail";
-      dom.exportBatchButton.disabled = report.status !== "pass";
-      dom.verifyArchiveButton.disabled = false;
-      if (output) {
-        output.textContent = JSON.stringify(report);
-        output.dataset.complete = "true";
-      }
-      return report;
     }
 
     function init() {
@@ -2733,12 +4440,14 @@
         const crop = state.cropInputs[state.selectedKey] || CHARM_SPECS[state.selectedKey].cropSource;
         if (crop) seedTransformControls(crop);
         else [dom.cropX, dom.cropY, dom.cropW, dom.cropH].forEach(function (input) { input.value = ""; });
+        updateInteractivity();
       });
       [dom.cropX, dom.cropY, dom.cropW, dom.cropH].forEach(function (input) { input.addEventListener("change", updateCropInput); });
       dom.manualLayer.addEventListener("change", updateBrushModes);
       dom.calibrationMode.addEventListener("change", function () { dom.calibrationModeBadge.textContent = dom.calibrationMode.value; dom.lineFields.classList.toggle("hidden", dom.calibrationMode.value !== "manual-line"); invalidateResult("校正モードを変更しました"); });
       [dom.widthP1, dom.widthP2, dom.heightP1, dom.heightP2].forEach(function (input) { input.addEventListener("change", function () { invalidateResult("校正線を変更しました"); }); });
       [dom.bgLow, dom.bgLowNumber, dom.bgHigh, dom.bgHighNumber, dom.logoThreshold, dom.logoThresholdNumber, dom.stitchContrast, dom.stitchContrastNumber].forEach(function (input) { input.addEventListener("change", function () { if (state.sourceImageData) invalidateResult("自動候補しきい値を変更しました"); }); });
+      dom.grainScaleMm.addEventListener("change", function () { invalidateColorlessResults("グレイン尺度候補を変更しました"); });
       dom.sourceCanvas.addEventListener("pointerdown", startPainting);
       dom.sourceCanvas.addEventListener("pointermove", movePainting);
       dom.sourceCanvas.addEventListener("pointerup", stopPainting);
@@ -2752,6 +4461,12 @@
       dom.exportCurrentButton.addEventListener("click", function () {
         try { exportCurrentAssets(); setStatus(state.selectedKey + " の派生アセットを書き出しました", "ok"); }
         catch (error) { setStatus("書き出し失敗: " + error.message, "error"); }
+      });
+      dom.exportRegressionButton.addEventListener("click", function () {
+        setStatus("flat回帰シートを生成中", "busy");
+        buildFlatRegressionSheets({ download: true }).then(function (output) {
+          setStatus(output.report.status === "pass" ? "24色＋固定8ケースを書き出しました（色味承認は保留）" : "回帰シートの保持画素検査が不合格です", output.report.status === "pass" ? "ok" : "error");
+        }).catch(function (error) { setStatus("回帰シート生成失敗: " + error.message, "error"); console.error(error); });
       });
       dom.exportBatchButton.addEventListener("click", function () {
         setStatus("候補アーカイブを構築中", "busy");
@@ -2772,7 +4487,11 @@
         if (!file) return;
         setStatus("アーカイブ検査8を実行中", "busy");
         verifyArchive(file, { download: true }).then(function (report) {
-          if (report.status === "pass") setStatus("全7種の検査1〜8 PASS。最終アーカイブを書き出しました", "ok");
+          if (report.status === "pass" && report.currentArtifacts && report.currentArtifacts.allCurrentMatched) {
+            setStatus("非Swan 7種の検査1〜8＋M/F PASS。swanは正規マニフェスト確定待ちです", "ok");
+          } else if (report.status === "pass") {
+            setStatus("アーカイブ単体は検査1〜8 PASSですが、現在の生成物とは一致しません（STALE）", "error");
+          }
           else {
             const firstFailure = report.errors[0] || (report.results.find(function (item) { return item.status === "fail"; }) || { reasons: ["不明なエラー"] }).reasons[0];
             setStatus("検査8 FAIL: " + firstFailure, "error");
@@ -2796,20 +4515,47 @@
       }
     }
 
+    function publicStateSnapshot() {
+      const batch = Object.fromEntries(Object.keys(state.batch).map(function (key) {
+        const item = state.batch[key];
+        return [key, Object.freeze({ status: item.status, verify: item.verify, foreground: item.foreground || null })];
+      }));
+      return Object.freeze({
+        selectedKey: state.selectedKey,
+        loadedKey: state.loadedKey,
+        sourceLoaded: !!state.sourceImageData,
+        transformDirty: state.transformDirty,
+        operation: state.operation ? Object.freeze({ kind: state.operation.kind }) : null,
+        resultKey: state.result ? state.result.key : null,
+        batch: Object.freeze(batch),
+        lastArchiveStatus: state.lastArchive ? state.lastArchive.status : null
+      });
+    }
+
     window.charmPrepAPI = Object.freeze({
       version: TOOL_VERSION,
       specs: CHARM_SPECS,
-      layout: LAYOUT,
-      getState: function () { return state; },
-      loadCharm: loadSource,
-      processCurrent: processCurrent,
-      runChecks: async function () { const result = state.result || await processCurrent(); return result.checks; },
-      getCurrentResult: function () { return state.result; },
+      layout: detachedPublicValue(LAYOUT),
+      getState: publicStateSnapshot,
+      loadCharm: function (key) { return loadSource(key); },
+      processCurrent: async function () { return detachedPublicValue(await processCurrent()); },
+      runChecks: async function () {
+        const result = state.result && state.result.key === state.selectedKey ? state.result : await processCurrent();
+        return detachedPublicValue(result.checks);
+      },
+      getCurrentResult: function () { return state.result ? detachedPublicValue(state.result) : null; },
       recolor: recolor,
-      runBatch: runBatch,
+      runBatch: async function () { return detachedPublicValue(await runBatch()); },
       exportArchive: exportArchive,
-      verifyArchive: verifyArchive,
-      generateRingAssets: generateRingAssets
+      verifyArchive: async function (input, options) { return detachedPublicValue(await verifyArchive(input, options)); },
+      generateRingAssets: async function (options) { return detachedPublicValue(await generateRingAssets(options)); },
+      buildFlatRegressionSheets: async function (options) { return detachedPublicValue(await buildFlatRegressionSheets(options)); },
+      setGrainScaleMm: function (value) {
+        if (state.operation) throw new Error("処理中はgrainScaleMmを変更できません");
+        if (!Number.isFinite(value) || value <= 0) throw new Error("grainScaleMmは正の有限値が必要です");
+        dom.grainScaleMm.value = String(value);
+        invalidateColorlessResults("グレイン尺度候補を変更しました");
+      }
     });
 
     init();
