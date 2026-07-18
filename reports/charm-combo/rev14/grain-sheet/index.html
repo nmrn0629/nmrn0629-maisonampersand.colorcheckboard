@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>シェーブル専用grain 質感比較シート v2(rev14 Phase 1)</title>
+<style>
+  body { font-family: "Hiragino Sans", sans-serif; margin: 24px; color: #333; background: #fafafa; }
+  h1 { font-size: 20px; }
+  .lead { font-size: 13px; line-height: 1.7; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; max-width: 1100px; }
+  .reco { background: #eef6ee; border: 1px solid #9c9; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 13px; }
+  table { border-collapse: collapse; background: #fff; margin-top: 16px; }
+  th, td { border-bottom: 1px solid #eee; padding: 8px 10px; vertical-align: top; font-size: 13px; text-align: left; }
+  th { background: #f0efe9; min-width: 180px; }
+  td img { width: 300px; max-width: 21vw; border-radius: 4px; display: block; }
+  .rowname { font-weight: 600; min-width: 150px; max-width: 180px; }
+  .note { font-weight: 400; font-size: 11px; color: #777; margin-top: 3px; }
+</style></head><body>
+<h1>シェーブル専用grain 質感比較シート v2 — 正本grainの選択(rev14 Phase 1)</h1>
+<div class="lead">
+  ナミさんから受領した<b>シェーブル質感画像3枚</b>(2026-07-18)をそれぞれ luma 化し、カーフと同一条件(blur半径 12px・振幅 ±0.35)で比率マップ→同一色タイルにしたものです。色は完全に捨てるので、<b>3候補の差は撮影条件(距離・照明・ツヤの写り方)だけ</b>——シェーブルの正本grainをどの画像にするか選んでください。グリーンとブルーの製品全体写真は形状・参考資料として保管します(生成入力には使いません)。
+  <div class="reco"><b>俺のおすすめは候補2(ベージュ)</b>: 3枚の中で革面の解像度が最も高く(824×383)、400pxタイルにほぼ折り返しなしで収まり、粒の立体感が一番自然に出ます。候補1(ブルー)も良いですが一回り低解像度(502×357)でタイル下部に折り返しが出ます。候補3(グリーン)は使える帯が薄く(高さ130px)縦方向の繰り返しが目立つため非推奨。<b>「候補2でOK」の一言で確定します</b>(別candidateでもOK)。</div>
+</div>
+<table>
+<tr><th></th><th>カーフ(既存 質感.jpg)<div class='note'>質感.jpg full-frame</div></th><th>候補1: ブルー質感アップ<div class='note'>1000090057.jpg(8557ba58…) 全面(縁10px除外) 502×357</div></th><th>候補2: ベージュ質感アップ<div class='note'>1000090060.jpg(f0a65c5b…) 全面(縁10px除外) 824×383</div></th><th>候補3: グリーン製品写真ROI<div class='note'>1000090066.jpg(0358b73c…) ROI x230,y545,w620,h130</div></th></tr>
+<tr><td class='rowname'>素材の輝度(luma)そのまま<div class='note'>色を捨てた状態(表示は幅に合わせ縮小)</div></td><td><img src='v2-calf-luma.png' alt='calf'></td><td><img src='v2-blue-luma.png' alt='blue'></td><td><img src='v2-beige-luma.png' alt='beige'></td><td><img src='v2-green-luma.png' alt='green'></td></tr><tr><td class='rowname'>グレージュ #82756b に適用<div class='note'>同一色・同一パラメータの 400×400 タイル</div></td><td><img src='v2-calf-greige.png' alt='calf'></td><td><img src='v2-blue-greige.png' alt='blue'></td><td><img src='v2-beige-greige.png' alt='beige'></td><td><img src='v2-green-greige.png' alt='green'></td></tr><tr><td class='rowname'>ラベンダー #8089e3 に適用<div class='note'>新色ラベンダーのイメージ</div></td><td><img src='v2-calf-lavender.png' alt='calf'></td><td><img src='v2-blue-lavender.png' alt='blue'></td><td><img src='v2-beige-lavender.png' alt='beige'></td><td><img src='v2-green-lavender.png' alt='green'></td></tr>
+</table>
+</body></html>
