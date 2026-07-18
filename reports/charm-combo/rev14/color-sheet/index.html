@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>27色 比較シート(rev14 Phase 1)</title>
+<style>
+  body { font-family: "Hiragino Sans", sans-serif; margin: 24px; color: #333; background: #fafafa; }
+  h1 { font-size: 20px; }
+  .lead { font-size: 13px; line-height: 1.7; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; max-width: 860px; }
+  table { border-collapse: collapse; background: #fff; margin-top: 16px; }
+  td { border-bottom: 1px solid #eee; padding: 6px 10px; vertical-align: middle; font-size: 13px; }
+  tr.group td { background: #f0efe9; font-weight: 600; font-size: 13px; padding: 8px 10px; }
+  tr.group.chevre td { background: #e8ecf5; }
+  .thumb img { width: 150px; height: 56px; object-fit: cover; border-radius: 4px; display: block; }
+  .name { font-weight: 600; min-width: 130px; }
+  .note { font-weight: 400; font-size: 11px; color: #777; }
+  .warn { font-weight: 400; font-size: 11px; color: #b0621e; }
+  .swpair { display: flex; gap: 10px; }
+  .sw .chip { width: 108px; height: 44px; border-radius: 4px; border: 1px solid rgba(0,0,0,.12); }
+  .sw .hx { font-family: Menlo, monospace; font-size: 11px; margin-top: 2px; color: #555; }
+  .joined { min-width: 150px; }
+  .joined .half { display: inline-block; width: 72px; height: 44px; line-height: 44px; text-align: center;
+                   color: rgba(255,255,255,.65); font-size: 11px; vertical-align: middle; }
+  .joined .half:first-child { border-radius: 4px 0 0 4px; }
+  .joined .half:last-child { border-radius: 0 4px 4px 0; }
+  .de { font-family: Menlo, monospace; color: #888; text-align: right; }
+  .pick label { display: block; white-space: nowrap; font-size: 12px; cursor: pointer; }
+  .toolbar { margin: 16px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  button { font-size: 13px; padding: 8px 14px; border-radius: 6px; border: 1px solid #bbb; background: #fff; cursor: pointer; }
+  button.primary { background: #2b6cb0; border-color: #2b6cb0; color: #fff; }
+  #result { width: 100%; max-width: 860px; height: 180px; font-family: Menlo, monospace; font-size: 12px; }
+</style></head><body>
+<h1>27色 比較シート — approvedHex の確定(rev14 Phase 1)</h1>
+<div class="lead">
+  各色について、正式採用する hex(approvedHex)を選んでください。<br>
+  <b>A = 現行UI値</b>(いまの charms.html の COLORS)/<b>B = チャート抽出値</b>(公式カラーチャートから規約 roi-lab-lower-median-v1 で機械抽出した値。サムネイルが実際に色を採った領域です)。<br>
+  <b>おすすめは全色 B</b>: 今回の凍結規約で誰がいつ再計算しても同じ値になり、検査と完全整合します。A と B の差はどの色もごくわずか(ΔE最大 = ピスタチオ 2.9)。<br>
+  <b>シェーブル3色</b>はチャート画像が Display P3 profile のため、B1 = 数値をそのまま読む/B2 = P3→sRGB 変換(チャートの実際の見え方に忠実)の2択です。おすすめは B2。<br>
+  「中央の連結スウォッチ」は A|B を直接くっつけたもので、境目が見えなければ実質同じ色です。選んだら一番下の「選択結果を作成」→表示されたテキストをチャットに貼ってください(全部おすすめ通りなら「全部Bで(シェーブルはB2)」の一言でもOKです)。
+</div>
+<table>
+<tr class="group"><td colspan="6">イエロー/オレンジ</td></tr><tr class="colorrow" data-name="ゴールド">
+<td class="thumb"><img src="thumbs/yellow-0.png" alt="チャート切片"></td>
+<td class="name">ゴールド</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#cb945f"></div><div class="hx">A #cb945f</div></div><div class="sw"><div class="chip" style="background:#c8925f"></div><div class="hx">B #c8925f</div></div></td>
+<td class="joined"><div class="half" style="background:#cb945f">A</div><div class="half" style="background:#c8925f">B</div></td>
+<td class="de">1.2</td>
+<td class="pick"><label><input type="radio" name="r-ゴールド" value="A(現行UI値)" data-hex="#cb945f">A 現行</label><label><input type="radio" name="r-ゴールド" value="B(チャート抽出値)" data-hex="#c8925f" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="オレンジ">
+<td class="thumb"><img src="thumbs/yellow-1.png" alt="チャート切片"></td>
+<td class="name">オレンジ</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#e59032"></div><div class="hx">A #e59032</div></div><div class="sw"><div class="chip" style="background:#e59134"></div><div class="hx">B #e59134</div></div></td>
+<td class="joined"><div class="half" style="background:#e59032">A</div><div class="half" style="background:#e59134">B</div></td>
+<td class="de">0.8</td>
+<td class="pick"><label><input type="radio" name="r-オレンジ" value="A(現行UI値)" data-hex="#e59032">A 現行</label><label><input type="radio" name="r-オレンジ" value="B(チャート抽出値)" data-hex="#e59134" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ライムイエロー">
+<td class="thumb"><img src="thumbs/yellow-2.png" alt="チャート切片"></td>
+<td class="name">ライムイエロー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#f1e157"></div><div class="hx">A #f1e157</div></div><div class="sw"><div class="chip" style="background:#f0e15c"></div><div class="hx">B #f0e15c</div></div></td>
+<td class="joined"><div class="half" style="background:#f1e157">A</div><div class="half" style="background:#f0e15c">B</div></td>
+<td class="de">2.3</td>
+<td class="pick"><label><input type="radio" name="r-ライムイエロー" value="A(現行UI値)" data-hex="#f1e157">A 現行</label><label><input type="radio" name="r-ライムイエロー" value="B(チャート抽出値)" data-hex="#f0e15c" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ペールイエロー">
+<td class="thumb"><img src="thumbs/yellow-3.png" alt="チャート切片"></td>
+<td class="name">ペールイエロー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#f5ebb7"></div><div class="hx">A #f5ebb7</div></div><div class="sw"><div class="chip" style="background:#f4ebb8"></div><div class="hx">B #f4ebb8</div></div></td>
+<td class="joined"><div class="half" style="background:#f5ebb7">A</div><div class="half" style="background:#f4ebb8">B</div></td>
+<td class="de">0.7</td>
+<td class="pick"><label><input type="radio" name="r-ペールイエロー" value="A(現行UI値)" data-hex="#f5ebb7">A 現行</label><label><input type="radio" name="r-ペールイエロー" value="B(チャート抽出値)" data-hex="#f4ebb8" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ブリック">
+<td class="thumb"><img src="thumbs/yellow-4.png" alt="チャート切片"></td>
+<td class="name">ブリック</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#8a5653"></div><div class="hx">A #8a5653</div></div><div class="sw"><div class="chip" style="background:#885854"></div><div class="hx">B #885854</div></div></td>
+<td class="joined"><div class="half" style="background:#8a5653">A</div><div class="half" style="background:#885854">B</div></td>
+<td class="de">1.6</td>
+<td class="pick"><label><input type="radio" name="r-ブリック" value="A(現行UI値)" data-hex="#8a5653">A 現行</label><label><input type="radio" name="r-ブリック" value="B(チャート抽出値)" data-hex="#885854" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ピスタチオ">
+<td class="thumb"><img src="thumbs/yellow-5.png" alt="チャート切片"></td>
+<td class="name">ピスタチオ</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#99b482"></div><div class="hx">A #99b482</div></div><div class="sw"><div class="chip" style="background:#94ad79"></div><div class="hx">B #94ad79</div></div></td>
+<td class="joined"><div class="half" style="background:#99b482">A</div><div class="half" style="background:#94ad79">B</div></td>
+<td class="de">2.9</td>
+<td class="pick"><label><input type="radio" name="r-ピスタチオ" value="A(現行UI値)" data-hex="#99b482">A 現行</label><label><input type="radio" name="r-ピスタチオ" value="B(チャート抽出値)" data-hex="#94ad79" checked>B 抽出</label></td>
+</tr><tr class="group"><td colspan="6">ベーシック</td></tr><tr class="colorrow" data-name="ブラック">
+<td class="thumb"><img src="thumbs/brown-0.png" alt="チャート切片"></td>
+<td class="name">ブラック</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#41413d"></div><div class="hx">A #41413d</div></div><div class="sw"><div class="chip" style="background:#41403d"></div><div class="hx">B #41403d</div></div></td>
+<td class="joined"><div class="half" style="background:#41413d">A</div><div class="half" style="background:#41403d">B</div></td>
+<td class="de">0.6</td>
+<td class="pick"><label><input type="radio" name="r-ブラック" value="A(現行UI値)" data-hex="#41413d">A 現行</label><label><input type="radio" name="r-ブラック" value="B(チャート抽出値)" data-hex="#41403d" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="グレージュ">
+<td class="thumb"><img src="thumbs/brown-1.png" alt="チャート切片"></td>
+<td class="name">グレージュ</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#817469"></div><div class="hx">A #817469</div></div><div class="sw"><div class="chip" style="background:#82756b"></div><div class="hx">B #82756b</div></div></td>
+<td class="joined"><div class="half" style="background:#817469">A</div><div class="half" style="background:#82756b">B</div></td>
+<td class="de">0.8</td>
+<td class="pick"><label><input type="radio" name="r-グレージュ" value="A(現行UI値)" data-hex="#817469">A 現行</label><label><input type="radio" name="r-グレージュ" value="B(チャート抽出値)" data-hex="#82756b" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ブラウン">
+<td class="thumb"><img src="thumbs/brown-2.png" alt="チャート切片"></td>
+<td class="name">ブラウン</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#925a45"></div><div class="hx">A #925a45</div></div><div class="sw"><div class="chip" style="background:#935a45"></div><div class="hx">B #935a45</div></div></td>
+<td class="joined"><div class="half" style="background:#925a45">A</div><div class="half" style="background:#935a45">B</div></td>
+<td class="de">0.5</td>
+<td class="pick"><label><input type="radio" name="r-ブラウン" value="A(現行UI値)" data-hex="#925a45">A 現行</label><label><input type="radio" name="r-ブラウン" value="B(チャート抽出値)" data-hex="#935a45" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="チャコールグレー">
+<td class="thumb"><img src="thumbs/brown-3.png" alt="チャート切片"></td>
+<td class="name">チャコールグレー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#616162"></div><div class="hx">A #616162</div></div><div class="sw"><div class="chip" style="background:#616062"></div><div class="hx">B #616062</div></div></td>
+<td class="joined"><div class="half" style="background:#616162">A</div><div class="half" style="background:#616062">B</div></td>
+<td class="de">0.8</td>
+<td class="pick"><label><input type="radio" name="r-チャコールグレー" value="A(現行UI値)" data-hex="#616162">A 現行</label><label><input type="radio" name="r-チャコールグレー" value="B(チャート抽出値)" data-hex="#616062" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="アイボリー">
+<td class="thumb"><img src="thumbs/brown-4.png" alt="チャート切片"></td>
+<td class="name">アイボリー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#eee9de"></div><div class="hx">A #eee9de</div></div><div class="sw"><div class="chip" style="background:#ece7dd"></div><div class="hx">B #ece7dd</div></div></td>
+<td class="joined"><div class="half" style="background:#eee9de">A</div><div class="half" style="background:#ece7dd">B</div></td>
+<td class="de">0.8</td>
+<td class="pick"><label><input type="radio" name="r-アイボリー" value="A(現行UI値)" data-hex="#eee9de">A 現行</label><label><input type="radio" name="r-アイボリー" value="B(チャート抽出値)" data-hex="#ece7dd" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="エトープ">
+<td class="thumb"><img src="thumbs/brown-5.png" alt="チャート切片"></td>
+<td class="name">エトープ</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#a18c71"></div><div class="hx">A #a18c71</div></div><div class="sw"><div class="chip" style="background:#a48e73"></div><div class="hx">B #a48e73</div></div></td>
+<td class="joined"><div class="half" style="background:#a18c71">A</div><div class="half" style="background:#a48e73">B</div></td>
+<td class="de">0.9</td>
+<td class="pick"><label><input type="radio" name="r-エトープ" value="A(現行UI値)" data-hex="#a18c71">A 現行</label><label><input type="radio" name="r-エトープ" value="B(チャート抽出値)" data-hex="#a48e73" checked>B 抽出</label></td>
+</tr><tr class="group"><td colspan="6">ブルー</td></tr><tr class="colorrow" data-name="ライトブルー">
+<td class="thumb"><img src="thumbs/blue-0.png" alt="チャート切片"></td>
+<td class="name">ライトブルー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#afece8"></div><div class="hx">A #afece8</div></div><div class="sw"><div class="chip" style="background:#b0ece8"></div><div class="hx">B #b0ece8</div></div></td>
+<td class="joined"><div class="half" style="background:#afece8">A</div><div class="half" style="background:#b0ece8">B</div></td>
+<td class="de">0.5</td>
+<td class="pick"><label><input type="radio" name="r-ライトブルー" value="A(現行UI値)" data-hex="#afece8">A 現行</label><label><input type="radio" name="r-ライトブルー" value="B(チャート抽出値)" data-hex="#b0ece8" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="シエルブルー">
+<td class="thumb"><img src="thumbs/blue-1.png" alt="チャート切片"></td>
+<td class="name">シエルブルー<div class="note">現行UI名「シェルブルー」→ 正名「シエルブルー」に統一予定</div></td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#6cb9cf"></div><div class="hx">A #6cb9cf</div></div><div class="sw"><div class="chip" style="background:#6cbacf"></div><div class="hx">B #6cbacf</div></div></td>
+<td class="joined"><div class="half" style="background:#6cb9cf">A</div><div class="half" style="background:#6cbacf">B</div></td>
+<td class="de">0.7</td>
+<td class="pick"><label><input type="radio" name="r-シエルブルー" value="A(現行UI値)" data-hex="#6cb9cf">A 現行</label><label><input type="radio" name="r-シエルブルー" value="B(チャート抽出値)" data-hex="#6cbacf" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ミストブルー">
+<td class="thumb"><img src="thumbs/blue-2.png" alt="チャート切片"></td>
+<td class="name">ミストブルー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#7cacc1"></div><div class="hx">A #7cacc1</div></div><div class="sw"><div class="chip" style="background:#7aaabf"></div><div class="hx">B #7aaabf</div></div></td>
+<td class="joined"><div class="half" style="background:#7cacc1">A</div><div class="half" style="background:#7aaabf">B</div></td>
+<td class="de">0.7</td>
+<td class="pick"><label><input type="radio" name="r-ミストブルー" value="A(現行UI値)" data-hex="#7cacc1">A 現行</label><label><input type="radio" name="r-ミストブルー" value="B(チャート抽出値)" data-hex="#7aaabf" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="アイスグレー">
+<td class="thumb"><img src="thumbs/blue-3.png" alt="チャート切片"></td>
+<td class="name">アイスグレー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#cccecd"></div><div class="hx">A #cccecd</div></div><div class="sw"><div class="chip" style="background:#cbcdcc"></div><div class="hx">B #cbcdcc</div></div></td>
+<td class="joined"><div class="half" style="background:#cccecd">A</div><div class="half" style="background:#cbcdcc">B</div></td>
+<td class="de">0.4</td>
+<td class="pick"><label><input type="radio" name="r-アイスグレー" value="A(現行UI値)" data-hex="#cccecd">A 現行</label><label><input type="radio" name="r-アイスグレー" value="B(チャート抽出値)" data-hex="#cbcdcc" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ロイヤルブルー">
+<td class="thumb"><img src="thumbs/blue-4.png" alt="チャート切片"></td>
+<td class="name">ロイヤルブルー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#4661c6"></div><div class="hx">A #4661c6</div></div><div class="sw"><div class="chip" style="background:#445fc1"></div><div class="hx">B #445fc1</div></div></td>
+<td class="joined"><div class="half" style="background:#4661c6">A</div><div class="half" style="background:#445fc1">B</div></td>
+<td class="de">1.8</td>
+<td class="pick"><label><input type="radio" name="r-ロイヤルブルー" value="A(現行UI値)" data-hex="#4661c6">A 現行</label><label><input type="radio" name="r-ロイヤルブルー" value="B(チャート抽出値)" data-hex="#445fc1" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ネイビー">
+<td class="thumb"><img src="thumbs/blue-5.png" alt="チャート切片"></td>
+<td class="name">ネイビー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#3a4b60"></div><div class="hx">A #3a4b60</div></div><div class="sw"><div class="chip" style="background:#3c4d61"></div><div class="hx">B #3c4d61</div></div></td>
+<td class="joined"><div class="half" style="background:#3a4b60">A</div><div class="half" style="background:#3c4d61">B</div></td>
+<td class="de">1.4</td>
+<td class="pick"><label><input type="radio" name="r-ネイビー" value="A(現行UI値)" data-hex="#3a4b60">A 現行</label><label><input type="radio" name="r-ネイビー" value="B(チャート抽出値)" data-hex="#3c4d61" checked>B 抽出</label></td>
+</tr><tr class="group"><td colspan="6">ピンク/レッド</td></tr><tr class="colorrow" data-name="ピンク">
+<td class="thumb"><img src="thumbs/red-0.png" alt="チャート切片"></td>
+<td class="name">ピンク</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#f87f8f"></div><div class="hx">A #f87f8f</div></div><div class="sw"><div class="chip" style="background:#f78192"></div><div class="hx">B #f78192</div></div></td>
+<td class="joined"><div class="half" style="background:#f87f8f">A</div><div class="half" style="background:#f78192">B</div></td>
+<td class="de">1.6</td>
+<td class="pick"><label><input type="radio" name="r-ピンク" value="A(現行UI値)" data-hex="#f87f8f">A 現行</label><label><input type="radio" name="r-ピンク" value="B(チャート抽出値)" data-hex="#f78192" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="レッド">
+<td class="thumb"><img src="thumbs/red-1.png" alt="チャート切片"></td>
+<td class="name">レッド</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#e55a60"></div><div class="hx">A #e55a60</div></div><div class="sw"><div class="chip" style="background:#e45c61"></div><div class="hx">B #e45c61</div></div></td>
+<td class="joined"><div class="half" style="background:#e55a60">A</div><div class="half" style="background:#e45c61">B</div></td>
+<td class="de">1.0</td>
+<td class="pick"><label><input type="radio" name="r-レッド" value="A(現行UI値)" data-hex="#e55a60">A 現行</label><label><input type="radio" name="r-レッド" value="B(チャート抽出値)" data-hex="#e45c61" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ローズピンク">
+<td class="thumb"><img src="thumbs/red-2.png" alt="チャート切片"></td>
+<td class="name">ローズピンク</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#a94174"></div><div class="hx">A #a94174</div></div><div class="sw"><div class="chip" style="background:#a93f74"></div><div class="hx">B #a93f74</div></div></td>
+<td class="joined"><div class="half" style="background:#a94174">A</div><div class="half" style="background:#a93f74">B</div></td>
+<td class="de">0.9</td>
+<td class="pick"><label><input type="radio" name="r-ローズピンク" value="A(現行UI値)" data-hex="#a94174">A 現行</label><label><input type="radio" name="r-ローズピンク" value="B(チャート抽出値)" data-hex="#a93f74" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="パープル">
+<td class="thumb"><img src="thumbs/red-3.png" alt="チャート切片"></td>
+<td class="name">パープル</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#a854a4"></div><div class="hx">A #a854a4</div></div><div class="sw"><div class="chip" style="background:#a855a2"></div><div class="hx">B #a855a2</div></div></td>
+<td class="joined"><div class="half" style="background:#a854a4">A</div><div class="half" style="background:#a855a2">B</div></td>
+<td class="de">1.6</td>
+<td class="pick"><label><input type="radio" name="r-パープル" value="A(現行UI値)" data-hex="#a854a4">A 現行</label><label><input type="radio" name="r-パープル" value="B(チャート抽出値)" data-hex="#a855a2" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="ペールピンク">
+<td class="thumb"><img src="thumbs/red-4.png" alt="チャート切片"></td>
+<td class="name">ペールピンク</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#e8cfde"></div><div class="hx">A #e8cfde</div></div><div class="sw"><div class="chip" style="background:#e7cbda"></div><div class="hx">B #e7cbda</div></div></td>
+<td class="joined"><div class="half" style="background:#e8cfde">A</div><div class="half" style="background:#e7cbda">B</div></td>
+<td class="de">1.6</td>
+<td class="pick"><label><input type="radio" name="r-ペールピンク" value="A(現行UI値)" data-hex="#e8cfde">A 現行</label><label><input type="radio" name="r-ペールピンク" value="B(チャート抽出値)" data-hex="#e7cbda" checked>B 抽出</label></td>
+</tr><tr class="colorrow" data-name="コーラルピンク">
+<td class="thumb"><img src="thumbs/red-5.png" alt="チャート切片"></td>
+<td class="name">コーラルピンク</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#f0a180"></div><div class="hx">A #f0a180</div></div><div class="sw"><div class="chip" style="background:#ef9f7e"></div><div class="hx">B #ef9f7e</div></div></td>
+<td class="joined"><div class="half" style="background:#f0a180">A</div><div class="half" style="background:#ef9f7e">B</div></td>
+<td class="de">0.6</td>
+<td class="pick"><label><input type="radio" name="r-コーラルピンク" value="A(現行UI値)" data-hex="#f0a180">A 現行</label><label><input type="radio" name="r-コーラルピンク" value="B(チャート抽出値)" data-hex="#ef9f7e" checked>B 抽出</label></td>
+</tr><tr class="group chevre"><td colspan="6">シェーブル(将来アイテム用 — 今回のチャーム画面では選択不可・定義のみ凍結)</td></tr><tr class="colorrow" data-name="ペールグレージュ">
+<td class="thumb"><img src="thumbs/chevre-0.png" alt="チャート切片"></td>
+<td class="name">ペールグレージュ</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#9c8e89"></div><div class="hx">B1 #9c8e89</div></div><div class="sw"><div class="chip" style="background:#9e8e89"></div><div class="hx">B2 #9e8e89</div></div></td>
+<td class="joined"><div class="half" style="background:#9c8e89">B1</div><div class="half" style="background:#9e8e89">B2</div></td>
+<td class="de">1.4</td>
+<td class="pick"><label><input type="radio" name="r-ペールグレージュ" value="B1(生数値のまま)" data-hex="#9c8e89">B1 生値</label><label><input type="radio" name="r-ペールグレージュ" value="B2(P3→sRGB変換)" data-hex="#9e8e89" checked>B2 P3変換</label></td>
+</tr><tr class="colorrow" data-name="グリーン">
+<td class="thumb"><img src="thumbs/chevre-1.png" alt="チャート切片"></td>
+<td class="name">グリーン <span class="warn">※sRGB色域外→彩度圧縮あり</span></td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#31894d"></div><div class="hx">B1 #31894d</div></div><div class="sw"><div class="chip" style="background:#00894c"></div><div class="hx">B2 #00894c</div></div></td>
+<td class="joined"><div class="half" style="background:#31894d">B1</div><div class="half" style="background:#00894c">B2</div></td>
+<td class="de">12.6</td>
+<td class="pick"><label><input type="radio" name="r-グリーン" value="B1(生数値のまま)" data-hex="#31894d">B1 生値</label><label><input type="radio" name="r-グリーン" value="B2(P3→sRGB変換)" data-hex="#00894c" checked>B2 P3変換</label></td>
+</tr><tr class="colorrow" data-name="ラベンダー">
+<td class="thumb"><img src="thumbs/chevre-2.png" alt="チャート切片"></td>
+<td class="name">ラベンダー</td>
+<td class="swpair"><div class="sw"><div class="chip" style="background:#8289dd"></div><div class="hx">B1 #8289dd</div></div><div class="sw"><div class="chip" style="background:#8089e3"></div><div class="hx">B2 #8089e3</div></div></td>
+<td class="joined"><div class="half" style="background:#8289dd">B1</div><div class="half" style="background:#8089e3">B2</div></td>
+<td class="de">3.3</td>
+<td class="pick"><label><input type="radio" name="r-ラベンダー" value="B1(生数値のまま)" data-hex="#8289dd">B1 生値</label><label><input type="radio" name="r-ラベンダー" value="B2(P3→sRGB変換)" data-hex="#8089e3" checked>B2 P3変換</label></td>
+</tr>
+</table>
+<div class="toolbar">
+  <button onclick="bulk('A')">カーフ24色を全部Aに</button>
+  <button onclick="bulk('B')">カーフ24色を全部Bに</button>
+  <button class="primary" onclick="makeResult()">選択結果を作成</button>
+  <button onclick="copyResult()">コピー</button>
+</div>
+<textarea id="result" placeholder="ここに選択結果が出ます"></textarea>
+<script>
+function bulk(k) {
+  document.querySelectorAll('.colorrow').forEach(r => {
+    const ins = r.querySelectorAll('input');
+    if (ins[0].value.startsWith('B1')) return; // シェーブルは対象外
+    ins[k === 'A' ? 0 : 1].checked = true;
+  });
+}
+function makeResult() {
+  const lines = ['[27色 approvedHex 選択結果]'];
+  document.querySelectorAll('.colorrow').forEach(r => {
+    const sel = r.querySelector('input:checked');
+    lines.push(r.dataset.name + ': ' + sel.value + ' ' + sel.dataset.hex);
+  });
+  document.getElementById('result').value = lines.join('\n');
+}
+function copyResult() {
+  makeResult();
+  const t = document.getElementById('result');
+  t.select();
+  navigator.clipboard ? navigator.clipboard.writeText(t.value) : document.execCommand('copy');
+}
+</script>
+</body></html>

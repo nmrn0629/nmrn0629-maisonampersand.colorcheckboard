@@ -18,6 +18,8 @@
 | AE-20260718-08 | **swan のくちばし = アクセント色として保持（masks.α<128）**。素材に着色して再書き出しする方式を採用（「アクセント色で保持」→「素材に着色して再書き出し（推奨）」の2段階承認） |
 | AE-20260718-09 | **swan の pipelineSource =「swanフチ画像　嘴カラーあり.png」**（1701×2560・RGB・αなし・SHA `77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435`・2026-07-18 20:50 受領）。検証: 四隅白254単色（チェッカーなし）・くちばしブラウン系 17,051px（平均RGB 149,87,44・革シボ付き）を機械確認。**supersededSources（生成入力禁止）= swan.jpg／swanフチ画像.png（チェッカー柄・SHA 847e75bb…）／swanフチ画像２.png（くちばし無着色・SHA 87ad635c…）／swan背景透過.png（装飾オーバーレイ）** |
 | AE-20260718-10 | **シェーブル3色（ペールグレージュ／グリーン／ラベンダー）は現行8チャームでは選択不可**。ユーザー指示「現時点で新色のシェーブルの3カラーについては、使えるチャームが限られていて、今お渡ししているチャームでは使えません。…一旦こちらのチャーム選択画面の時は、新しい3色のカラーは選択できないような仕様にしてほしい」。実装後に追加されるアイテムで選択可能になる予定。→ **27 leatherVariant の定義（hex・専用 grain・material profile）は将来用の正本として凍結しつつ、シェーブル3 variant の appliesToCharms = 空**。数量契約は `finiteCases = Σ variants.appliesToCharms.length = 24色×8チャーム = 192`（216 を置換）。クライアント色確認も 192 組。UI は「選択可能な material が2種以上ある場合のみ革種選択を表示」とし、現段階の charms.html はカーフ24色のみの表示となる |
+| AE-20260718-11 | **カーフ24色の approvedHex = チャート抽出値（B）を全色採用**。比較シート（reports/charm-combo/rev14/color-sheet/index.html — A=現行UI値 vs B=チャート抽出値・A/B間の最大差はピスタチオ ΔE 2.9）を提示し、ユーザー回答「そのおすすめの方で進めてもらって大丈夫です」（おすすめ=カーフ24色は全部B・シェーブルはB2）。samplingMethod=`roi-lab-lower-median-v1`（recomputedProposedHex=proposedHex=approvedHex）。抽出条件: パネル境界検出=`lab-adjacent-diff-transition-band-v1`（予想境界±8%窓内で隣接行/列平均の Lab ΔE>1.8 の遷移帯を除外。白線前提の初版検出はブラウン系/ブルー系で誤検出したため置換）・samplingRect=パネル上12%〜58%の帯・左右8%マージン（下部の色名文字を回避）・exclusionMask=全0・全27パネル均一性検査PASS（samplingRect内の隣接行/列平均ΔE≦1.8・レンジΔE≦25）。panelRect/samplingRect/Lab下位中央値/decodedRgbaSha256 の正本=chart-panels.json（本ディレクトリ） |
+| AE-20260718-12 | **シェーブル3色の approvedHex = P3→sRGB変換値（B2）を採用**（同上のユーザー回答）。チャート「ニューカラー（シェーブル）.jpg」のみ **Display P3 Gamut with sRGB Transfer** プロファイル（他4枚はsRGB）のため、生数値のstraight解釈（B1）ではなく実際の見え方に忠実なP3→sRGB変換値を選択。変換=sRGB transferでリニア化→P3→XYZ(D65)行列→Lab（下位中央値はP3解釈Labで採取）→sRGB戻し。**グリーンはsRGB色域外→L/h固定・C二分探索20回で彩度圧縮**（改訂13 flatLeatherTone と同一規則）。freeze時の記録方式: `roi-lab-lower-median-v1` の独立再計算（recomputedProposedHex）はstraight解釈のみを一致対象とするため、シェーブル3色は **samplingMethod=`approved-explicit-hex`**（本Evidence IDと変換手順を記録）とし、straight値（B1: #9c8e89/#31894d/#8289dd）はchart-panels.jsonに参考保存 |
 
 ## 数量契約への影響（AE-20260718-10 による確定値）
 
@@ -32,3 +34,39 @@
 - 候補台帳突合: フチ画像8点・背景透過8点・チャート5点の寸法・SHA-256 が同期計画 §3／§3-1 の台帳と完全一致（source-candidates.json / color-candidates.json 参照）
 - フチ画像の背景: 7種＋swan嘴カラーあり版はコーナー100×100が輝度254単色。旧 swanフチ画像.png のみチェッカー柄（79色種・輝度242..254）で不適 → 差し替え済み
 - チャートのパネル構成: レッド系・イエロー系・ブラウン系・ブルー系 = 2列×3行の6パネル／ニューカラー（シェーブル）= 上段全幅1（ペールグレージュ）＋下段2（グリーン・ラベンダー）の3パネル。計27
+
+## 確定 approvedHex 一覧（AE-20260718-11／AE-20260718-12・2026-07-18 承認）
+
+数値の正本は chart-panels.json（labLowerMedian・panelRect・samplingRect・decodedRgbaSha256 込み）。本表は人間可読の転記で、freeze JSON 作成時に chart-panels.json から機械再取込して本表と照合する。
+
+| chart | panelIndex | canonicalLabel | approvedHex | 由来 |
+|---|---|---|---|---|
+| red | 0 | ピンク | #f78192 | B（チャート抽出値） |
+| red | 1 | レッド | #e45c61 | B（チャート抽出値） |
+| red | 2 | ローズピンク | #a93f74 | B（チャート抽出値） |
+| red | 3 | パープル | #a855a2 | B（チャート抽出値） |
+| red | 4 | ペールピンク | #e7cbda | B（チャート抽出値） |
+| red | 5 | コーラルピンク | #ef9f7e | B（チャート抽出値） |
+| yellow | 0 | ゴールド | #c8925f | B（チャート抽出値） |
+| yellow | 1 | オレンジ | #e59134 | B（チャート抽出値） |
+| yellow | 2 | ライムイエロー | #f0e15c | B（チャート抽出値） |
+| yellow | 3 | ペールイエロー | #f4ebb8 | B（チャート抽出値） |
+| yellow | 4 | ブリック | #885854 | B（チャート抽出値） |
+| yellow | 5 | ピスタチオ | #94ad79 | B（チャート抽出値） |
+| brown | 0 | ブラック | #41403d | B（チャート抽出値） |
+| brown | 1 | グレージュ | #82756b | B（チャート抽出値） |
+| brown | 2 | ブラウン | #935a45 | B（チャート抽出値） |
+| brown | 3 | チャコールグレー | #616062 | B（チャート抽出値） |
+| brown | 4 | アイボリー | #ece7dd | B（チャート抽出値） |
+| brown | 5 | エトープ | #a48e73 | B（チャート抽出値） |
+| blue | 0 | ライトブルー | #b0ece8 | B（チャート抽出値） |
+| blue | 1 | シエルブルー | #6cbacf | B（チャート抽出値） |
+| blue | 2 | ミストブルー | #7aaabf | B（チャート抽出値） |
+| blue | 3 | アイスグレー | #cbcdcc | B（チャート抽出値） |
+| blue | 4 | ロイヤルブルー | #445fc1 | B（チャート抽出値） |
+| blue | 5 | ネイビー | #3c4d61 | B（チャート抽出値） |
+| chevre | 0 | ペールグレージュ | #9e8e89 | B2（P3→sRGB変換） |
+| chevre | 1 | グリーン | #00894c | B2（P3→sRGB変換）・sRGB色域外→C圧縮 |
+| chevre | 2 | ラベンダー | #8089e3 | B2（P3→sRGB変換） |
+
+補足: アイボリーの approvedHex はチャート由来の #ece7dd だが、チャーム表示上の DISPLAY_COLORS では改訂13 §5-6 のとおり referenceIvory（frenchie実物色基準）へ差し替えられる（COLORS 正本値とUI表示の二層構造は変更なし）。

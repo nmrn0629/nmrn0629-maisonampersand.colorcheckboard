@@ -1,0 +1,1145 @@
+{
+ "generatedAt": "2026-07-18",
+ "samplingRule": {
+  "marginXFrac": 0.08,
+  "topFrac": 0.12,
+  "bottomFrac": 0.58,
+  "note": "samplingRect = panelRect内 上12%〜58%の帯・左右8%マージン(下部の色名文字を回避)。exclusionMask=全0(除外なし)前提"
+ },
+ "boundaryRule": {
+  "method": "lab-adjacent-diff-transition-band-v1",
+  "diffThreshold": 1.8,
+  "searchHalfFrac": 0.08,
+  "note": "予想境界±8%窓内で隣接行/列平均のLab ΔE>閾値の範囲を遷移帯とし、帯全体をパネル外として除外"
+ },
+ "charts": [
+  {
+   "key": "red",
+   "pngFile": "レッド系.png",
+   "width": 1080,
+   "height": 1072,
+   "decodedRgbaSha256": "3086023179255b2fec0768ba5882463813e1ffa78a7166cc3d1b2aab2e9625c2",
+   "colorMode": "srgb",
+   "boundaries": {
+    "yBands": [
+     {
+      "band": [
+       317,
+       352
+      ],
+      "maxDiff": 11.5,
+      "windowMaxDiff": 11.5
+     },
+     {
+      "band": [
+       656,
+       726
+      ],
+      "maxDiff": 15.7,
+      "windowMaxDiff": 15.7
+     }
+    ],
+    "xBands": [
+     {
+      "band": [
+       537,
+       540
+      ],
+      "maxDiff": 6.8,
+      "windowMaxDiff": 6.8
+     }
+    ]
+   },
+   "panels": [
+    {
+     "panelIndex": 0,
+     "canonicalLabel": "ピンク",
+     "panelRect": {
+      "x": 0,
+      "y": 0,
+      "w": 537,
+      "h": 317
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 38,
+      "w": 451,
+      "h": 146
+     },
+     "straight": {
+      "labLowerMedian": [
+       67.715,
+       46.805,
+       11.613
+      ],
+      "sRGB": [
+       247,
+       129,
+       146
+      ],
+      "hex": "#f78192",
+      "acceptedPixelCount": 65846,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/red-0.png"
+    },
+    {
+     "panelIndex": 1,
+     "canonicalLabel": "レッド",
+     "panelRect": {
+      "x": 541,
+      "y": 0,
+      "w": 539,
+      "h": 317
+     },
+     "samplingRect": {
+      "x": 584,
+      "y": 38,
+      "w": 453,
+      "h": 146
+     },
+     "straight": {
+      "labLowerMedian": [
+       57.109,
+       53.563,
+       24.648
+      ],
+      "sRGB": [
+       228,
+       92,
+       97
+      ],
+      "hex": "#e45c61",
+      "acceptedPixelCount": 66138,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/red-1.png"
+    },
+    {
+     "panelIndex": 2,
+     "canonicalLabel": "ローズピンク",
+     "panelRect": {
+      "x": 0,
+      "y": 353,
+      "w": 537,
+      "h": 303
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 389,
+      "w": 451,
+      "h": 140
+     },
+     "straight": {
+      "labLowerMedian": [
+       43.197,
+       48.611,
+       -7.584
+      ],
+      "sRGB": [
+       169,
+       63,
+       116
+      ],
+      "hex": "#a93f74",
+      "acceptedPixelCount": 63140,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/red-2.png"
+    },
+    {
+     "panelIndex": 3,
+     "canonicalLabel": "パープル",
+     "panelRect": {
+      "x": 541,
+      "y": 353,
+      "w": 539,
+      "h": 303
+     },
+     "samplingRect": {
+      "x": 584,
+      "y": 389,
+      "w": 453,
+      "h": 140
+     },
+     "straight": {
+      "labLowerMedian": [
+       48.798,
+       44.714,
+       -27.009
+      ],
+      "sRGB": [
+       168,
+       85,
+       162
+      ],
+      "hex": "#a855a2",
+      "acceptedPixelCount": 63420,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/red-3.png"
+    },
+    {
+     "panelIndex": 4,
+     "canonicalLabel": "ペールピンク",
+     "panelRect": {
+      "x": 0,
+      "y": 727,
+      "w": 537,
+      "h": 345
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 768,
+      "w": 451,
+      "h": 159
+     },
+     "straight": {
+      "labLowerMedian": [
+       84.362,
+       12.25,
+       -3.838
+      ],
+      "sRGB": [
+       231,
+       203,
+       218
+      ],
+      "hex": "#e7cbda",
+      "acceptedPixelCount": 71709,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/red-4.png"
+    },
+    {
+     "panelIndex": 5,
+     "canonicalLabel": "コーラルピンク",
+     "panelRect": {
+      "x": 541,
+      "y": 727,
+      "w": 539,
+      "h": 345
+     },
+     "samplingRect": {
+      "x": 584,
+      "y": 768,
+      "w": 453,
+      "h": 159
+     },
+     "straight": {
+      "labLowerMedian": [
+       72.782,
+       25.905,
+       29.395
+      ],
+      "sRGB": [
+       239,
+       159,
+       126
+      ],
+      "hex": "#ef9f7e",
+      "acceptedPixelCount": 72027,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/red-5.png"
+    }
+   ]
+  },
+  {
+   "key": "yellow",
+   "pngFile": "イエロー系.png",
+   "width": 1080,
+   "height": 1080,
+   "decodedRgbaSha256": "3a2baf48166c574315eba0cd6ebd12ae4b950a3400321f591faa9f8ff7895e74",
+   "colorMode": "srgb",
+   "boundaries": {
+    "yBands": [
+     {
+      "band": [
+       293,
+       362
+      ],
+      "maxDiff": 23.7,
+      "windowMaxDiff": 23.7
+     },
+     {
+      "band": [
+       656,
+       732
+      ],
+      "maxDiff": 10.3,
+      "windowMaxDiff": 10.3
+     }
+    ],
+    "xBands": [
+     {
+      "band": [
+       539,
+       541
+      ],
+      "maxDiff": 7.9,
+      "windowMaxDiff": 7.9
+     }
+    ]
+   },
+   "panels": [
+    {
+     "panelIndex": 0,
+     "canonicalLabel": "ゴールド",
+     "panelRect": {
+      "x": 0,
+      "y": 0,
+      "w": 539,
+      "h": 293
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 35,
+      "w": 453,
+      "h": 135
+     },
+     "straight": {
+      "labLowerMedian": [
+       64.711,
+       14.607,
+       35.11
+      ],
+      "sRGB": [
+       200,
+       146,
+       95
+      ],
+      "hex": "#c8925f",
+      "acceptedPixelCount": 61155,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/yellow-0.png"
+    },
+    {
+     "panelIndex": 1,
+     "canonicalLabel": "オレンジ",
+     "panelRect": {
+      "x": 542,
+      "y": 0,
+      "w": 538,
+      "h": 293
+     },
+     "samplingRect": {
+      "x": 585,
+      "y": 35,
+      "w": 452,
+      "h": 135
+     },
+     "straight": {
+      "labLowerMedian": [
+       67.384,
+       24.47,
+       59.581
+      ],
+      "sRGB": [
+       229,
+       145,
+       52
+      ],
+      "hex": "#e59134",
+      "acceptedPixelCount": 61020,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/yellow-1.png"
+    },
+    {
+     "panelIndex": 2,
+     "canonicalLabel": "ライムイエロー",
+     "panelRect": {
+      "x": 0,
+      "y": 363,
+      "w": 539,
+      "h": 293
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 398,
+      "w": 453,
+      "h": 135
+     },
+     "straight": {
+      "labLowerMedian": [
+       88.483,
+       -10.14,
+       64.822
+      ],
+      "sRGB": [
+       240,
+       225,
+       92
+      ],
+      "hex": "#f0e15c",
+      "acceptedPixelCount": 61155,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/yellow-2.png"
+    },
+    {
+     "panelIndex": 3,
+     "canonicalLabel": "ペールイエロー",
+     "panelRect": {
+      "x": 542,
+      "y": 363,
+      "w": 538,
+      "h": 293
+     },
+     "samplingRect": {
+      "x": 585,
+      "y": 398,
+      "w": 452,
+      "h": 135
+     },
+     "straight": {
+      "labLowerMedian": [
+       92.587,
+       -4.899,
+       25.926
+      ],
+      "sRGB": [
+       244,
+       235,
+       184
+      ],
+      "hex": "#f4ebb8",
+      "acceptedPixelCount": 61020,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/yellow-3.png"
+    },
+    {
+     "panelIndex": 4,
+     "canonicalLabel": "ブリック",
+     "panelRect": {
+      "x": 0,
+      "y": 733,
+      "w": 539,
+      "h": 347
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 775,
+      "w": 453,
+      "h": 159
+     },
+     "straight": {
+      "labLowerMedian": [
+       42.441,
+       19.666,
+       10.196
+      ],
+      "sRGB": [
+       136,
+       88,
+       84
+      ],
+      "hex": "#885854",
+      "acceptedPixelCount": 72027,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/yellow-4.png"
+    },
+    {
+     "panelIndex": 5,
+     "canonicalLabel": "ピスタチオ",
+     "panelRect": {
+      "x": 542,
+      "y": 733,
+      "w": 538,
+      "h": 347
+     },
+     "samplingRect": {
+      "x": 585,
+      "y": 775,
+      "w": 452,
+      "h": 159
+     },
+     "straight": {
+      "labLowerMedian": [
+       67.647,
+       -18.096,
+       23.828
+      ],
+      "sRGB": [
+       148,
+       173,
+       121
+      ],
+      "hex": "#94ad79",
+      "acceptedPixelCount": 71868,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/yellow-5.png"
+    }
+   ]
+  },
+  {
+   "key": "brown",
+   "pngFile": "ブラウン系.png",
+   "width": 1079,
+   "height": 1079,
+   "decodedRgbaSha256": "a7640aa3aef12ba636ad62b29f2ff17d6d52d701df9bb03958d43a5514ab7386",
+   "colorMode": "srgb",
+   "boundaries": {
+    "yBands": [
+     {
+      "band": [
+       297,
+       360
+      ],
+      "maxDiff": 5.5,
+      "windowMaxDiff": 5.5
+     },
+     {
+      "band": [
+       666,
+       728
+      ],
+      "maxDiff": 12.1,
+      "windowMaxDiff": 12.1
+     }
+    ],
+    "xBands": [
+     {
+      "band": [
+       537,
+       542
+      ],
+      "maxDiff": 3.5,
+      "windowMaxDiff": 3.5
+     }
+    ]
+   },
+   "panels": [
+    {
+     "panelIndex": 0,
+     "canonicalLabel": "ブラック",
+     "panelRect": {
+      "x": 0,
+      "y": 0,
+      "w": 537,
+      "h": 297
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 36,
+      "w": 451,
+      "h": 136
+     },
+     "straight": {
+      "labLowerMedian": [
+       27.031,
+       -0.439,
+       2.169
+      ],
+      "sRGB": [
+       65,
+       64,
+       61
+      ],
+      "hex": "#41403d",
+      "acceptedPixelCount": 61336,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/brown-0.png"
+    },
+    {
+     "panelIndex": 1,
+     "canonicalLabel": "グレージュ",
+     "panelRect": {
+      "x": 543,
+      "y": 0,
+      "w": 536,
+      "h": 297
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 36,
+      "w": 450,
+      "h": 136
+     },
+     "straight": {
+      "labLowerMedian": [
+       50.152,
+       3.21,
+       7.315
+      ],
+      "sRGB": [
+       130,
+       117,
+       107
+      ],
+      "hex": "#82756b",
+      "acceptedPixelCount": 61200,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/brown-1.png"
+    },
+    {
+     "panelIndex": 2,
+     "canonicalLabel": "ブラウン",
+     "panelRect": {
+      "x": 0,
+      "y": 361,
+      "w": 537,
+      "h": 305
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 398,
+      "w": 451,
+      "h": 140
+     },
+     "straight": {
+      "labLowerMedian": [
+       44.156,
+       21.204,
+       21.799
+      ],
+      "sRGB": [
+       147,
+       90,
+       69
+      ],
+      "hex": "#935a45",
+      "acceptedPixelCount": 63140,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/brown-2.png"
+    },
+    {
+     "panelIndex": 3,
+     "canonicalLabel": "チャコールグレー",
+     "panelRect": {
+      "x": 543,
+      "y": 361,
+      "w": 536,
+      "h": 305
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 398,
+      "w": 450,
+      "h": 140
+     },
+     "straight": {
+      "labLowerMedian": [
+       40.731,
+       0.793,
+       -0.975
+      ],
+      "sRGB": [
+       97,
+       96,
+       98
+      ],
+      "hex": "#616062",
+      "acceptedPixelCount": 63000,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/brown-3.png"
+    },
+    {
+     "panelIndex": 4,
+     "canonicalLabel": "アイボリー",
+     "panelRect": {
+      "x": 0,
+      "y": 729,
+      "w": 537,
+      "h": 350
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 771,
+      "w": 451,
+      "h": 161
+     },
+     "straight": {
+      "labLowerMedian": [
+       91.807,
+       -0.032,
+       5.574
+      ],
+      "sRGB": [
+       236,
+       231,
+       221
+      ],
+      "hex": "#ece7dd",
+      "acceptedPixelCount": 72611,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/brown-4.png"
+    },
+    {
+     "panelIndex": 5,
+     "canonicalLabel": "エトープ",
+     "panelRect": {
+      "x": 543,
+      "y": 729,
+      "w": 536,
+      "h": 350
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 771,
+      "w": 450,
+      "h": 161
+     },
+     "straight": {
+      "labLowerMedian": [
+       60.318,
+       4.033,
+       17.451
+      ],
+      "sRGB": [
+       164,
+       142,
+       115
+      ],
+      "hex": "#a48e73",
+      "acceptedPixelCount": 72450,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/brown-5.png"
+    }
+   ]
+  },
+  {
+   "key": "blue",
+   "pngFile": "ブルー系.png",
+   "width": 1076,
+   "height": 1076,
+   "decodedRgbaSha256": "968f6b6a5ada6bb4ab4e8a31a8902fa636a5ea4d6ea401a84ef25d115c2fe9cc",
+   "colorMode": "srgb",
+   "boundaries": {
+    "yBands": [
+     {
+      "band": [
+       346,
+       352
+      ],
+      "maxDiff": 3.4,
+      "windowMaxDiff": 3.4
+     },
+     {
+      "band": [
+       648,
+       724
+      ],
+      "maxDiff": 14.6,
+      "windowMaxDiff": 14.6
+     }
+    ],
+    "xBands": [
+     {
+      "band": [
+       536,
+       542
+      ],
+      "maxDiff": 5.1,
+      "windowMaxDiff": 5.1
+     }
+    ]
+   },
+   "panels": [
+    {
+     "panelIndex": 0,
+     "canonicalLabel": "ライトブルー",
+     "panelRect": {
+      "x": 0,
+      "y": 0,
+      "w": 536,
+      "h": 346
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 42,
+      "w": 450,
+      "h": 159
+     },
+     "straight": {
+      "labLowerMedian": [
+       89.333,
+       -19.436,
+       -4.468
+      ],
+      "sRGB": [
+       176,
+       236,
+       232
+      ],
+      "hex": "#b0ece8",
+      "acceptedPixelCount": 71550,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/blue-0.png"
+    },
+    {
+     "panelIndex": 1,
+     "canonicalLabel": "シエルブルー",
+     "panelRect": {
+      "x": 543,
+      "y": 0,
+      "w": 533,
+      "h": 346
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 42,
+      "w": 447,
+      "h": 159
+     },
+     "straight": {
+      "labLowerMedian": [
+       71.425,
+       -18.411,
+       -18.034
+      ],
+      "sRGB": [
+       108,
+       186,
+       207
+      ],
+      "hex": "#6cbacf",
+      "acceptedPixelCount": 71073,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/blue-1.png"
+    },
+    {
+     "panelIndex": 2,
+     "canonicalLabel": "ミストブルー",
+     "panelRect": {
+      "x": 0,
+      "y": 353,
+      "w": 536,
+      "h": 295
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 388,
+      "w": 450,
+      "h": 136
+     },
+     "straight": {
+      "labLowerMedian": [
+       67.1,
+       -10.664,
+       -15.97
+      ],
+      "sRGB": [
+       122,
+       170,
+       191
+      ],
+      "hex": "#7aaabf",
+      "acceptedPixelCount": 61200,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/blue-2.png"
+    },
+    {
+     "panelIndex": 3,
+     "canonicalLabel": "アイスグレー",
+     "panelRect": {
+      "x": 543,
+      "y": 353,
+      "w": 533,
+      "h": 295
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 388,
+      "w": 447,
+      "h": 136
+     },
+     "straight": {
+      "labLowerMedian": [
+       82.227,
+       -0.869,
+       0.256
+      ],
+      "sRGB": [
+       203,
+       205,
+       204
+      ],
+      "hex": "#cbcdcc",
+      "acceptedPixelCount": 60792,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/blue-3.png"
+    },
+    {
+     "panelIndex": 4,
+     "canonicalLabel": "ロイヤルブルー",
+     "panelRect": {
+      "x": 0,
+      "y": 725,
+      "w": 536,
+      "h": 351
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 767,
+      "w": 450,
+      "h": 162
+     },
+     "straight": {
+      "labLowerMedian": [
+       43.169,
+       21.729,
+       -54.438
+      ],
+      "sRGB": [
+       68,
+       95,
+       193
+      ],
+      "hex": "#445fc1",
+      "acceptedPixelCount": 72900,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/blue-4.png"
+    },
+    {
+     "panelIndex": 5,
+     "canonicalLabel": "ネイビー",
+     "panelRect": {
+      "x": 543,
+      "y": 725,
+      "w": 533,
+      "h": 351
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 767,
+      "w": 447,
+      "h": 162
+     },
+     "straight": {
+      "labLowerMedian": [
+       32.174,
+       -1.18,
+       -13.475
+      ],
+      "sRGB": [
+       60,
+       77,
+       97
+      ],
+      "hex": "#3c4d61",
+      "acceptedPixelCount": 72414,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/blue-5.png"
+    }
+   ]
+  },
+  {
+   "key": "chevre",
+   "pngFile": "newcolor-chevre.png",
+   "width": 1080,
+   "height": 1081,
+   "decodedRgbaSha256": "fedc97c2ac6389580cde805aa4a71499069e5e1c7e582499af6f48aa5e69e5b9",
+   "colorMode": "p3",
+   "boundaries": {
+    "yBands": [
+     {
+      "band": [
+       477,
+       542
+      ],
+      "maxDiff": 10.8,
+      "windowMaxDiff": 10.8
+     }
+    ],
+    "xBands": [
+     {
+      "band": [
+       535,
+       542
+      ],
+      "maxDiff": 38.3,
+      "windowMaxDiff": 38.3
+     }
+    ]
+   },
+   "panels": [
+    {
+     "panelIndex": 0,
+     "canonicalLabel": "ペールグレージュ",
+     "panelRect": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 477
+     },
+     "samplingRect": {
+      "x": 86,
+      "y": 57,
+      "w": 908,
+      "h": 220
+     },
+     "straight": {
+      "labLowerMedian": [
+       60.178,
+       3.963,
+       4.429
+      ],
+      "sRGB": [
+       156,
+       142,
+       137
+      ],
+      "hex": "#9c8e89",
+      "acceptedPixelCount": 199760,
+      "gamutCompressed": false
+     },
+     "p3Converted": {
+      "labLowerMedian": [
+       60.262,
+       5.202,
+       5.006
+      ],
+      "sRGB": [
+       158,
+       142,
+       137
+      ],
+      "hex": "#9e8e89",
+      "acceptedPixelCount": 199760,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/chevre-0.png"
+    },
+    {
+     "panelIndex": 1,
+     "canonicalLabel": "グリーン",
+     "panelRect": {
+      "x": 0,
+      "y": 543,
+      "w": 535,
+      "h": 538
+     },
+     "samplingRect": {
+      "x": 43,
+      "y": 608,
+      "w": 449,
+      "h": 247
+     },
+     "straight": {
+      "labLowerMedian": [
+       50.723,
+       -40.147,
+       24.37
+      ],
+      "sRGB": [
+       49,
+       137,
+       77
+      ],
+      "hex": "#31894d",
+      "acceptedPixelCount": 110903,
+      "gamutCompressed": false
+     },
+     "p3Converted": {
+      "labLowerMedian": [
+       50.149,
+       -52.44,
+       27.137
+      ],
+      "sRGB": [
+       0,
+       137,
+       76
+      ],
+      "hex": "#00894c",
+      "acceptedPixelCount": 110903,
+      "gamutCompressed": true
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/chevre-1.png"
+    },
+    {
+     "panelIndex": 2,
+     "canonicalLabel": "ラベンダー",
+     "panelRect": {
+      "x": 543,
+      "y": 543,
+      "w": 537,
+      "h": 538
+     },
+     "samplingRect": {
+      "x": 586,
+      "y": 608,
+      "w": 451,
+      "h": 247
+     },
+     "straight": {
+      "labLowerMedian": [
+       59.784,
+       18.198,
+       -43.565
+      ],
+      "sRGB": [
+       130,
+       137,
+       221
+      ],
+      "hex": "#8289dd",
+      "acceptedPixelCount": 111397,
+      "gamutCompressed": false
+     },
+     "p3Converted": {
+      "labLowerMedian": [
+       60.053,
+       19.402,
+       -46.659
+      ],
+      "sRGB": [
+       128,
+       137,
+       227
+      ],
+      "hex": "#8089e3",
+      "acceptedPixelCount": 111397,
+      "gamutCompressed": false
+     },
+     "uniformityIssues": [],
+     "thumb": "thumbs/chevre-2.png"
+    }
+   ]
+  }
+ ]
+}
