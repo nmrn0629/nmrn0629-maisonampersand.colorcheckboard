@@ -449,6 +449,13 @@
       lastPoint: null,
       manualRevision: 0,
       grainResource: null,
+      productionGrainGeneration: 0,
+      productionGrainWorker: null,
+      productionGrainReject: null,
+      oracleGrainCache: new Map(),
+      oracleGeneration: 0,
+      oracleWorker: null,
+      oracleReject: null,
       referenceIvoryResource: null,
       operationSerial: 0,
       operation: null,
@@ -838,11 +845,196 @@
       });
     }
 
+    const STRAIGHT_PNG_MARKER = "charm-prep-straight-rgba\u0000" + TOOL_VERSION;
+
+    let pngCrcTable = null;
+
+    function pngCrc32(bytes) {
+      if (!pngCrcTable) {
+        pngCrcTable = new Uint32Array(256);
+        for (let n = 0; n < 256; n += 1) {
+          let value = n;
+          for (let bit = 0; bit < 8; bit += 1) value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+          pngCrcTable[n] = value >>> 0;
+        }
+      }
+      let crc = 0xffffffff;
+      for (let index = 0; index < bytes.length; index += 1) crc = pngCrcTable[(crc ^ bytes[index]) & 255] ^ (crc >>> 8);
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    function pngUint32(value) {
+      const bytes = new Uint8Array(4);
+      new DataView(bytes.buffer).setUint32(0, value >>> 0, false);
+      return bytes;
+    }
+
+    function concatByteArrays(parts, totalLength) {
+      const length = totalLength === undefined ? parts.reduce(function (sum, part) { return sum + part.byteLength; }, 0) : totalLength;
+      const output = new Uint8Array(length);
+      let offset = 0;
+      parts.forEach(function (part) { output.set(part, offset); offset += part.byteLength; });
+      if (offset !== length) throw new Error("byte配列長が一致しません");
+      return output;
+    }
+
+    function pngChunk(type, data) {
+      if (!/^[A-Za-z]{4}$/.test(type)) throw new Error("PNGチャンク型が不正です");
+      const typeBytes = new TextEncoder().encode(type);
+      const body = data || new Uint8Array(0);
+      const crcInput = concatByteArrays([typeBytes, body]);
+      return concatByteArrays([pngUint32(body.byteLength), typeBytes, body, pngUint32(pngCrc32(crcInput))]);
+    }
+
+    function paethPredictor(a, b, c) {
+      const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+      return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+    }
+
+    function decoderPaethPredictor(left, up, upperLeft) {
+      const estimate = left + up - upperLeft;
+      const leftDistance = Math.abs(estimate - left);
+      const upDistance = Math.abs(estimate - up);
+      const cornerDistance = Math.abs(estimate - upperLeft);
+      if (leftDistance <= upDistance && leftDistance <= cornerDistance) return left;
+      if (upDistance <= cornerDistance) return up;
+      return upperLeft;
+    }
+
+    function filterStraightRgba(rgba, width, height) {
+      const stride = width * 4;
+      const output = new Uint8Array((stride + 1) * height);
+      const candidates = Array.from({ length: 5 }, function () { return new Uint8Array(stride); });
+      for (let y = 0; y < height; y += 1) {
+        const rowOffset = y * stride, previousOffset = (y - 1) * stride;
+        let bestType = 0, bestScore = Infinity;
+        for (let type = 0; type <= 4; type += 1) {
+          const candidate = candidates[type];
+          let score = 0;
+          for (let x = 0; x < stride; x += 1) {
+            const raw = rgba[rowOffset + x];
+            const left = x >= 4 ? rgba[rowOffset + x - 4] : 0;
+            const up = y > 0 ? rgba[previousOffset + x] : 0;
+            const upperLeft = y > 0 && x >= 4 ? rgba[previousOffset + x - 4] : 0;
+            const predictor = type === 0 ? 0 : type === 1 ? left : type === 2 ? up : type === 3 ? Math.floor((left + up) / 2) : paethPredictor(left, up, upperLeft);
+            const value = (raw - predictor + 256) & 255;
+            candidate[x] = value;
+            score += value < 128 ? value : 256 - value;
+          }
+          if (score < bestScore) { bestScore = score; bestType = type; }
+        }
+        const destination = y * (stride + 1);
+        output[destination] = bestType;
+        output.set(candidates[bestType], destination + 1);
+      }
+      return output;
+    }
+
+    async function transformStreamBytes(bytes, format, decompress, limit) {
+      const Constructor = decompress ? globalThis.DecompressionStream : globalThis.CompressionStream;
+      if (typeof Constructor !== "function") throw new Error((decompress ? "DecompressionStream" : "CompressionStream") + "に対応したブラウザが必要です");
+      const reader = new Blob([bytes]).stream().pipeThrough(new Constructor(format)).getReader();
+      const chunks = [];
+      let total = 0;
+      while (true) {
+        const result = await reader.read();
+        if (result.done) break;
+        total += result.value.byteLength;
+        if (limit !== undefined && total > limit) { await reader.cancel(); throw new Error("PNG展開サイズが上限を超えています"); }
+        chunks.push(result.value);
+      }
+      return concatByteArrays(chunks, total);
+    }
+
     async function imageDataToBlob(imageData) {
-      const canvas = document.createElement("canvas");
-      setCanvasSize(canvas, imageData.width, imageData.height);
-      getContext(canvas).putImageData(imageData, 0, 0);
-      return canvasToBlob(canvas, "image/png");
+      if (!imageData || !Number.isInteger(imageData.width) || !Number.isInteger(imageData.height)
+        || imageData.width < 1 || imageData.height < 1 || imageData.width > ARCHIVE_MAX_IMAGE_DIMENSION
+        || imageData.height > ARCHIVE_MAX_IMAGE_DIMENSION || imageData.data.length !== imageData.width * imageData.height * 4) {
+        throw new Error("PNG書出しImageDataが不正です");
+      }
+      const filtered = filterStraightRgba(imageData.data, imageData.width, imageData.height);
+      const compressed = await transformStreamBytes(filtered, "deflate", false);
+      const ihdr = new Uint8Array(13), view = new DataView(ihdr.buffer);
+      view.setUint32(0, imageData.width, false); view.setUint32(4, imageData.height, false);
+      ihdr[8] = 8; ihdr[9] = 6; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+      const png = concatByteArrays([
+        new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
+        pngChunk("IHDR", ihdr),
+        pngChunk("tEXt", new TextEncoder().encode(STRAIGHT_PNG_MARKER)),
+        pngChunk("IDAT", compressed),
+        pngChunk("IEND", new Uint8Array(0))
+      ]);
+      if (png.byteLength > ARCHIVE_MAX_ENTRY_BYTES) throw new Error("PNG書出しサイズが上限を超えています");
+      return new Blob([png], { type: "image/png" });
+    }
+
+    function parsePngRgba(bytes, label) {
+      const name = label || "PNG";
+      if (!(bytes instanceof Uint8Array) || bytes.byteLength < 57 || bytes.byteLength > ARCHIVE_MAX_ENTRY_BYTES) throw new Error(name + " のファイルサイズが不正です");
+      const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+      if (!signature.every(function (value, index) { return bytes[index] === value; })) throw new Error(name + " のPNG署名が不正です");
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      let offset = 8, width = 0, height = 0, sawIhdr = false, sawIdat = false, idatEnded = false, sawIend = false, markedStraight = false;
+      const idat = [];
+      while (offset < bytes.byteLength) {
+        if (offset + 12 > bytes.byteLength) throw new Error(name + " のPNGチャンクが切れています");
+        const length = view.getUint32(offset, false);
+        if (length > ARCHIVE_MAX_ENTRY_BYTES || offset + 12 + length > bytes.byteLength) throw new Error(name + " のPNGチャンク長が不正です");
+        const typeOffset = offset + 4, dataOffset = offset + 8, crcOffset = dataOffset + length;
+        const type = String.fromCharCode(bytes[typeOffset], bytes[typeOffset + 1], bytes[typeOffset + 2], bytes[typeOffset + 3]);
+        const crcInput = bytes.subarray(typeOffset, crcOffset);
+        if (pngCrc32(crcInput) !== view.getUint32(crcOffset, false)) throw new Error(name + " の" + type + " CRCが不正です");
+        const data = bytes.subarray(dataOffset, crcOffset);
+        if (!sawIhdr) {
+          if (type !== "IHDR" || length !== 13) throw new Error(name + " の先頭チャンクがIHDRではありません");
+          width = new DataView(data.buffer, data.byteOffset, data.byteLength).getUint32(0, false);
+          height = new DataView(data.buffer, data.byteOffset, data.byteLength).getUint32(4, false);
+          if (width < 1 || height < 1 || width > ARCHIVE_MAX_IMAGE_DIMENSION || height > ARCHIVE_MAX_IMAGE_DIMENSION
+            || data[8] !== 8 || data[9] !== 6 || data[10] !== 0 || data[11] !== 0 || data[12] !== 0) throw new Error(name + " は8-bit RGBA・非interlace PNGではありません");
+          sawIhdr = true;
+        } else if (type === "IHDR") throw new Error(name + " にIHDRが重複しています");
+        else if (type === "IDAT") {
+          if (idatEnded || sawIend) throw new Error(name + " のIDAT順序が不正です");
+          sawIdat = true; idat.push(data);
+        } else {
+          if (sawIdat) idatEnded = true;
+          if (type === "IEND") {
+            if (length !== 0 || !sawIdat || sawIend) throw new Error(name + " のIENDが不正です");
+            sawIend = true;
+          } else if (type === "tEXt") {
+            if (new TextDecoder("latin1").decode(data) === STRAIGHT_PNG_MARKER) markedStraight = true;
+          } else if ((bytes[typeOffset] & 32) === 0) throw new Error(name + " に未対応の必須チャンク" + type + "があります");
+        }
+        offset = crcOffset + 4;
+        if (sawIend && offset !== bytes.byteLength) throw new Error(name + " のIEND後にデータがあります");
+      }
+      if (!sawIhdr || !sawIdat || !sawIend) throw new Error(name + " の必須チャンクが不足しています");
+      return { width: width, height: height, idat: concatByteArrays(idat), markedStraight: markedStraight };
+    }
+
+    async function decodeStraightPngBlob(blob, label, requireMarker) {
+      if (!blob || blob.size < 1 || blob.size > ARCHIVE_MAX_ENTRY_BYTES) throw new Error((label || "PNG") + " のサイズが不正です");
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const parsed = parsePngRgba(bytes, label);
+      if (requireMarker && !parsed.markedStraight) throw new Error((label || "PNG") + " はstraight RGBA出力ではありません");
+      const stride = parsed.width * 4, expected = (stride + 1) * parsed.height;
+      const filtered = await transformStreamBytes(parsed.idat, "deflate", true, expected);
+      if (filtered.byteLength !== expected) throw new Error((label || "PNG") + " の展開サイズが寸法と一致しません");
+      const rgba = new Uint8ClampedArray(stride * parsed.height);
+      for (let y = 0; y < parsed.height; y += 1) {
+        const sourceOffset = y * (stride + 1), filter = filtered[sourceOffset];
+        if (filter > 4) throw new Error((label || "PNG") + " のfilter種別が不正です");
+        const destinationOffset = y * stride, previousOffset = (y - 1) * stride;
+        for (let x = 0; x < stride; x += 1) {
+          const encoded = filtered[sourceOffset + 1 + x];
+          const left = x >= 4 ? rgba[destinationOffset + x - 4] : 0;
+          const up = y > 0 ? rgba[previousOffset + x] : 0;
+          const upperLeft = y > 0 && x >= 4 ? rgba[previousOffset + x - 4] : 0;
+          const predictor = filter === 0 ? 0 : filter === 1 ? left : filter === 2 ? up : filter === 3 ? Math.floor((left + up) / 2) : decoderPaethPredictor(left, up, upperLeft);
+          rgba[destinationOffset + x] = (encoded + predictor) & 255;
+        }
+      }
+      return { imageData: new ImageData(rgba, parsed.width, parsed.height), markedStraight: parsed.markedStraight };
     }
 
     async function blobToImageData(blob) {
@@ -858,12 +1050,12 @@
     }
 
     async function decodedRgbaHash(blob) {
-      const decoded = await blobToImageData(blob);
+      const decoded = (await decodeStraightPngBlob(blob, "artifact PNG", true)).imageData;
       return sha256(decoded.data);
     }
 
     async function decodeArtifactSnapshot(blob) {
-      const imageData = await blobToImageData(blob);
+      const imageData = (await decodeStraightPngBlob(blob, "artifact PNG", true)).imageData;
       return {
         imageData: imageData,
         width: imageData.width,
@@ -918,7 +1110,7 @@
         if (hashKind === "decoded" && decodedSha256 !== expectedSha256) {
           throw new Error(path + " decoded RGBA SHA-256不一致");
         }
-        return { path: path, fileSha256: fileSha256, decodedSha256: decodedSha256, imageData: imageData };
+        return { path: path, fileSha256: fileSha256, decodedSha256: decodedSha256, imageData: imageData, bytes: bytes };
       } finally {
         if (bitmap.close) bitmap.close();
       }
@@ -986,13 +1178,18 @@
         "        map[index] = clamp(g0[index] / (sum / divisor), 1 - amp, 1 + amp);",
         "      }",
         "    }",
-        "    self.postMessage({ buffer: map.buffer }, [map.buffer]);",
-        "  } catch (error) { self.postMessage({ error: error && error.message ? error.message : String(error) }); }",
+        "    self.postMessage({ generation: input.generation, buffer: map.buffer }, [map.buffer]);",
+        "  } catch (error) { self.postMessage({ generation: event.data.generation, error: error && error.message ? error.message : String(error) }); }",
         "};"
       ].join("\n");
     }
 
-    async function exactMirrorBoxRatioMapMain(g0, width, height, radius, amp) {
+    async function exactMirrorBoxRatioMapMain(g0, width, height, radius, amp, generation, operationToken) {
+      function assertFresh() {
+        if (operationToken !== undefined) assertOperationToken(operationToken);
+        if (generation !== state.productionGrainGeneration) throw new Error("グレインmain-thread計算は新しい世代により中断されました");
+      }
+      assertFresh();
       const span = 2 * radius + 1, divisor = span * span;
       const map = new Float64Array(width * height);
       for (let y = 0; y < height; y += 1) {
@@ -1006,32 +1203,57 @@
           const index = y * width + x;
           map[index] = clamp(g0[index] / (sum / divisor), 1 - amp, 1 + amp);
         }
-        if ((y & 3) === 3) await new Promise(function (resolve) { setTimeout(resolve, 0); });
+        if ((y & 3) === 3) {
+          assertFresh();
+          await new Promise(function (resolve) { setTimeout(resolve, 0); });
+          assertFresh();
+        }
       }
+      assertFresh();
       return map;
     }
 
-    async function exactMirrorBoxRatioMap(g0, width, height, radius, amp) {
-      if (typeof Worker === "undefined") return exactMirrorBoxRatioMapMain(g0, width, height, radius, amp);
+    async function exactMirrorBoxRatioMap(g0, width, height, radius, amp, operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
+      const previousReject = state.productionGrainReject, previousWorker = state.productionGrainWorker;
+      state.productionGrainReject = null; state.productionGrainWorker = null;
+      if (previousReject) previousReject(new Error("グレイン計算は新しい世代により中断されました"));
+      if (previousWorker) previousWorker.terminate();
+      const generation = ++state.productionGrainGeneration;
+      if (typeof Worker === "undefined") return exactMirrorBoxRatioMapMain(g0, width, height, radius, amp, generation, operationToken);
       const url = URL.createObjectURL(new Blob([exactMirrorBoxWorkerSource()], { type: "text/javascript" }));
       let worker = null;
+      let timeoutId = null;
       try {
         worker = new Worker(url);
+        state.productionGrainWorker = worker;
         return await new Promise(function (resolve, reject) {
+          state.productionGrainReject = reject;
+          timeoutId = setTimeout(function () { reject(new Error("グレインWorkerが12分以内に完了しませんでした")); }, 12 * 60 * 1000);
           worker.onmessage = function (event) {
-            if (event.data && event.data.error) reject(new Error(event.data.error));
-            else resolve(new Float64Array(event.data.buffer));
+            try {
+              if (operationToken !== undefined) assertOperationToken(operationToken);
+              if (!event.data || event.data.generation !== generation || generation !== state.productionGrainGeneration) throw new Error("グレインWorker世代トークンが一致しません");
+              if (event.data.error) reject(new Error(event.data.error));
+              else resolve(new Float64Array(event.data.buffer));
+            } catch (error) { reject(error); }
           };
-          worker.onerror = function (event) { reject(new Error(event.message || "グレインWorkerが失敗しました")); };
-          worker.postMessage({ buffer: g0.buffer, width: width, height: height, radius: radius, amp: amp }, [g0.buffer]);
+          worker.onerror = function (event) {
+            try { if (operationToken !== undefined) assertOperationToken(operationToken); } catch (error) { return reject(error); }
+            reject(new Error(event.message || "グレインWorkerが失敗しました"));
+          };
+          worker.postMessage({ generation: generation, buffer: g0.buffer, width: width, height: height, radius: radius, amp: amp }, [g0.buffer]);
         });
       } finally {
+        if (timeoutId !== null) clearTimeout(timeoutId);
         if (worker) worker.terminate();
         URL.revokeObjectURL(url);
+        if (state.productionGrainWorker === worker) { state.productionGrainWorker = null; state.productionGrainReject = null; }
       }
     }
 
-    async function buildGrainResource(image, grainConfig, identity) {
+    async function buildGrainResource(image, grainConfig, identity, operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const width = image.width, height = image.height;
       const radius = grainConfig.grainRadiusPx;
       if (radius !== GRAIN_DEFAULTS.grainRadiusPx) {
@@ -1042,14 +1264,23 @@
         const offset = index * 4;
         g0[index] = luminance(image.data[offset], image.data[offset + 1], image.data[offset + 2]);
       }
-      const map = await exactMirrorBoxRatioMap(g0, width, height, radius, grainConfig.grainAmp);
+      const map = await exactMirrorBoxRatioMap(g0, width, height, radius, grainConfig.grainAmp, operationToken);
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       await new Promise(function (resolve) { setTimeout(resolve, 0); });
-      return { file: identity.file, sha256: identity.sha256, width: width, height: height, radius: radius, amp: grainConfig.grainAmp, map: map };
+      if (operationToken !== undefined) assertOperationToken(operationToken);
+      return {
+        file: identity.file, sha256: identity.sha256, width: width, height: height,
+        radius: radius, amp: grainConfig.grainAmp, map: map,
+        sourceImageData: cloneImageData(image),
+        rawBytes: identity.rawBytes ? identity.rawBytes.slice(0) : null
+      };
     }
 
-    async function loadGrainResource(grainConfig) {
+    async function loadGrainResource(grainConfig, operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const manifest = INPUT_MANIFEST.grain;
       const resource = await fetchImageResource(manifest.file, manifest.sha256);
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       if (state.grainResource
         && state.grainResource.file === manifest.file
         && state.grainResource.sha256 === resource.fileSha256
@@ -1057,15 +1288,19 @@
         && state.grainResource.amp === grainConfig.grainAmp
         && state.grainResource.width === resource.imageData.width
         && state.grainResource.height === resource.imageData.height) return state.grainResource;
-      state.grainResource = await buildGrainResource(resource.imageData, grainConfig, { file: manifest.file, sha256: resource.fileSha256 });
+      state.grainResource = await buildGrainResource(resource.imageData, grainConfig, { file: manifest.file, sha256: resource.fileSha256, rawBytes: resource.bytes }, operationToken);
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       return state.grainResource;
     }
 
-    async function buildVerificationGrainResource(grainBytes, grainConfig) {
+    async function buildVerificationGrainResource(grainBytes, grainConfig, operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const manifest = INPUT_MANIFEST.grain;
       if (!(grainBytes instanceof ArrayBuffer) || await sha256(grainBytes) !== manifest.sha256) throw new Error("verification grain SHA-256不一致");
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const image = await blobToImageData(new Blob([grainBytes], { type: mimeForSource(manifest.file) }));
-      return buildGrainResource(image, grainConfig, { file: manifest.file, sha256: manifest.sha256 });
+      if (operationToken !== undefined) assertOperationToken(operationToken);
+      return buildGrainResource(image, grainConfig, { file: manifest.file, sha256: manifest.sha256, rawBytes: grainBytes }, operationToken);
     }
 
     function hasLayerPixels(layer) {
@@ -1077,6 +1312,74 @@
       let count = 0;
       for (let i = 3; i < layer.data.length; i += 4) if (layer.data[i] === 255) count += 1;
       return count;
+    }
+
+    function validateHorseshoeManualKeep(layer) {
+      if (!layer || !Number.isInteger(layer.width) || !Number.isInteger(layer.height) || layer.data.length !== layer.width * layer.height * 4) {
+        return { pass: false, unionArea: 0, componentCount8: 0, reason: "manual-keep画像不正" };
+      }
+      const count = layer.width * layer.height, selected = new Uint8Array(count), visited = new Uint8Array(count);
+      let unionArea = 0, componentCount8 = 0;
+      for (let index = 0; index < count; index += 1) if (layer.data[index * 4 + 3] === 255) { selected[index] = 1; unionArea += 1; }
+      for (let start = 0; start < count; start += 1) {
+        if (!selected[start] || visited[start]) continue;
+        componentCount8 += 1;
+        const queue = [start]; visited[start] = 1;
+        for (let head = 0; head < queue.length; head += 1) {
+          const current = queue[head], x = current % layer.width, y = Math.floor(current / layer.width);
+          for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nx = x + dx, ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= layer.width || ny >= layer.height) continue;
+            const next = ny * layer.width + nx;
+            if (selected[next] && !visited[next]) { visited[next] = 1; queue.push(next); }
+          }
+        }
+      }
+      const pass = componentCount8 === 6 && unionArea >= 32000 && unionArea <= 34000;
+      return { pass: pass, unionArea: unionArea, componentCount8: componentCount8, reason: pass ? null : "6成分・union 32000..34000契約外" };
+    }
+
+    function validateFinalHorseshoeKeep(masks, manualKeep, correction) {
+      if (!masks || !manualKeep || !correction || manualKeep.width !== correction.workSize.w || manualKeep.height !== correction.workSize.h
+        || masks.width !== correction.assetSize.w || masks.height !== correction.assetSize.h) {
+        return { pass: false, actualArea: 0, expectedArea: 0, actualComponentCount8: 0, expectedComponentCount8: 0, missingPxCount: 0, extraPxCount: 0, reason: "最終keep検査の寸法不一致" };
+      }
+      const count = masks.width * masks.height, actual = new Uint8Array(count), expected = new Uint8Array(count);
+      let actualArea = 0, expectedArea = 0, missingPxCount = 0, extraPxCount = 0;
+      for (let y = 0; y < masks.height; y += 1) for (let x = 0; x < masks.width; x += 1) {
+        const index = y * masks.width + x, offset = index * 4;
+        const sourceX = Math.min(manualKeep.width - 1, Math.floor((x + .5) * manualKeep.width / masks.width));
+        const sourceY = Math.min(manualKeep.height - 1, Math.floor((y + .5) * manualKeep.height / masks.height));
+        actual[index] = masks.data[offset + 3] < 128 ? 1 : 0;
+        expected[index] = manualKeep.data[(sourceY * manualKeep.width + sourceX) * 4 + 3] === 255 ? 1 : 0;
+        actualArea += actual[index]; expectedArea += expected[index];
+        if (expected[index] && !actual[index]) missingPxCount += 1;
+        if (actual[index] && !expected[index]) extraPxCount += 1;
+      }
+      function componentCount8(selected) {
+        const visited = new Uint8Array(count);
+        let components = 0;
+        for (let start = 0; start < count; start += 1) {
+          if (!selected[start] || visited[start]) continue;
+          components += 1;
+          const queue = [start]; visited[start] = 1;
+          for (let head = 0; head < queue.length; head += 1) {
+            const current = queue[head], x = current % masks.width, y = Math.floor(current / masks.width);
+            for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
+              if (!dx && !dy) continue;
+              const nx = x + dx, ny = y + dy;
+              if (nx < 0 || ny < 0 || nx >= masks.width || ny >= masks.height) continue;
+              const next = ny * masks.width + nx;
+              if (selected[next] && !visited[next]) { visited[next] = 1; queue.push(next); }
+            }
+          }
+        }
+        return components;
+      }
+      const actualComponentCount8 = componentCount8(actual), expectedComponentCount8 = componentCount8(expected);
+      const pass = missingPxCount === 0 && extraPxCount === 0 && actualComponentCount8 === 6 && expectedComponentCount8 === 6;
+      return { pass: pass, actualArea: actualArea, expectedArea: expectedArea, actualComponentCount8: actualComponentCount8, expectedComponentCount8: expectedComponentCount8, missingPxCount: missingPxCount, extraPxCount: extraPxCount, reason: pass ? null : "最終masksとcenter-nearest投影keepが不一致" };
     }
 
     function downloadBlob(blob, filename) {
@@ -2151,6 +2454,9 @@
       const stoneComponents = [];
       recipe.stoneSeeds.forEach(function (center) {
         const component = extractClosedStone(source, background, recipe, center);
+        if (component.pixels.some(function (index) { return keepMask[index] !== 0; })) {
+          throw new Error("horseshoe stone seedが既採用の連結成分を重複抽出しました");
+        }
         stoneComponents.push(component);
         component.pixels.forEach(function (index) {
           keepMask[index] = 1;
@@ -2158,8 +2464,27 @@
           keep.data[offset] = keep.data[offset + 1] = keep.data[offset + 2] = 0; keep.data[offset + 3] = 255;
         });
       });
-      const keepCount = stoneComponents.reduce(function (sum, component) { return sum + component.area; }, 0);
-      if (stoneComponents.length !== 6 || keepCount < 32000 || keepCount > 34000) throw new Error("horseshoe manual keep面積が契約外です: " + keepCount);
+      let keepCount = 0, keepComponentCount = 0;
+      for (let index = 0; index < keepMask.length; index += 1) keepCount += keepMask[index];
+      const visitedKeep = new Uint8Array(count);
+      for (let start = 0; start < count; start += 1) {
+        if (!keepMask[start] || visitedKeep[start]) continue;
+        keepComponentCount += 1;
+        const queue = [start]; visitedKeep[start] = 1;
+        for (let head = 0; head < queue.length; head += 1) {
+          const current = queue[head], x = current % width, y = Math.floor(current / width);
+          for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nx = x + dx, ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            const next = ny * width + nx;
+            if (keepMask[next] && !visitedKeep[next]) { visitedKeep[next] = 1; queue.push(next); }
+          }
+        }
+      }
+      if (stoneComponents.length !== 6 || keepComponentCount !== 6 || keepCount < 32000 || keepCount > 34000) {
+        throw new Error("horseshoe manual keep集合が契約外です: seeds=" + stoneComponents.length + " / components8=" + keepComponentCount + " / union=" + keepCount);
+      }
 
       const logoMask = new Uint8Array(count);
       const logo = extractLogoComponents(source, background, recipe);
@@ -2644,6 +2969,132 @@
       return { bakedPxCount: bakedPxCount, bakedNonGrayPxCount: bakedNonGrayPxCount, nonLeatherChangedPxCount: nonLeatherChangedPxCount };
     }
 
+    function flatOracleWorkerSource() {
+      return [
+        "self.onmessage = async function (event) {",
+        "  try {",
+        "    const input = event.data;",
+        "    const digest = await crypto.subtle.digest('SHA-256', input.rawBytes);",
+        "    const actualSha = Array.from(new Uint8Array(digest)).map(function (v) { return v.toString(16).padStart(2, '0'); }).join('');",
+        "    if (actualSha !== input.sha256) throw new Error('F oracle raw grain SHA-256 mismatch');",
+        "    const width = input.width, height = input.height, radius = input.radius, amp = input.amp;",
+        "    if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') throw new Error('F oracle raw-byte decode requires createImageBitmap/OffscreenCanvas');",
+        "    const bitmap = await createImageBitmap(new Blob([input.rawBytes], { type: input.mime }));",
+        "    if (bitmap.width !== width || bitmap.height !== height) { if (bitmap.close) bitmap.close(); throw new Error('F oracle raw grain dimensions mismatch'); }",
+        "    const canvas = new OffscreenCanvas(width, height), context = canvas.getContext('2d', { willReadFrequently: true });",
+        "    context.drawImage(bitmap, 0, 0); if (bitmap.close) bitmap.close();",
+        "    const rgba = context.getImageData(0, 0, width, height).data;",
+        "    if (rgba.length !== width * height * 4) throw new Error('F oracle RGBA size mismatch');",
+        "    function independentMirror(index, size) { const period = 2 * size; const t = ((index % period) + period) % period; return t < size ? t : period - 1 - t; }",
+        "    const g0 = new Float64Array(width * height);",
+        "    for (let index = 0; index < g0.length; index += 1) { const o = index * 4; g0[index] = (0.2126 * rgba[o] + 0.7152 * rgba[o + 1] + 0.0722 * rgba[o + 2]) / 255; }",
+        "    const span = 2 * radius + 1, divisor = span * span, map = new Float64Array(width * height);",
+        "    for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {",
+        "      let sum = 0;",
+        "      for (let dy = -radius; dy <= radius; dy += 1) { const row = independentMirror(y + dy, height) * width; for (let dx = -radius; dx <= radius; dx += 1) sum += g0[row + independentMirror(x + dx, width)]; }",
+        "      const blur = sum / divisor; if (!(blur > 0) || !Number.isFinite(blur)) throw new Error('F oracle leather-grain blur=0');",
+        "      const ratio = g0[y * width + x] / blur; map[y * width + x] = Math.max(1 - amp, Math.min(1 + amp, ratio));",
+        "    }",
+        "    self.postMessage({ generation: input.generation, decodeMode: 'worker-raw-bytes', buffer: map.buffer }, [map.buffer]);",
+        "  } catch (error) { self.postMessage({ generation: event.data.generation, error: error && error.message ? error.message : String(error) }); }",
+        "};"
+      ].join("\n");
+    }
+
+    async function getFlatOracleResource(resource, record, operationToken) {
+      if (!resource || !(resource.rawBytes instanceof ArrayBuffer) || !resource.sourceImageData) throw new Error("F oracle raw grain resource missing");
+      const key = [resource.sha256, resource.width, resource.height, record.grainRadiusPx, record.grainAmp].join("|");
+      const cached = state.oracleGrainCache.get(key);
+      if (cached) {
+        if (operationToken !== undefined) assertOperationToken(operationToken);
+        return cached;
+      }
+      if (typeof Worker === "undefined") throw new Error("F oracleにはWorker対応ブラウザが必要です");
+      if (state.oracleWorker) state.oracleWorker.terminate();
+      if (state.oracleReject) state.oracleReject(new Error("F oracle計算は新しい世代により中断されました"));
+      state.oracleWorker = null; state.oracleReject = null;
+      const generation = ++state.oracleGeneration;
+      const url = URL.createObjectURL(new Blob([flatOracleWorkerSource()], { type: "text/javascript" }));
+      let worker = null, timeoutId = null;
+      try {
+        worker = new Worker(url);
+        state.oracleWorker = worker;
+        const map = await new Promise(function (resolve, reject) {
+          state.oracleReject = reject;
+          timeoutId = setTimeout(function () { reject(new Error("F oracle Workerが12分でタイムアウトしました")); }, 12 * 60 * 1000);
+          worker.onmessage = function (event) {
+            if (event.data.generation !== generation || generation !== state.oracleGeneration) return reject(new Error("F oracle世代トークンが一致しません"));
+            if (event.data.error) reject(new Error(event.data.error));
+            else resolve({ map: new Float64Array(event.data.buffer), decodeMode: event.data.decodeMode });
+          };
+          worker.onerror = function (event) { reject(new Error(event.message || "F oracle Workerが失敗しました")); };
+          worker.postMessage({
+            generation: generation, sha256: resource.sha256, width: resource.width, height: resource.height,
+            radius: record.grainRadiusPx, amp: record.grainAmp, mime: mimeForSource(resource.file || INPUT_MANIFEST.grain.file),
+            rawBytes: resource.rawBytes.slice(0)
+          });
+        });
+        if (operationToken !== undefined) assertOperationToken(operationToken);
+        if (generation !== state.oracleGeneration || map.map.length !== resource.width * resource.height || map.decodeMode !== "worker-raw-bytes") throw new Error("F oracle mapが不正または旧世代です");
+        const oracle = Object.freeze({ key: key, sha256: resource.sha256, width: resource.width, height: resource.height, radius: record.grainRadiusPx, amp: record.grainAmp, map: map.map, decodeMode: map.decodeMode });
+        state.oracleGrainCache.set(key, oracle);
+        while (state.oracleGrainCache.size > 2) state.oracleGrainCache.delete(state.oracleGrainCache.keys().next().value);
+        return oracle;
+      } finally {
+        if (timeoutId !== null) clearTimeout(timeoutId);
+        if (worker) worker.terminate(); URL.revokeObjectURL(url);
+        if (state.oracleWorker === worker) { state.oracleWorker = null; state.oracleReject = null; }
+      }
+    }
+
+    async function auditFlatBakeOracle(oracleResource, before, afterBake, masks, record) {
+      if (!oracleResource || !before || !afterBake || !masks || before.width !== afterBake.width || before.height !== afterBake.height
+        || before.width !== masks.width || before.height !== masks.height || oracleResource.map.length !== oracleResource.width * oracleResource.height) {
+        throw new Error("F oracle画像寸法が不正です");
+      }
+      const radius = record && record.grainRadiusPx;
+      if (!Number.isInteger(radius) || radius <= 0 || !Number.isFinite(record.grainAmp)
+        || !Number.isFinite(record.grainBase) || !Number.isFinite(record.grainScaleX)
+        || !Number.isFinite(record.grainScaleY) || !Number.isFinite(record.flatWhite)
+        || record.grainScaleX <= 0 || record.grainScaleY <= 0 || record.flatWhite <= 0) throw new Error("F oracle設定が不正です");
+      const grainWidth = oracleResource.width, grainHeight = oracleResource.height;
+      function oracleMirror(index, size) {
+        const period = 2 * size;
+        const t = ((index % period) + period) % period;
+        return t < size ? t : period - 1 - t;
+      }
+      let bakedPxCount = 0, expectedMismatchPxCount = 0, nonLeatherChangedPxCount = 0, uniqueGrainPxCount = 0;
+      const visited = new Uint8Array(oracleResource.map.length);
+      for (let y = 0; y < before.height; y += 1) {
+        for (let x = 0; x < before.width; x += 1) {
+          const offset = (y * before.width + x) * 4;
+          const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
+          if (!leather) {
+            if (before.data[offset] !== afterBake.data[offset] || before.data[offset + 1] !== afterBake.data[offset + 1]
+              || before.data[offset + 2] !== afterBake.data[offset + 2]) nonLeatherChangedPxCount += 1;
+            continue;
+          }
+          bakedPxCount += 1;
+          const u = Math.floor((x + 0.5) / record.grainScaleX), v = Math.floor((y + 0.5) / record.grainScaleY);
+          const grainX = oracleMirror(u, grainWidth), grainY = oracleMirror(v, grainHeight), grainIndex = grainY * grainWidth + grainX;
+          if (!visited[grainIndex]) { visited[grainIndex] = 1; uniqueGrainPxCount += 1; }
+          const sourceLum = (0.2126 * before.data[offset] + 0.7152 * before.data[offset + 1] + 0.0722 * before.data[offset + 2]) / 255;
+          const shade = Math.max(0, Math.min(1, sourceLum / record.flatWhite));
+          const expected = Math.round(Math.max(0, Math.min(255, record.grainBase * shade * oracleResource.map[grainIndex])));
+          if (afterBake.data[offset] !== expected || afterBake.data[offset + 1] !== expected || afterBake.data[offset + 2] !== expected) expectedMismatchPxCount += 1;
+        }
+      }
+      return {
+        bakedPxCount: bakedPxCount,
+        expectedMismatchPxCount: expectedMismatchPxCount,
+        nonLeatherChangedPxCount: nonLeatherChangedPxCount,
+        uniqueGrainPxCount: uniqueGrainPxCount,
+        numericType: "Float64",
+        loopOrder: "dy-outer/dx-inner",
+        mirrorImplementation: "independent"
+      };
+    }
+
     function auditDisplayColors(referenceIvory) {
       return COLORS.map(function (color) {
         const rgb = color.name === "アイボリー" ? { r: referenceIvory.r, g: referenceIvory.g, b: referenceIvory.b } : {
@@ -2665,8 +3116,32 @@
       return { source: JSON.parse(JSON.stringify(source)), referenceIvory: referenceIvory, displayColors: auditDisplayColors(referenceIvory), corePxCount: red.length };
     }
 
-    async function applyColorlessGrain(base, masks, spec, baseMeta, calibrationInput, explicitConfig, explicitResource) {
+    function bakeFlatGrainMap(before, masks, resource, record) {
+      if (!before || !masks || before.width !== masks.width || before.height !== masks.height
+        || !resource || !Number.isInteger(resource.width) || !Number.isInteger(resource.height)
+        || resource.width <= 0 || resource.height <= 0 || !resource.map || resource.map.length !== resource.width * resource.height
+        || !record || !Number.isFinite(record.grainBase) || !Number.isFinite(record.grainScaleX)
+        || !Number.isFinite(record.grainScaleY) || !Number.isFinite(record.flatWhite)
+        || record.grainScaleX <= 0 || record.grainScaleY <= 0 || record.flatWhite <= 0) throw new Error("グレイン焼き込み入力が不正です");
+      const afterBake = cloneImageData(before);
+      for (let y = 0; y < before.height; y += 1) {
+        for (let x = 0; x < before.width; x += 1) {
+          const offset = rgbaIndex(x, y, before.width);
+          const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
+          if (!leather) continue;
+          const shade = clamp(luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]) / record.flatWhite, 0, 1);
+          const u = Math.floor((x + .5) / record.grainScaleX), v = Math.floor((y + .5) / record.grainScaleY);
+          const grain = resource.map[mirrorIndex(v, resource.height) * resource.width + mirrorIndex(u, resource.width)];
+          const gray = Math.round(clamp(record.grainBase * shade * grain, 0, 255));
+          afterBake.data[offset] = afterBake.data[offset + 1] = afterBake.data[offset + 2] = gray;
+        }
+      }
+      return { afterBake: afterBake, f1a: auditFlatBake(before, afterBake, masks) };
+    }
+
+    async function applyColorlessGrain(base, masks, spec, baseMeta, calibrationInput, explicitConfig, explicitResource, operationToken) {
       if (spec.sourceMode !== "colorless") return null;
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const grainScaleMm = explicitConfig ? explicitConfig.grainScaleMm : Number(dom.grainScaleMm.value);
       const config = Object.assign({}, spec.grain, explicitConfig || {}, { grainScaleMm: grainScaleMm });
       if (!Number.isInteger(config.grainBase) || config.grainBase < 1 || config.grainBase > 255
@@ -2684,38 +3159,24 @@
       if (![pxPerMmWorkW, pxPerMmWorkH, grainScaleX, grainScaleY].every(function (value) { return Number.isFinite(value) && value > 0; })) throw new Error("グレイン軸別尺度が正の有限値ではありません");
       const flatWhite = workMetrics.flatWhite;
       setStatus(spec.label + " グレイン比率マップを生成中", "busy");
-      const resource = explicitResource || await loadGrainResource(config);
+      const resource = explicitResource || await loadGrainResource(config, operationToken);
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       if (resource.sha256 !== INPUT_MANIFEST.grain.sha256 || resource.radius !== config.grainRadiusPx || resource.amp !== config.grainAmp) throw new Error("グレインリソースが設定と一致しません");
-      const afterBake = cloneImageData(base);
-      let bakedPxCount = 0, nonLeatherChangedPxCount = 0, bakedNonGrayPxCount = 0;
-      for (let y = 0; y < base.height; y += 1) {
-        for (let x = 0; x < base.width; x += 1) {
-          const offset = rgbaIndex(x, y, base.width);
-          const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
-          if (!leather) continue;
-          const shade = clamp(luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]) / flatWhite, 0, 1);
-          const u = Math.floor((x + .5) / grainScaleX), v = Math.floor((y + .5) / grainScaleY);
-          const grain = resource.map[mirrorIndex(v, resource.height) * resource.width + mirrorIndex(u, resource.width)];
-          const gray = Math.round(clamp(config.grainBase * shade * grain, 0, 255));
-          afterBake.data[offset] = afterBake.data[offset + 1] = afterBake.data[offset + 2] = gray;
-          bakedPxCount += 1;
-          if (afterBake.data[offset] !== afterBake.data[offset + 1] || afterBake.data[offset] !== afterBake.data[offset + 2]) bakedNonGrayPxCount += 1;
-        }
-      }
-      for (let offset = 0; offset < base.data.length; offset += 4) {
-        const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
-        if (!leather && (before.data[offset] !== afterBake.data[offset] || before.data[offset + 1] !== afterBake.data[offset + 1] || before.data[offset + 2] !== afterBake.data[offset + 2])) nonLeatherChangedPxCount += 1;
-      }
+      const bakeRecord = { grainBase: config.grainBase, grainScaleX: grainScaleX, grainScaleY: grainScaleY, flatWhite: flatWhite };
+      const baked = bakeFlatGrainMap(before, masks, resource, bakeRecord);
+      const afterBake = baked.afterBake;
       base.data.set(afterBake.data);
       const nearest = defringeBaseRgb(base);
       const edge = edgeStatsForBase(base, nearest);
       return {
         before: before,
+        rawGrainImageData: cloneImageData(resource.sourceImageData),
+        oracleGrainResource: resource,
         workMasks: workMasks,
         calibrationInput: jsonClone(calibrationInput),
         workMetrics: workMetrics,
         afterBake: afterBake,
-        f1a: { bakedPxCount: bakedPxCount, bakedNonGrayPxCount: bakedNonGrayPxCount, nonLeatherChangedPxCount: nonLeatherChangedPxCount },
+        f1a: baked.f1a,
         baseMeta: { imageData: base, nearest: nearest, edgeCount: edge.edgeCount, edgeBad: edge.edgeBad, background: baseMeta.background },
         record: {
           file: resource.file,
@@ -2817,6 +3278,13 @@
         calibration: { mode: mode, widthLine: mode === "manual-line" ? widthLine : null, heightLine: mode === "manual-line" ? heightLine : null, widthMeasurePx: widthMeasure, heightMeasurePx: heightMeasure, pxPerMmW: pxPerMmW, pxPerMmH: pxPerMmH, distortion: distortion },
         pxPerMm: pxPerMmW
       };
+    }
+
+    function finalBaseMetaFromDecoded(base, background) {
+      const scratch = cloneImageData(base);
+      const nearest = defringeBaseRgb(scratch);
+      const edge = edgeStatsForBase(base, nearest);
+      return { imageData: base, nearest: nearest, edgeCount: edge.edgeCount, edgeBad: edge.edgeBad, background: background };
     }
 
     function cloneStitchPaths(paths) {
@@ -3073,7 +3541,7 @@
       return JSON.stringify(a) === JSON.stringify(b);
     }
 
-    function computeFlatCheck(spec, base, masks, grainContext, options) {
+    async function computeFlatCheck(spec, base, masks, grainContext, options) {
       if (spec.sourceMode !== "colorless") return makeCheck(true, "photo素材のため対象外", { applicable: false });
       const settings = options || {};
       const failures = [];
@@ -3088,6 +3556,16 @@
       }
       if (!f1a || f1a.bakedPxCount < 1 || f1a.bakedNonGrayPxCount !== 0 || f1a.nonLeatherChangedPxCount !== 0
         || !displayColorsEqual(f1a, grainContext && grainContext.f1a)) failures.push("F-1(a) range/gray mismatch");
+      let oracle = null;
+      try {
+        if (!grainContext || !grainContext.oracleGrainResource || !record) throw new Error("raw grain context missing");
+        const operationToken = settings.operationToken !== undefined ? settings.operationToken : (state.operation ? state.operation.token : undefined);
+        const oracleResource = await getFlatOracleResource(grainContext.oracleGrainResource, record, operationToken);
+        oracle = await auditFlatBakeOracle(oracleResource, grainContext.before, grainContext.afterBake, grainContext.workMasks, record);
+      } catch (error) {
+        failures.push("F oracle: " + error.message);
+      }
+      if (!oracle || oracle.bakedPxCount < 1 || oracle.expectedMismatchPxCount !== 0 || oracle.nonLeatherChangedPxCount !== 0) failures.push("F oracle expected bake mismatch");
       let finalCoreCount = 0, finalCoreNonGray = 0;
       for (let offset = 0; offset < base.data.length; offset += 4) {
         if (base.data[offset + 3] !== 255 || masks.data[offset + 3] < 128 || masks.data[offset] < 128) continue;
@@ -3140,7 +3618,7 @@
         || !displayColorPeers.every(function (colors) { return displayColorsEqual(colors, reference.displayColors); })) failures.push("F-4 displayColors mismatch");
       return makeCheck(failures.length === 0,
         "F-1 core=" + finalCoreCount + "/nonGray=" + finalCoreNonGray + " / F-2 grain / F-3 ivory / F-4 colors" + (failures.length ? " / " + failures.join("; ") : ""),
-        { applicable: true, f1a: f1a, finalCoreCount: finalCoreCount, finalCoreNonGray: finalCoreNonGray, grain: record, grainScalePeerCount: grainScalePeers.length, grainScalePeers: grainScalePeers, recomputedWork: recomputedWork, referenceIvory: reference && reference.referenceIvory, referenceCorePxCount: reference && reference.corePxCount, displayColorCount: reference && reference.displayColors.length, displayColorPeerCount: displayColorPeers.length, expectedColorlessCount: expectedColorlessCount, failures: failures });
+        { applicable: true, f1a: f1a, oracle: oracle, finalCoreCount: finalCoreCount, finalCoreNonGray: finalCoreNonGray, grain: record, grainScalePeerCount: grainScalePeers.length, grainScalePeers: grainScalePeers, recomputedWork: recomputedWork, referenceIvory: reference && reference.referenceIvory, referenceCorePxCount: reference && reference.corePxCount, displayColorCount: reference && reference.displayColors.length, displayColorPeerCount: displayColorPeers.length, expectedColorlessCount: expectedColorlessCount, failures: failures });
     }
 
     function numbersEqual(a, b) {
@@ -3310,6 +3788,8 @@
       if (spec.stitchMode === "fallback") stitchPass = fallbackGate.pass && derived.stitchPxCount === 0 && countManualInpaint(manual) >= 1 && stitchDiff > 0 && (spec.threadColor === "dark" || spec.threadColor === "light");
       const transferBytes = baseBlob.size + masksBlob.size;
       const calibrationGate = calibrationValidation(key, spec, derived, correction);
+      const keepInputTopology = key === "horseshoe" ? validateHorseshoeManualKeep(manual && manual.keep) : { pass: true, unionArea: null, componentCount8: null, reason: null };
+      const keepTopology = key === "horseshoe" ? validateFinalHorseshoeKeep(masks, manual && manual.keep, correction) : { pass: true, actualArea: null, expectedArea: null, actualComponentCount8: null, expectedComponentCount8: null, missingPxCount: null, extraPxCount: null, reason: null };
       return [
         makeCheck(derived.identityViolations === 0, "違反 " + derived.identityViolations + " px", { violations: derived.identityViolations }),
         makeCheck(derived.corePxCount >= 1 && Number.isFinite(derived.baseLum), "コア " + derived.corePxCount + " px", { corePxCount: derived.corePxCount, baseLum: derived.baseLum }),
@@ -3326,7 +3806,7 @@
         }),
         makeCheck(derived.edgePxCount >= 1 && edgeBadRatio < .005, "edge " + derived.edgePxCount + " px / d>32 " + derived.edgeBadPxCount + " px", { edgePxCount: derived.edgePxCount, badPxCount: derived.edgeBadPxCount, badRatio: edgeBadRatio }),
         makeCheck(stitchPass, spec.stitchMode + " / B " + derived.stitchPxCount + " px / diff " + stitchDiff + " px" + (fallbackGate && fallbackGate.failures.length ? " / " + fallbackGate.failures.join("; ") : ""), { mode: spec.stitchMode, stitchPxCount: derived.stitchPxCount, diffPxCount: stitchDiff, maskDiffPxCount: maskStitchDiff, threadColor: spec.threadColor, stitchPaths: stitchPaths, fallback: fallbackGate, manualInpaintPxCount: countManualInpaint(manual) }),
-        makeCheck(spec.attachmentMode === "none", "attachment=" + spec.attachmentMode + " / keep " + derived.keepPxCount + " px" + (key !== "horseshoe" && derived.keepPxCount > 0 ? " (要目視確認)" : ""), { attachmentMode: spec.attachmentMode, keepPxCount: derived.keepPxCount, warning: key !== "horseshoe" && derived.keepPxCount > 0 }),
+        makeCheck(spec.attachmentMode === "none" && keepInputTopology.pass && keepTopology.pass, "attachment=" + spec.attachmentMode + " / keep " + derived.keepPxCount + " px" + (key === "horseshoe" ? " / final actual=" + keepTopology.actualArea + " expected=" + keepTopology.expectedArea + " / components=" + keepTopology.actualComponentCount8 + "/" + keepTopology.expectedComponentCount8 + " / missing=" + keepTopology.missingPxCount + " extra=" + keepTopology.extraPxCount : derived.keepPxCount > 0 ? " (要目視確認)" : ""), { attachmentMode: spec.attachmentMode, keepPxCount: derived.keepPxCount, warning: key !== "horseshoe" && derived.keepPxCount > 0, keepInputTopology: keepInputTopology, keepTopology: keepTopology }),
         makeCheck(transferBytes <= 900 * 1024, Math.round(transferBytes / 1024) + " KB / 900 KB", { baseBytes: baseBlob.size, masksBytes: masksBlob.size, totalBytes: transferBytes })
       ];
     }
@@ -3385,12 +3865,19 @@
       const key = job.key, spec = job.spec;
       const baseBlob = await imageDataToBlob(base);
       const masksBlob = await imageDataToBlob(masks);
-      const decodedBase = await blobToImageData(baseBlob);
+      const decodedBase = (await decodeStraightPngBlob(baseBlob, key + ".base.png", true)).imageData;
+      const decodedMasks = (await decodeStraightPngBlob(masksBlob, key + ".masks.png", true)).imageData;
+      if (!imageDataEqual(base, decodedBase) || !imageDataEqual(masks, decodedMasks)) throw new Error(key + " straight RGBA PNGの独立再読込が生成画像と一致しません");
+      const decodedMeta = finalBaseMetaFromDecoded(decodedBase, baseMeta.background);
+      const decodedDerived = computeDerived(decodedBase, decodedMasks, spec, decodedMeta, correction.preDerived.calibration);
+      const decodedCorrection = Object.assign({}, correction, { base: decodedBase, masks: decodedMasks, baseMeta: decodedMeta, derived: decodedDerived });
+      const decodedWhiteOutput = recolor(decodedBase, decodedMasks, decodedDerived, { r: 65, g: 65, b: 61 }, "gold", "white", spec);
+      const decodedBlackOutput = recolor(decodedBase, decodedMasks, decodedDerived, { r: 65, g: 65, b: 61 }, "gold", "black", spec);
       const manualRecords = await buildManualRecords(key, job.manual);
       const sourceHash = await sha256(job.sourceBytes);
       const baseHash = await sha256(decodedBase.data);
-      const masksHash = await decodedRgbaHash(masksBlob);
-      const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, masks, derived, whiteOutput, blackOutput, correction, job.manual);
+      const masksHash = await sha256(decodedMasks.data);
+      const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, decodedMasks, decodedDerived, decodedWhiteOutput, decodedBlackOutput, decodedCorrection, job.manual);
       const manifestCheck = computeManifestCheck(key, spec, sourceHash, grainContext);
       const displayColorPeers = referenceResource ? [referenceResource.displayColors] : [];
       const grainScalePeers = grainContext ? [grainContext.record.grainScaleMm] : [];
@@ -3400,9 +3887,9 @@
           grainScalePeers.push(prep.inputs.grain.grainScaleMm);
         }
       });
-      const flatCheck = computeFlatCheck(spec, base, masks, grainContext, { referenceResource: referenceResource, expectedReferenceSource: referenceResource && referenceResource.source, displayColorPeers: displayColorPeers, grainScalePeers: grainScalePeers });
+      const flatCheck = await computeFlatCheck(spec, decodedBase, decodedMasks, grainContext, { referenceResource: referenceResource, expectedReferenceSource: referenceResource && referenceResource.source, displayColorPeers: displayColorPeers, grainScalePeers: grainScalePeers, operationToken: job.operationToken });
       const checks = checks1to7.concat([manifestCheck, flatCheck, { status: "pending", detail: "書き出し済みアーカイブの再読込待ち", values: {} }]);
-      const stitchDiff = countRgbDiff(whiteOutput, blackOutput);
+      const stitchDiff = countRgbDiff(decodedWhiteOutput, decodedBlackOutput);
       const browser = browserInfo();
 
       const prep = {
@@ -3416,7 +3903,7 @@
           rotationDeg: job.work.rotation,
           crop: job.work.crop,
           workSize: { w: job.work.w, h: job.work.h },
-          assetSize: { w: base.width, h: base.height },
+          assetSize: { w: decodedBase.width, h: decodedBase.height },
           scale: { x: job.work.scaleX, y: job.work.scaleY },
           logoRoiSource: spec.logoRoiSource || null,
           logoRoiWork: job.work.logoRoi,
@@ -3451,15 +3938,19 @@
           } : null,
           referenceIvorySource: spec.sourceMode === "colorless" ? jsonClone(referenceResource.source) : null
         },
-        derived: publicV4DerivedRecord(derived, correction, spec, grainContext, referenceResource),
+        derived: publicV4DerivedRecord(decodedDerived, decodedCorrection, spec, grainContext, referenceResource),
         expectedOutput: {
-          base: { file: "assets/charms/" + key + ".base.png", width: base.width, height: base.height, decodedRgbaSha256: baseHash, byteLength: baseBlob.size },
-          masks: { file: "assets/charms/" + key + ".masks.png", width: masks.width, height: masks.height, decodedRgbaSha256: masksHash, byteLength: masksBlob.size }
+          base: { file: "assets/charms/" + key + ".base.png", width: decodedBase.width, height: decodedBase.height, decodedRgbaSha256: baseHash, byteLength: baseBlob.size },
+          masks: { file: "assets/charms/" + key + ".masks.png", width: decodedMasks.width, height: decodedMasks.height, decodedRgbaSha256: masksHash, byteLength: masksBlob.size }
         },
         checks: publicChecksRecord(checks),
         verify: { status: "pending", checkedAt: null, inputMatch: false, outputMatch: false, regenerationMatch: false }
       };
-      return { checks: checks, prep: prep, baseBlob: baseBlob, masksBlob: masksBlob, manualRecords: manualRecords, stitchDiff: stitchDiff };
+      return {
+        checks: checks, prep: prep, baseBlob: baseBlob, masksBlob: masksBlob, manualRecords: manualRecords, stitchDiff: stitchDiff,
+        base: decodedBase, masks: decodedMasks, derived: decodedDerived, correction: decodedCorrection,
+        previews: { white: decodedWhiteOutput, black: decodedBlackOutput }
+      };
     }
 
     function assertFiniteRecord(value, fields, label) {
@@ -3617,11 +4108,15 @@
     }
 
     async function decodeArchivePng(entry, label) {
-      const header = pngDimensions(entry.bytes, label);
+      const parsed = parsePngRgba(entry.bytes, label);
       let imageData;
-      try { imageData = await blobToImageData(entry.blob); } catch (error) { throw new Error(label + " PNGをデコードできません: " + error.message); }
+      try {
+        imageData = parsed.markedStraight
+          ? (await decodeStraightPngBlob(entry.blob, label, true)).imageData
+          : await blobToImageData(entry.blob);
+      } catch (error) { throw new Error(label + " PNGをデコードできません: " + error.message); }
       assertArchive(imageData.width > 0 && imageData.height > 0 && imageData.width <= ARCHIVE_MAX_IMAGE_DIMENSION && imageData.height <= ARCHIVE_MAX_IMAGE_DIMENSION, label + " の画像寸法が不正です");
-      assertArchive(imageData.width === header.width && imageData.height === header.height, label + " のIHDRとデコード寸法が一致しません");
+      assertArchive(imageData.width === parsed.width && imageData.height === parsed.height, label + " のIHDRとデコード寸法が一致しません");
       return imageData;
     }
 
@@ -3711,8 +4206,10 @@
       }
     }
 
-    async function regenerateFromPrep(parsed, prep, key, spec, inputs, archivedOutputs, flatVerification) {
+    async function regenerateFromPrep(parsed, prep, key, spec, inputs, archivedOutputs, flatVerification, operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const source = await transformSourceFromPrep(inputs.sourceBytes, prep, key);
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const pipeline = prep.pipeline;
       const matte = buildMatte(source, inputs.manual.alpha, pipeline.background.low, pipeline.background.high);
       if (!jsonEqual(matte.background, pipeline.background.sampledRgb)) throw new Error(key + " sampledRgb再生成不一致");
@@ -3724,8 +4221,9 @@
       let grainContext = null;
       if (spec.sourceMode === "colorless") {
         if (!flatVerification) throw new Error(key + " flat verification contextがありません");
-        const verificationGrain = await buildVerificationGrainResource(inputs.grainBytes, prep.inputs.grain);
-        grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibrationInput, prep.inputs.grain, verificationGrain);
+        const verificationGrain = await buildVerificationGrainResource(inputs.grainBytes, prep.inputs.grain, operationToken);
+        grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibrationInput, prep.inputs.grain, verificationGrain, operationToken);
+        if (operationToken !== undefined) assertOperationToken(operationToken);
         baseMeta = grainContext.baseMeta;
       }
       const preDerived = computeDerived(baseMeta.imageData, masks, spec, baseMeta, calibrationInput);
@@ -3736,11 +4234,17 @@
       const blackOutput = recolor(correction.base, correction.masks, derived, { r: 65, g: 65, b: 61 }, "gold", "black", spec);
       const baseBlob = await imageDataToBlob(correction.base);
       const masksBlob = await imageDataToBlob(correction.masks);
-      const decodedBase = await blobToImageData(baseBlob);
-      const decodedMasks = await blobToImageData(masksBlob);
-      const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, correction.masks, derived, whiteOutput, blackOutput, correction, inputs.manual);
+      const decodedBase = (await decodeStraightPngBlob(baseBlob, key + ".base.png regenerated", true)).imageData;
+      const decodedMasks = (await decodeStraightPngBlob(masksBlob, key + ".masks.png regenerated", true)).imageData;
+      if (!imageDataEqual(correction.base, decodedBase) || !imageDataEqual(correction.masks, decodedMasks)) throw new Error(key + " 再生成PNGのstraight RGBA独立再読込が一致しません");
+      const decodedMeta = finalBaseMetaFromDecoded(decodedBase, correction.baseMeta.background);
+      const decodedDerived = computeDerived(decodedBase, decodedMasks, spec, decodedMeta, correction.preDerived.calibration);
+      const decodedCorrection = Object.assign({}, correction, { base: decodedBase, masks: decodedMasks, baseMeta: decodedMeta, derived: decodedDerived });
+      const decodedWhiteOutput = recolor(decodedBase, decodedMasks, decodedDerived, { r: 65, g: 65, b: 61 }, "gold", "white", spec);
+      const decodedBlackOutput = recolor(decodedBase, decodedMasks, decodedDerived, { r: 65, g: 65, b: 61 }, "gold", "black", spec);
+      const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, decodedMasks, decodedDerived, decodedWhiteOutput, decodedBlackOutput, decodedCorrection, inputs.manual);
       const manifestCheck = computeManifestCheck(key, spec, await sha256(inputs.sourceBytes), grainContext);
-      const flatCheck = computeFlatCheck(spec, correction.base, correction.masks, grainContext, flatVerification || {});
+      const flatCheck = await computeFlatCheck(spec, decodedBase, decodedMasks, grainContext, flatVerification || {});
       const checks = checks1to7.concat([manifestCheck, flatCheck]);
       if (!checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) throw new Error(key + " 再生成した検査1〜7＋M/FにFAILがあります");
       const mismatches = [];
@@ -3749,21 +4253,23 @@
       if (await sha256(decodedBase.data) !== prep.expectedOutput.base.decodedRgbaSha256) mismatches.push("base decoded hash");
       if (await sha256(decodedMasks.data) !== prep.expectedOutput.masks.decodedRgbaSha256) mismatches.push("masks decoded hash");
       if (baseBlob.size !== prep.expectedOutput.base.byteLength || masksBlob.size !== prep.expectedOutput.masks.byteLength) mismatches.push("PNG byteLength");
-      if (!jsonEqual(publicV4DerivedRecord(derived, correction, spec, grainContext, flatVerification && flatVerification.referenceResource), prep.derived)) mismatches.push("derived record");
+      if (!jsonEqual(publicV4DerivedRecord(decodedDerived, decodedCorrection, spec, grainContext, flatVerification && flatVerification.referenceResource), prep.derived)) mismatches.push("derived record");
       if (!jsonEqual(publicChecksRecord(checks), prep.checks)) mismatches.push("checks 1-7/M/F record");
       if (!jsonEqual(correction.workSize, pipeline.workSize) || !jsonEqual(correction.assetSize, pipeline.assetSize)) mismatches.push("work/asset size");
       if (!jsonEqual(correction.stitchPathsWork, prep.inputs.stitchPathsWork) || !jsonEqual(correction.stitchPathsAsset, prep.derived.stitchPathsAsset)) mismatches.push("stitch paths");
       if (mismatches.length) throw new Error(key + " 再生成不一致: " + mismatches.join(", "));
-      return { base: decodedBase, masks: decodedMasks, derived: derived, correction: correction, checks: checks };
+      return { base: decodedBase, masks: decodedMasks, derived: decodedDerived, correction: decodedCorrection, checks: checks };
     }
 
-    async function verifyParsedArchive(parsed) {
+    async function verifyParsedArchive(parsed, operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
       const results = [];
       let flatVerification = null, flatVerificationError = null;
       if (CHARM_KEYS.some(function (key) { return CHARM_SPECS[key].sourceMode === "colorless"; })) {
         try { flatVerification = await buildArchiveFlatVerificationContext(parsed); } catch (error) { flatVerificationError = error.message; }
       }
       for (const key of CHARM_KEYS) {
+        if (operationToken !== undefined) assertOperationToken(operationToken);
         const prep = parsed.preps[key];
         const reasons = [];
         let spec = null, inputs = null, outputs = null;
@@ -3775,7 +4281,7 @@
         }
         try { outputs = await verifyArchivedOutputs(parsed, prep, key); outputMatch = true; } catch (error) { reasons.push("output: " + error.message); }
         if (spec && inputs && outputs) {
-          try { await regenerateFromPrep(parsed, prep, key, spec, inputs, outputs, flatVerification); regenerationMatch = true; } catch (error) { reasons.push("regeneration: " + error.message); }
+          try { await regenerateFromPrep(parsed, prep, key, spec, inputs, outputs, flatVerification, operationToken); regenerationMatch = true; } catch (error) { reasons.push("regeneration: " + error.message); }
         } else reasons.push("regeneration: 入力または出力照合が不合格のため未実行");
         const pass = inputMatch && outputMatch && regenerationMatch;
         results.push({ key: key, status: pass ? "pass" : "fail", inputMatch: inputMatch, outputMatch: outputMatch, regenerationMatch: regenerationMatch, reasons: reasons });
@@ -4049,7 +4555,7 @@
         if (!jsonEqual(parsed.archive.browser, currentBrowser)) {
           return recordEarlyVerificationFailure(["archive: 算出ブラウザが一致しません。同一ブラウザ・同一バージョンで再実行してください"], operationToken);
         }
-        const first = await verifyParsedArchive(parsed);
+        const first = await verifyParsedArchive(parsed, operationToken);
         const firstPassResults = jsonClone(first.results);
         assertOperationToken(operationToken);
         const checkedAt = new Date().toISOString();
@@ -4076,7 +4582,7 @@
             assertOperationToken(operationToken);
             rebuiltText = serializeArchiveObject(rebuilt);
             const finalParsed = await parseArchive(rebuiltText);
-            const final = await verifyParsedArchive(finalParsed);
+            const final = await verifyParsedArchive(finalParsed, operationToken);
             finalResults = jsonClone(final.results);
             assertOperationToken(operationToken);
             const forceFinalFailure = settings.forceFinalReverificationFailure === true;
@@ -4299,7 +4805,7 @@
         if (spec.sourceMode === "colorless") {
           referenceResource = await loadReferenceIvoryResource();
           assertOperationToken(operationToken);
-          grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibrationInput, { grainScaleMm: job.grainScaleMm });
+          grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibrationInput, { grainScaleMm: job.grainScaleMm }, null, operationToken);
           assertOperationToken(operationToken);
           baseMeta = grainContext.baseMeta;
         }
@@ -4316,20 +4822,23 @@
         if (state.loadedKey !== key || state.selectedKey !== key || state.manualRevision !== job.manualRevision) {
           throw new Error("処理中に選択チャームまたは手動補正が変更されました");
         }
+        const finalCorrection = artifacts.correction;
+        const finalDerived = artifacts.derived;
+        const finalIvoryOutput = recolor(artifacts.base, artifacts.masks, finalDerived, ivoryTarget, "silver", "white", spec);
         const result = {
-          key: key, base: correction.base, masks: correction.masks, derived: derived,
+          key: key, base: artifacts.base, masks: artifacts.masks, derived: finalDerived,
           work: job.work,
           preDerived: preDerived,
-          aspectCorrection: correction.aspectCorrection,
-          stitchPathsWork: correction.stitchPathsWork,
-          stitchPathsAsset: correction.stitchPathsAsset,
+          aspectCorrection: finalCorrection.aspectCorrection,
+          stitchPathsWork: finalCorrection.stitchPathsWork,
+          stitchPathsAsset: finalCorrection.stitchPathsAsset,
           grainContext: grainContext,
-          previews: { blackGoldWhite: whiteOutput, blackGoldBlack: blackOutput, ivorySilverWhite: ivoryOutput },
+          previews: { blackGoldWhite: artifacts.previews.white, blackGoldBlack: artifacts.previews.black, ivorySilverWhite: finalIvoryOutput },
           checks: artifacts.checks, prep: artifacts.prep, artifacts: artifacts
         };
         state.result = result;
         const pass = result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
-        state.batch[key] = { status: pass ? "pass" : "fail", verify: "pending", foreground: derived.fgBboxPx ? derived.fgBboxPx.w + "×" + derived.fgBboxPx.h : "—", result: result };
+        state.batch[key] = { status: pass ? "pass" : "fail", verify: "pending", foreground: finalDerived.fgBboxPx ? finalDerived.fgBboxPx.w + "×" + finalDerived.fgBboxPx.h : "—", result: result };
         renderResult(result); renderBatch(); updateInteractivity();
         dom.exportCurrentButton.disabled = !pass;
         dom.exportBatchButton.disabled = !allBatchPass1to7();
@@ -4428,6 +4937,151 @@
       }
     }
 
+    async function runInternalSelfTests() {
+      const operationToken = beginOperation("internal-selftest");
+      try {
+      const results = [];
+      function record(name, pass, detail) { results.push({ name: name, status: pass ? "pass" : "fail", detail: detail || "" }); }
+      try {
+        const rgba = new Uint8ClampedArray([
+          201, 17, 99, 0, 14, 230, 71, 1, 255, 2, 199, 2,
+          8, 77, 245, 127, 92, 31, 18, 254, 4, 5, 6, 255
+        ]);
+        const source = new ImageData(rgba, 3, 2);
+        const blob = await imageDataToBlob(source);
+        const decoded = (await decodeStraightPngBlob(blob, "selftest low-alpha", true)).imageData;
+        record("png-low-alpha-straight-rgba", imageDataEqual(source, decoded), "alpha 0/1/2/127/254/255");
+        const corrupted = new Uint8Array(await blob.arrayBuffer()); corrupted[corrupted.length - 1] ^= 1;
+        let rejected = false;
+        try { await decodeStraightPngBlob(new Blob([corrupted], { type: "image/png" }), "selftest CRC", true); } catch (error) { rejected = /CRC/.test(error.message); }
+        record("png-crc-rejection", rejected, "corrupted IEND CRC");
+        const paethCases = [[10, 20, 5], [200, 10, 100], [20, 220, 100], [100, 100, 100], [10, 100, 90]];
+        const paethExpected = [20, 100, 100, 100, 10];
+        record("png-encoder-paeth-vectors", paethCases.every(function (v, index) { return paethPredictor(v[0], v[1], v[2]) === paethExpected[index]; }), "expected=" + paethExpected.join(","));
+        record("png-decoder-paeth-vectors", paethCases.every(function (v, index) { return decoderPaethPredictor(v[0], v[1], v[2]) === paethExpected[index]; }), "expected=" + paethExpected.join(","));
+      } catch (error) { record("png-suite", false, error.message); }
+
+      try {
+        const grainData = new Uint8ClampedArray(2 * 2 * 4);
+        for (let offset = 0; offset < grainData.length; offset += 4) { grainData[offset] = grainData[offset + 1] = grainData[offset + 2] = 128; grainData[offset + 3] = 255; }
+        const grainImage = new ImageData(grainData, 2, 2), grainBlob = await imageDataToBlob(grainImage), rawBytes = await grainBlob.arrayBuffer();
+        const resource = { file: "selftest.png", sha256: await sha256(rawBytes), width: 2, height: 2, rawBytes: rawBytes, sourceImageData: grainImage };
+        const oracleRecord = { grainRadiusPx: 1, grainAmp: .25, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
+        const oracleResource = await getFlatOracleResource(resource, oracleRecord, operationToken);
+        const beforeData = new Uint8ClampedArray([255,255,255,255, 128,128,128,255, 64,64,64,255, 32,32,32,255]);
+        const before = new ImageData(beforeData, 2, 2), after = cloneImageData(before), masks = emptyLayer(2, 2);
+        for (let offset = 0; offset < masks.data.length; offset += 4) { masks.data[offset] = 255; masks.data[offset + 3] = 255; const gray = Math.round(200 * before.data[offset] / 255); after.data[offset] = after.data[offset + 1] = after.data[offset + 2] = gray; }
+        const audit = await auditFlatBakeOracle(oracleResource, before, after, masks, oracleRecord);
+        record("oracle-2x2-constant-gray", audit.expectedMismatchPxCount === 0 && audit.bakedPxCount === 4, JSON.stringify(audit));
+      } catch (error) { record("oracle-2x2-constant-gray", false, error.message); }
+
+      try {
+        const width = 4, height = 3, radius = 2, amp = .25, rgba = new Uint8ClampedArray(width * height * 4);
+        for (let index = 0; index < width * height; index += 1) { const offset = index * 4; rgba[offset] = (index * 37 + 11) & 255; rgba[offset + 1] = (index * 91 + 7) & 255; rgba[offset + 2] = (index * 53 + 19) & 255; rgba[offset + 3] = 255; }
+        const grainImage = new ImageData(rgba, width, height), grainBlob = await imageDataToBlob(grainImage), rawBytes = await grainBlob.arrayBuffer();
+        const resource = { file: "selftest.png", sha256: await sha256(rawBytes), width: width, height: height, rawBytes: rawBytes, sourceImageData: grainImage };
+        const defaultRecord = { grainRadiusPx: radius, grainAmp: amp, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
+        const oracleResource = await getFlatOracleResource(resource, defaultRecord, operationToken);
+        const productionG0 = new Float64Array(width * height);
+        for (let index = 0; index < productionG0.length; index += 1) { const offset = index * 4; productionG0[index] = luminance(rgba[offset], rgba[offset + 1], rgba[offset + 2]); }
+        const correct = await exactMirrorBoxRatioMap(productionG0, width, height, radius, amp, operationToken);
+        const before = cloneImageData(grainImage), masks = emptyLayer(width, height);
+        for (let offset = 0; offset < masks.data.length; offset += 4) { masks.data[offset] = 255; masks.data[offset + 3] = 255; }
+        async function auditMap(map, record, selectedMasks) {
+          const baked = bakeFlatGrainMap(before, selectedMasks || masks, { width: width, height: height, map: map }, record);
+          return { baked: baked, audit: await auditFlatBakeOracle(oracleResource, before, baked.afterBake, selectedMasks || masks, record) };
+        }
+        const normal = await auditMap(correct, defaultRecord);
+        record("oracle-production-bake", normal.audit.expectedMismatchPxCount === 0 && normal.audit.nonLeatherChangedPxCount === 0,
+          JSON.stringify(normal.audit));
+        function mutatedMap(kind) {
+          const g0 = new Float64Array(width * height);
+          for (let index = 0; index < g0.length; index += 1) { const o = index * 4; const value = (.2126 * rgba[o] + .7152 * rgba[o + 1] + .0722 * rgba[o + 2]) / 255; g0[index] = kind === "float32" ? Math.fround(value) : value; }
+          function indexFor(value, size) {
+            if (kind === "mirror") return ((value % size) + size) % size;
+            const period = 2 * size, t = ((value % period) + period) % period; return t < size ? t : period - 1 - t;
+          }
+          const output = new Float64Array(g0.length), divisor = (2 * radius + 1) ** 2;
+          for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+            let sum = 0;
+            if (kind === "loop-order") for (let dx = -radius; dx <= radius; dx += 1) for (let dy = -radius; dy <= radius; dy += 1) sum += g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)];
+            else for (let dy = -radius; dy <= radius; dy += 1) for (let dx = -radius; dx <= radius; dx += 1) sum = kind === "float32" ? Math.fround(sum + g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)]) : sum + g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)];
+            const ratio = g0[y * width + x] / (sum / divisor); output[y * width + x] = Math.max(1 - amp, Math.min(1 + amp, ratio));
+          }
+          return output;
+        }
+        async function detectIntegratedMutation(kind, mutation) {
+          let candidate = await auditMap(mutation, defaultRecord);
+          if (candidate.audit.expectedMismatchPxCount > 0) return { audit: candidate.audit, tuned: false };
+          for (let index = 0; index < mutation.length; index += 1) {
+            if (Object.is(mutation[index], correct[index])) continue;
+            const offset = index * 4;
+            const sourceLum = luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]);
+            const midpoint = (mutation[index] + correct[index]) / 2;
+            if (!(sourceLum > 0) || !(midpoint > 0)) continue;
+            for (let boundary = 1.5; boundary < defaultRecord.grainBase * midpoint; boundary += 1) {
+              const scale = boundary / midpoint;
+              if (!(scale > 0) || scale > defaultRecord.grainBase) continue;
+              const tunedFlatWhite = sourceLum * defaultRecord.grainBase / scale;
+              if (!(tunedFlatWhite > 0) || tunedFlatWhite > 1) continue;
+              const tunedRecord = Object.assign({}, defaultRecord, { flatWhite: tunedFlatWhite });
+              const normalTuned = await auditMap(correct, tunedRecord), mutationTuned = await auditMap(mutation, tunedRecord);
+              if (normalTuned.audit.expectedMismatchPxCount === 0 && mutationTuned.audit.expectedMismatchPxCount > 0) {
+                return { audit: mutationTuned.audit, tuned: true, grainIndex: index, flatWhite: tunedRecord.flatWhite };
+              }
+            }
+          }
+          return { audit: candidate.audit, tuned: false };
+        }
+        for (const kind of ["float32", "mirror", "loop-order"]) {
+          const detected = await detectIntegratedMutation(kind, mutatedMap(kind));
+          record("oracle-mutation-" + kind, detected.audit.expectedMismatchPxCount > 0, JSON.stringify(detected));
+        }
+        const fixedOne = new Float64Array(correct.length); fixedOne.fill(1);
+        const fixedDetected = await detectIntegratedMutation("grain-one", fixedOne);
+        record("oracle-mutation-grain-one", fixedDetected.audit.expectedMismatchPxCount > 0, JSON.stringify(fixedDetected));
+        const nonLeatherMasks = cloneImageData(masks), nonLeatherOffset = (width * height - 1) * 4;
+        nonLeatherMasks.data[nonLeatherOffset] = 0;
+        const nonLeatherBaseline = await auditMap(correct, defaultRecord, nonLeatherMasks);
+        const nonLeatherAfter = cloneImageData(nonLeatherBaseline.baked.afterBake);
+        nonLeatherAfter.data[nonLeatherOffset] = (nonLeatherAfter.data[nonLeatherOffset] + 1) & 255;
+        const nonLeatherAudit = await auditFlatBakeOracle(oracleResource, before, nonLeatherAfter, nonLeatherMasks, defaultRecord);
+        record("oracle-mutation-nonleather", nonLeatherBaseline.audit.expectedMismatchPxCount === 0 && nonLeatherBaseline.audit.nonLeatherChangedPxCount === 0
+          && nonLeatherAudit.nonLeatherChangedPxCount > 0, JSON.stringify(nonLeatherAudit));
+      } catch (error) { record("oracle-mutation-suite", false, error.message); }
+
+      try {
+        const layer = emptyLayer(1016, 100);
+        for (let component = 0; component < 6; component += 1) for (let y = 0; y < 100; y += 1) for (let x = component * 160; x < component * 160 + 55; x += 1) layer.data[(y * 1016 + x) * 4 + 3] = 255;
+        const valid = validateHorseshoeManualKeep(layer);
+        const finalMasks = emptyLayer(955, 100);
+        for (let y = 0; y < 100; y += 1) for (let x = 0; x < 955; x += 1) {
+          const sourceX = Math.min(1015, Math.floor((x + .5) * 1016 / 955));
+          finalMasks.data[(y * 955 + x) * 4 + 3] = layer.data[(y * 1016 + sourceX) * 4 + 3] === 255 ? 0 : 255;
+        }
+        const correction = { workSize: { w: 1016, h: 100 }, assetSize: { w: 955, h: 100 } };
+        const validFinal = validateFinalHorseshoeKeep(finalMasks, layer, correction);
+        const foreignMasks = cloneImageData(finalMasks), missingMasks = cloneImageData(finalMasks);
+        let foreignIndex = -1, missingIndex = -1;
+        for (let index = 0; index < 955 * 100; index += 1) {
+          if (foreignIndex < 0 && finalMasks.data[index * 4 + 3] >= 128) foreignIndex = index;
+          if (missingIndex < 0 && finalMasks.data[index * 4 + 3] < 128) missingIndex = index;
+        }
+        foreignMasks.data[foreignIndex * 4 + 3] = 0; missingMasks.data[missingIndex * 4 + 3] = 255;
+        const foreign = validateFinalHorseshoeKeep(foreignMasks, layer, correction), missing = validateFinalHorseshoeKeep(missingMasks, layer, correction);
+        for (let x = 55; x < 160; x += 1) layer.data[(50 * 1016 + x) * 4 + 3] = 255;
+        const duplicate = validateHorseshoeManualKeep(layer);
+        record("stone-six-components", valid.pass && validFinal.pass && validFinal.actualArea < 32000 && !foreign.pass && foreign.extraPxCount === 1 && !missing.pass && missing.missingPxCount === 1 && !duplicate.pass && duplicate.componentCount8 === 5,
+          "input=" + JSON.stringify(valid) + " / shrink=" + JSON.stringify(validFinal) + " / foreign=" + JSON.stringify(foreign) + " / missing=" + JSON.stringify(missing) + " / duplicate=" + JSON.stringify(duplicate));
+      } catch (error) { record("stone-six-components", false, error.message); }
+      const report = { status: results.every(function (item) { return item.status === "pass"; }) ? "pass" : "fail", toolVersion: TOOL_VERSION, results: results };
+      console.table(results);
+      return report;
+      } finally {
+        endOperation(operationToken);
+      }
+    }
+
     function init() {
       CHARM_KEYS.forEach(function (key) { const option = document.createElement("option"); option.value = key; option.textContent = CHARM_SPECS[key].label; dom.charmSelect.appendChild(option); });
       dom.charmSelect.value = state.selectedKey;
@@ -4513,6 +5167,11 @@
           automationResult.dataset.complete = "true";
         });
       }
+      if (new URLSearchParams(location.search).get("selftest") === "1") {
+        const selfTestResult = document.createElement("pre"); selfTestResult.id = "selfTestResult"; selfTestResult.textContent = JSON.stringify({ status: "running" }); document.body.appendChild(selfTestResult);
+        runInternalSelfTests().then(function (report) { selfTestResult.textContent = JSON.stringify(report); selfTestResult.dataset.complete = "true"; })
+          .catch(function (error) { selfTestResult.textContent = JSON.stringify({ status: "error", error: error.message }); selfTestResult.dataset.complete = "true"; });
+      }
     }
 
     function publicStateSnapshot() {
@@ -4550,6 +5209,7 @@
       verifyArchive: async function (input, options) { return detachedPublicValue(await verifyArchive(input, options)); },
       generateRingAssets: async function (options) { return detachedPublicValue(await generateRingAssets(options)); },
       buildFlatRegressionSheets: async function (options) { return detachedPublicValue(await buildFlatRegressionSheets(options)); },
+      runInternalSelfTests: async function () { return detachedPublicValue(await runInternalSelfTests()); },
       setGrainScaleMm: function (value) {
         if (state.operation) throw new Error("処理中はgrainScaleMmを変更できません");
         if (!Number.isFinite(value) || value <= 0) throw new Error("grainScaleMmは正の有限値が必要です");
