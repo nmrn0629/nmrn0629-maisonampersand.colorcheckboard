@@ -1,9 +1,9 @@
-# チャーム組み合わせ表示 実装指示書 v2（Codex 向け・改訂14対応）
+# チャーム組み合わせ表示 実装指示書 v2（Codex 向け・改訂15対応）
 
-- 作成日: 2026-07-19
-- 正本計画: `plans/charm-combo-display-plan.md` **revision 14**
+- 作成日: 2026-07-19（改訂15対応更新: 2026-07-22 — protectedFiles の実在ファイル限定化。技術値は改訂14から不変・計画書 §0-C）
+- 正本計画: `plans/charm-combo-display-plan.md` **revision 15**
 - 進行契約: `plans/charm-combo-codex-claude-sync-plan.md`（同期計画）**Phase 3〜7・§2-4 commit chain**
-- **技術値の優先関係**: 同期計画の権限は進行機構（Phase 順序・commit chain・handoff・専用 worktree・還流票）に限定され、**技術値（素材・色・検査・数量）は計画書 rev14 が優先**する。同期計画に残る referenceIvory / DISPLAY_COLORS / 216 等の旧値は **計画書 §8 の override map** に従い DISPLAY_VARIANTS / approvedHex / 192 へ読み替える
+- **技術値の優先関係**: 同期計画の権限は進行機構（Phase 順序・commit chain・handoff・専用 worktree・還流票）に限定され、**技術値（素材・色・検査・数量）は計画書 rev15 が優先**する。同期計画に残る referenceIvory / DISPLAY_COLORS / 216 / protectedFiles 2点（index.html・bags.html）等の旧値は **計画書 §8 の override map** に従い DISPLAY_VARIANTS / approvedHex / 192 / protectedFiles = [index.html] へ読み替える
 - revision lock: `plans/charm-combo-revision-lock.json`
 - 本書は旧 `plans/impl-instructions-charm-combo-display.md`（改訂8時点・7種/168組/64配置/転記9項目）を**置換**する。旧指示書は SUPERSEDED（DO NOT EXECUTE）であり、いかなる数量・手順も旧指示書から読まない
 
@@ -12,18 +12,18 @@
 あなたは、革小物ブランド「maison &.」カラーシミュレーターの**チャーム組み合わせ表示ページ**の実装を担当します。
 
 - **作るもの**:
-  1. `tools/charm-prep.html` の改訂14対応更新（Phase 3） — INPUT_MANIFEST 8種・COLOR_REFERENCE_MANIFEST・LEATHER_VARIANTS 27・MATERIAL_PROFILES 2・schemaVersion 5・toolVersion 0.6.0・swan の CHARM_SPECS 登録。**実装済みコミット 39fe815 のツールを正として拡張する**（straight RGBA・独立 F oracle・mutation・Worker 世代管理は実装済み — 定数と material 分岐の更新が中心）
+  1. `tools/charm-prep.html` の改訂15対応更新（Phase 3・技術値は改訂14確定値から不変） — INPUT_MANIFEST 8種・COLOR_REFERENCE_MANIFEST・LEATHER_VARIANTS 27・MATERIAL_PROFILES 2・schemaVersion 5・toolVersion 0.6.0・swan の CHARM_SPECS 登録。**実装済みコミット 39fe815 のツールを正として拡張する**（straight RGBA・独立 F oracle・mutation・Worker 世代管理は実装済み — 定数と material 分岐の更新が中心）
   2. 派生アセット一式の再生成（Phase 4） — `source-photos/`（canonicalSource 8点・Phase 1 凍結済み）から `assets/charms/`（8種の base/masks/prep.json/manual-*）・`assets/rings/`（丸カン透過PNG 銀/金）を**全8種**生成
   3. `charms.html` の完成実装（Phase 6） — 左右チャーム（8種＋なし）× LEATHER_VARIANTS（material 絞り込み・現行 calf 24色）× 金具（丸カン銀/金）× ロゴカラー（金/銀）× ステッチ（白/黒）
-- **技術仕様の正**: `plans/charm-combo-display-plan.md` revision 14（本書と矛盾したら**計画書を優先**し、矛盾に気づいたことを報告する）
+- **技術仕様の正**: `plans/charm-combo-display-plan.md` revision 15（本書と矛盾したら**計画書を優先**し、矛盾に気づいたことを報告する）
 - **実装前に計画書全文を精読すること**（特に §0-A・§0-B・§4-1c・§5-2・§5-4・§5-6・§7・§9）
 
-## 0-A. 数量契約（改訂14 — 計画書 §0-A と同一値・revision lock の counts と一致必須）
+## 0-A. 数量契約（改訂15 — 計画書 §0-A と同一値・revision lock の counts と一致必須）
 
 <!-- COUNTS-CONTRACT-BEGIN -->
 | countKey | 値 |
 |---|---:|
-| planRevision | 14 |
+| planRevision | 15 |
 | charms | 8 |
 | materialProfiles | 2 |
 | leatherVariants | 27 |
@@ -45,11 +45,11 @@
   1. revision lock（`plans/charm-combo-revision-lock.json`）の manifestPayloadSha256・documents 3点 SHA・counts の照合が PASS
   2. selectedPhase2EvidenceCommit の親子関係（親 = selectedLockCommit ただ一つ）・許可 path・handoffPayloadSha256 が PASS（`git show` ベース）
   3. dirty worktree の保全（同期計画 §7-0 の8手順 — バックアップ・SHA 照合・復元試験・ユーザー承認）が完了
-  4. **selectedPhase2EvidenceCommit そのものを開始点とする専用 worktree**（`git worktree add -b feature/charm-combo-codex-rev14 <path> <selectedPhase2EvidenceCommit>`）が clean で、元 worktree が読み取り専用として台帳化済み
+  4. **selectedPhase2EvidenceCommit そのものを開始点とする専用 worktree**（`git worktree add -b feature/charm-combo-codex-rev15 <path> <selectedPhase2EvidenceCommit>`）が clean で、元 worktree が読み取り専用として台帳化済み
 - Phase 3〜7 の生成・検証・コミットは**専用 worktree だけ**で行う。元 worktree への自動コピー・merge・restore は禁止
 - コミットは同期計画 §13 の順（toolCommit → phase-3 evidence → assetCommit → phase-4 evidence → shapeApprovalCommit → phase-5 evidence → charmsCommit → phase-6 evidence → colorReviewCommit → phase-7 evidence）。各 phaseOutputCommit / phaseEvidenceCommit の親子・許可 path・handoffPayloadSha256 は同期計画 §2-4 の契約どおり。メッセージは英語
 - **禁止事項（厳守）**:
-  - `index.html`・`bags.html` の変更（1バイトも変えない。protectedFiles — `git diff --exit-code <phase3StartHead> -- index.html bags.html` と byte SHA の両方で無変更を証明）
+  - `index.html` の変更（1バイトも変えない。**protectedFiles = [`index.html`] の1点のみ**〔改訂15・計画書 §0-C-1・§8 override map〕 — `git diff --exit-code <phase3StartHead> -- index.html` と byte SHA の両方で無変更を証明。**`bags.html` は phase3StartHead の系統に存在しないため protectedFiles 対象外** — 参照は §10 の読み取り専用参照のみ。同期計画の「index.html・bags.html の2点」記述は override map で index.html 単独へ読み替える）
   - main へのマージ・リモートへの push（ローカルコミットのみ。push はユーザー指示待ち）
   - フレームワーク・ビルドツール・npm の導入（1ファイル自己完結・vanilla JS を維持）
   - Canvas `toBlob` を base/masks/manual 派生 PNG の正規エンコーダーに使う（straight RGBA エンコーダー必須 — 計画書 §5-4）
@@ -162,7 +162,7 @@ const cacheKey = (job) => `${job.charmKey}|${job.variantKey}|${job.materialKey}|
 
 ## 6. 期待出力ハッシュ照合の実施手順（コミット前検査8・計画書 §5-4）
 
-**改訂14では canvas 経由のデコードを使わない**。書き出し済み PNG を**独立 PNG パーサ（parsePngRgba / decodeStraightPngBlob — 39fe815 実装済み）**で straight RGBA へデコードし、`crypto.subtle.digest("SHA-256", rgba)` を prep.json の期待出力ハッシュと照合する。straight marker（toolVersion 付き）・CRC・IHDR・IDAT 順序・filter・寸法・展開量の検査を含む。三者照合（入力照合〔マニフェスト込み〕・出力照合・再生成照合）は計画書 §5-4 検査8 の定義どおり。**8種すべて合格するまで派生アセットをコミットしない**。
+**改訂14以降は canvas 経由のデコードを使わない**。書き出し済み PNG を**独立 PNG パーサ（parsePngRgba / decodeStraightPngBlob — 39fe815 実装済み）**で straight RGBA へデコードし、`crypto.subtle.digest("SHA-256", rgba)` を prep.json の期待出力ハッシュと照合する。straight marker（toolVersion 付き）・CRC・IHDR・IDAT 順序・filter・寸法・展開量の検査を含む。三者照合（入力照合〔マニフェスト込み〕・出力照合・再生成照合）は計画書 §5-4 検査8 の定義どおり。**8種すべて合格するまで派生アセットをコミットしない**。
 
 ## 7. 有限値検査（ゲート化・計画書 §9-13）
 
@@ -189,13 +189,13 @@ const cacheKey = (job) => `${job.charmKey}|${job.variantKey}|${job.materialKey}|
 
 ## 10. リポジトリ内の参考ファイル
 
-- `plans/charm-combo-display-plan.md`（revision 14） — **技術仕様の正（最初に全文精読）**
+- `plans/charm-combo-display-plan.md`（revision 15） — **技術仕様の正（最初に全文精読）**
 - `plans/charm-combo-codex-claude-sync-plan.md` — 進行・commit chain・handoff・還流票の正本
 - `plans/charm-approved-source-freeze.json` / `plans/charm-approved-color-freeze.json` — 素材・色の凍結正本
 - `reports/charm-combo/rev14/phase-1-approvals.md` — 承認台帳（AE-20260718-01〜14）
 - コミット 39fe815 の `tools/charm-prep.html` — straight RGBA・F oracle・mutation・Worker 世代管理の実装済み参照（`git show 39fe815:tools/charm-prep.html`）
 - コミット 3cf9f1c の `charms.html` — 代表チャーム版（Phase 6 の拡張元）
-- `index.html` — `metalTone()`・`extractKeyRingAsset()`（丸カン透過PNG生成に1回だけ使用）・CSS変数・スウォッチUI・`copySummaryText()`。**参照のみ、変更禁止**
-- `bags.html` — グループ選択UI・サマリー＋コピー・レスポンシブの流用元。**参照のみ、変更禁止**
+- `index.html` — `metalTone()`・`extractKeyRingAsset()`（丸カン透過PNG生成に1回だけ使用）・CSS変数・スウォッチUI・`copySummaryText()`。**参照のみ、変更禁止（protectedFiles の唯一の対象・§1）**
+- `bags.html`（**worktree には存在しない** — ローカルブランチ `ミニバッグ実装テスト-opus` のコミット `b29274f` を `git show b29274f:bags.html` で読む・同一リポジトリ内オブジェクト） — グループ選択UI・サマリー＋コピー・レスポンシブの流用元。**読み取り専用のコミット固定参照であり protectedFiles 対象外**（改訂15・計画書 §0-C-2。phase3StartHead の系統に bags.html は存在しないため byte 不変証明の対象にならない）
 
 以上。丁寧に実装してください。各チェックポイントでの停止と日本語報告、Phase ごとの commit chain 契約（同期計画 §2-4）の遵守を忘れずに。

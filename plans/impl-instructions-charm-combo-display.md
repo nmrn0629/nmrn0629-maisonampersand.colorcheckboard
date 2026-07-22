@@ -1,7 +1,7 @@
 <!-- SUPERSEDED-METADATA-BEGIN
 status: SUPERSEDED — DO NOT EXECUTE
 supersededAt: 2026-07-18
-successorPlan: plans/charm-combo-display-plan.md revision 14
+successorPlan: plans/charm-combo-display-plan.md revision 15
 successorInstructions: plans/impl-instructions-charm-combo-display-v2.md
 lockManifest: plans/charm-combo-revision-lock.json
 SUPERSEDED-METADATA-END -->
