@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "phase": 3,
+  "planRevision": 15,
+  "toolVersion": "0.6.0",
+  "status": "pass",
+  "executedAt": "2026-07-26T07:14:17Z",
+  "method": {
+    "transport": "http",
+    "url": "http://127.0.0.1:8899/tools/charm-prep.html?selftest=1",
+    "browser": "Codex In-app Browser"
+  },
+  "resultCount": 24,
+  "results": [
+    { "name": "phase3-schema-and-version", "status": "pass" },
+    { "name": "phase3-counts", "status": "pass" },
+    { "name": "phase3-source-tone-one-to-one", "status": "pass" },
+    { "name": "phase3-source-manifest", "status": "pass" },
+    { "name": "phase3-color-reference-manifest", "status": "pass" },
+    { "name": "phase3-material-profiles", "status": "pass" },
+    { "name": "phase3-freeze-transfer", "status": "pass" },
+    { "name": "phase3-variant-transfer", "status": "pass" },
+    { "name": "phase3-measured-inputs", "status": "pass" },
+    { "name": "png-low-alpha-straight-rgba", "status": "pass" },
+    { "name": "png-marker-required", "status": "pass" },
+    { "name": "png-crc-rejection", "status": "pass" },
+    { "name": "png-encoder-paeth-vectors", "status": "pass" },
+    { "name": "png-decoder-paeth-vectors", "status": "pass" },
+    { "name": "manual-marker-and-alpha-contract", "status": "pass" },
+    { "name": "worker-generation-timeout-cleanup", "status": "pass" },
+    { "name": "oracle-2x2-constant-gray", "status": "pass" },
+    { "name": "oracle-production-bake", "status": "pass" },
+    { "name": "oracle-mutation-float32", "status": "pass" },
+    { "name": "oracle-mutation-mirror", "status": "pass" },
+    { "name": "oracle-mutation-loop-order", "status": "pass" },
+    { "name": "oracle-mutation-grain-one", "status": "pass" },
+    { "name": "oracle-mutation-nonleather", "status": "pass" },
+    { "name": "stone-six-components", "status": "pass" }
+  ],
+  "mutationProbes": {
+    "count": 5,
+    "allDetected": true,
+    "negativeProbeFailuresAreExpected": true
+  },
+  "contractSnapshot": {
+    "charms": 8,
+    "materialProfiles": 2,
+    "leatherVariants": 27,
+    "finiteCases": 192,
+    "layouts": 81,
+    "swanSizeMmMeasuredConfirmed": false,
+    "swanStitchMode": "detect-provisional-phase4"
+  },
+  "staticChecks": {
+    "nodeSyntax": "pass",
+    "gitDiffCheck": "pass",
+    "protectedIndexHtml": "pass",
+    "nearestOpaqueExhaustiveAndRandomAudit": "pass"
+  },
+  "codexCliReview": {
+    "status": "not-run",
+    "attempts": 2,
+    "reason": "初回は~/.codex/state_5.sqliteのreadonly DBエラー、再試行はapi.openai.comの名前解決失敗で終了。"
+  },
+  "unresolved": [
+    "swanのstitchModeはPhase 4で実画素から確定する。",
+    "Phase 4開始前にcanonicalSource 8点のSHA照合結果をユーザーへ報告し確認を受ける。"
+  ]
+}
