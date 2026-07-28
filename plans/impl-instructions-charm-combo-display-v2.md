@@ -1,9 +1,9 @@
-# チャーム組み合わせ表示 実装指示書 v2（Codex 向け・改訂15対応）
+# チャーム組み合わせ表示 実装指示書 v2（Codex 向け・改訂16対応）
 
-- 作成日: 2026-07-19（改訂15対応更新: 2026-07-22 — protectedFiles の実在ファイル限定化。技術値は改訂14から不変・計画書 §0-C）
-- 正本計画: `plans/charm-combo-display-plan.md` **revision 15**
+- 作成日: 2026-07-19（改訂16対応更新: 2026-07-28 — Phase 4 実測の還流〔swan 実寸確定 W90×H90・frenchie cropSource・osanpo manual-owner 決定的レシピ・toolVersion 0.7.0〕・計画書 §0-D。改訂15対応更新: 2026-07-22 — protectedFiles の実在ファイル限定化・計画書 §0-C）
+- 正本計画: `plans/charm-combo-display-plan.md` **revision 16**
 - 進行契約: `plans/charm-combo-codex-claude-sync-plan.md`（同期計画）**Phase 3〜7・§2-4 commit chain**
-- **技術値の優先関係**: 同期計画の権限は進行機構（Phase 順序・commit chain・handoff・専用 worktree・還流票）に限定され、**技術値（素材・色・検査・数量）は計画書 rev15 が優先**する。同期計画に残る referenceIvory / DISPLAY_COLORS / 216 / protectedFiles 2点（index.html・bags.html）等の旧値は **計画書 §8 の override map** に従い DISPLAY_VARIANTS / approvedHex / 192 / protectedFiles = [index.html] へ読み替える
+- **技術値の優先関係**: 同期計画の権限は進行機構（Phase 順序・commit chain・handoff・専用 worktree・還流票）に限定され、**技術値（素材・色・検査・数量）は計画書 rev16 が優先**する。同期計画に残る referenceIvory / DISPLAY_COLORS / 216 / protectedFiles 2点（index.html・bags.html）等の旧値は **計画書 §8 の override map** に従い DISPLAY_VARIANTS / approvedHex / 192 / protectedFiles = [index.html] へ読み替える
 - revision lock: `plans/charm-combo-revision-lock.json`
 - 本書は旧 `plans/impl-instructions-charm-combo-display.md`（改訂8時点・7種/168組/64配置/転記9項目）を**置換**する。旧指示書は SUPERSEDED（DO NOT EXECUTE）であり、いかなる数量・手順も旧指示書から読まない
 
@@ -12,18 +12,18 @@
 あなたは、革小物ブランド「maison &.」カラーシミュレーターの**チャーム組み合わせ表示ページ**の実装を担当します。
 
 - **作るもの**:
-  1. `tools/charm-prep.html` の改訂15対応更新（Phase 3・技術値は改訂14確定値から不変） — INPUT_MANIFEST 8種・COLOR_REFERENCE_MANIFEST・LEATHER_VARIANTS 27・MATERIAL_PROFILES 2・schemaVersion 5・toolVersion 0.6.0・swan の CHARM_SPECS 登録。**実装済みコミット 39fe815 のツールを正として拡張する**（straight RGBA・独立 F oracle・mutation・Worker 世代管理は実装済み — 定数と material 分岐の更新が中心）
+  1. `tools/charm-prep.html` の改訂16対応更新（Phase 3） — INPUT_MANIFEST 8種・COLOR_REFERENCE_MANIFEST・LEATHER_VARIANTS 27・MATERIAL_PROFILES 2・schemaVersion 5・**toolVersion 0.7.0**・swan の CHARM_SPECS 登録に加え、**改訂16分 = frenchie の cropSource 定数 {x:320, y:848, w:1105, h:1312}（計画書 §0-D-2・§5-4）・osanpo の manual-alpha / manual-owner 決定的レシピ `OSANPO_COLORLESS_MANUAL`（id "osanpo-colorless-20260728-v1"・定数一式とアルゴリズムは計画書 §0-D-3 が正本 — 定数の転記は §0-D-3 の値と完全一致させる）・sizeMmMeasured 全8種 true（swan 受領日 2026-07-28・計画書 §0-D-1）・チェーン外追補 763cf1e の swan ステッチ判定 UI／selftest 復元堅牢化の正規取り込み（計画書 §0-D-4）**。**旧 phase-3 evidence（e71507d）時点のツール＋763cf1e の内容を正として拡張する**（straight RGBA・独立 F oracle・mutation・Worker 世代管理は実装済み）
   2. 派生アセット一式の再生成（Phase 4） — `source-photos/`（canonicalSource 8点・Phase 1 凍結済み）から `assets/charms/`（8種の base/masks/prep.json/manual-*）・`assets/rings/`（丸カン透過PNG 銀/金）を**全8種**生成
   3. `charms.html` の完成実装（Phase 6） — 左右チャーム（8種＋なし）× LEATHER_VARIANTS（material 絞り込み・現行 calf 24色）× 金具（丸カン銀/金）× ロゴカラー（金/銀）× ステッチ（白/黒）
-- **技術仕様の正**: `plans/charm-combo-display-plan.md` revision 15（本書と矛盾したら**計画書を優先**し、矛盾に気づいたことを報告する）
-- **実装前に計画書全文を精読すること**（特に §0-A・§0-B・§4-1c・§5-2・§5-4・§5-6・§7・§9）
+- **技術仕様の正**: `plans/charm-combo-display-plan.md` revision 16（本書と矛盾したら**計画書を優先**し、矛盾に気づいたことを報告する）
+- **実装前に計画書全文を精読すること**（特に §0-A・§0-B・§0-D・§4-1c・§5-2・§5-4・§5-6・§7・§9）
 
-## 0-A. 数量契約（改訂15 — 計画書 §0-A と同一値・revision lock の counts と一致必須）
+## 0-A. 数量契約（改訂16 — 計画書 §0-A と同一値・revision lock の counts と一致必須）
 
 <!-- COUNTS-CONTRACT-BEGIN -->
 | countKey | 値 |
 |---|---:|
-| planRevision | 15 |
+| planRevision | 16 |
 | charms | 8 |
 | materialProfiles | 2 |
 | leatherVariants | 27 |
@@ -45,7 +45,7 @@
   1. revision lock（`plans/charm-combo-revision-lock.json`）の manifestPayloadSha256・documents 3点 SHA・counts の照合が PASS
   2. selectedPhase2EvidenceCommit の親子関係（親 = selectedLockCommit ただ一つ）・許可 path・handoffPayloadSha256 が PASS（`git show` ベース）
   3. dirty worktree の保全（同期計画 §7-0 の8手順 — バックアップ・SHA 照合・復元試験・ユーザー承認）が完了
-  4. **selectedPhase2EvidenceCommit そのものを開始点とする専用 worktree**（`git worktree add -b feature/charm-combo-codex-rev15 <path> <selectedPhase2EvidenceCommit>`）が clean で、元 worktree が読み取り専用として台帳化済み
+  4. **selectedPhase2EvidenceCommit そのものを開始点とする専用 worktree**（`git worktree add -b feature/charm-combo-codex-rev16 <path> <selectedPhase2EvidenceCommit>`）が clean で、元 worktree が読み取り専用として台帳化済み
 - Phase 3〜7 の生成・検証・コミットは**専用 worktree だけ**で行う。元 worktree への自動コピー・merge・restore は禁止
 - コミットは同期計画 §13 の順（toolCommit → phase-3 evidence → assetCommit → phase-4 evidence → shapeApprovalCommit → phase-5 evidence → charmsCommit → phase-6 evidence → colorReviewCommit → phase-7 evidence）。各 phaseOutputCommit / phaseEvidenceCommit の親子・許可 path・handoffPayloadSha256 は同期計画 §2-4 の契約どおり。メッセージは英語
 - **禁止事項（厳守）**:
@@ -75,9 +75,9 @@
 
 各 Phase の開始時検証・成果物・handoff・停止条件は同期計画の当該節（§7〜§11）を正とする。以下は停止チェックポイントの要約。
 
-- **Phase 3（ツール同期）**: INPUT_MANIFEST（8種＋grain 2点 — **値は freeze JSON から直接生成**・§2）・CHARM_SPECS 8種（swan 登録・全種 colorless/flat）・COLOR_REFERENCE_MANIFEST・LEATHER_VARIANTS 27・MATERIAL_PROFILES 2・schemaVersion 5・toolVersion "0.6.0" へ更新。**selftest=1 全通過**を確認し、`tools/charm-prep.html` だけを toolCommit へ固定。prep-selftest.json＋phase-3-handoff.json を phase-3 evidence commit へ
+- **Phase 3（ツール同期）**: INPUT_MANIFEST（8種＋grain 2点 — **値は freeze JSON から直接生成**・§2）・CHARM_SPECS 8種（swan 登録・全種 colorless/flat・**sizeMmMeasured 全8種 true〔swan 2026-07-28〕・frenchie cropSource {x:320, y:848, w:1105, h:1312}・osanpo manualRecipe = `OSANPO_COLORLESS_MANUAL`〔id "osanpo-colorless-20260728-v1"・定数一式とアルゴリズムは計画書 §0-D-3 の正本値を完全一致で転記。manual-alpha（閉領域 flood-fill 前景化・吊り穴 α0）と manual-owner（破線 B・ロゴ G）を horseshoe と同一の補助関数群で機械生成・全 range 照合 fail-fast〕**）・COLOR_REFERENCE_MANIFEST・LEATHER_VARIANTS 27・MATERIAL_PROFILES 2・schemaVersion 5・**toolVersion "0.7.0"** へ更新し、**763cf1e の swan ステッチ判定 UI／selftest 復元堅牢化を正規に取り込む**（計画書 §0-D）。**selftest=1 全通過**（**改訂16 追加: ①CHARM_SPECS.frenchie.cropSource が契約値 {x:320, y:848, w:1105, h:1312} と完全一致 ②OSANPO_COLORLESS_MANUAL の id・全定数が計画書 §0-D-3 の契約値と完全一致 ③canonicalSource からの osanpo レシピ生成が全 range 照合〔mainWhiteRange・hangingHoleRange・stitchRange・logoRange〕PASS、の3検証項目を含む** — 計画書 §0-D-2/3）を確認し、`tools/charm-prep.html` だけを toolCommit へ固定。prep-selftest.json＋phase-3-handoff.json を phase-3 evidence commit へ。**osanpo レシピの定数は prep.json へ記録しない**（ツール定数 — 再現性は manual-*.png の SHA 経由で検査8 が機械検証。範囲・定数の変更が必要になったら還流票 → 再改訂・再ロック必須〔無断調整禁止〕。計画書 §0-D-3）
 - **チェックポイント①（Phase 4 冒頭・必須停止）**: canonicalSource 8点の SHA 照合結果（§4-1c マニフェストとの完全一致）を報告してユーザーの確認を待つ
-- **Phase 4（全8種再生成）**: パイプライン①〜⑩（⑦' material 別グレイン焼き込み・⑧' 二段階アスペクト補正・straight RGBA 書き出し）で全8種を生成。検査1〜7・M・F（独立 F oracle＋mutation 5種込み）→ 書き出し → 検査8（三者照合・最終 PNG 独立デコード）。§7 チェックリスト・81配置3条件・fixedVisualCaseCount 確定・**swan の stitchMode 確定**。成果物だけを assetCommit へ固定（tools・handoff を混在させない）
+- **Phase 4（全8種再生成）**: パイプライン①〜⑩（**① frenchie は cropSource 適用**・⑦' material 別グレイン焼き込み・⑧' 二段階アスペクト補正〔**swan は confirmed=true・preDistortion>3% のため適用対象**〕・straight RGBA 書き出し）で全8種を生成。検査1〜7・M・F（独立 F oracle＋mutation 5種込み）→ 書き出し → 検査8（三者照合・最終 PNG 独立デコード）。§7 チェックリスト・81配置3条件・fixedVisualCaseCount 確定・**swan の stitchMode 確定**（前回バッチ実測は detect 成立 — B所有 1,106・差分 1,106）・**osanpo はレシピ生成 manual-alpha / manual-owner で detect 成立を確認**（B>0・差分>0・threadColor="light"。生成画素数・成分数・検査5 実測値を prep-inspection-1-8.json へ記録 — 計画書 §0-D-3）・**frenchie は crop 後の §7-4 再判定（前景長辺 ≥600px）を記録**。素材検証レポートに計画書 §7「Phase 4 の成果物」④の**改訂16 追加分（osanpo レシピ記録・frenchie crop 記録・swan 補正記録）**を含める。成果物だけを assetCommit へ固定（tools・handoff を混在させない）
 - **チェックポイント②（Phase 4 完了時・必須停止）**: 素材検証レポート（8種構成 — 計画書 §7 の「Phase 4 の成果物」④）を報告し、**再撮影要否・例外承認の確認を得るまで Phase 5 の承認依頼に進まない**。「免除不可」項目の不合格は例外承認で通過できない
 - **Phase 5（形状・意匠QA）**: 各チャームの4面比較 — ①pipelineSource ②approvalReference ③新アセットの **calf:ivory（`#ece7dd`）表示** ④新アセットの **calf:black（`#41403d`）固定表示**（計画書 §8 override map — chevre 適用チャーム0のため同期計画 §9-1 の「シェーブル代表色」面を置換。material 切替不変性検査は現行 N/A）。**swan ロゴの立体陰影の見た目もここで最終判断**（AE-20260718-07）。全8種の形状承認まで charms.html 完成実装へ進まない
 - **Phase 6（charms.html 完成）**: 代表版を8種＋なしへ拡張。LAYOUT・BitmapLRU・renderGen・cacheKey（`charmKey|variantKey|materialKey|logo|stitch`）・flatLeatherTone・capture renderJob・ImageBitmap.close・debug harness は既存実装パターンをコピーする（同期計画 §10-2）。§9 受け入れ基準 0〜13 をセルフチェック
@@ -101,9 +101,10 @@
 | **Worker 世代管理**（新世代開始時に旧 Promise reject＋Worker terminate・operation token 照合・timeout 後の全解放） | §5-4 |
 | masks.α は**保持フラグ**（α<128=保持・保持画素の masks.RGB は読まない）・所有権恒等式3条件・共通述語 `masks.α≥128` | §5-2 |
 | フェザー帯も所有を持つ・出力α = base.α（二重減衰禁止）・baseLum は下位中央値 `floor((n-1)/2)` | §5-2 |
-| calibration の正本は prep.json のみ・**osanpo は manual-line 必須**（計測線は新素材上で新規指定 — 旧座標流用禁止） | §5-2 |
+| calibration の正本は prep.json のみ・**osanpo は manual-line 必須**（計測線は新素材上で新規指定 — 旧座標流用禁止）・**osanpo のステッチは自動検出不成立が確定 — manual-owner 決定的レシピで B 所有を機械生成**（detect 契約・検査5 の条件式は不変） | §5-2・§0-D-3 |
 | 検査5 は**完全列挙型ゲート**（detect/none/fallback の条件セット不合致・未知値は即不合格）。swan の stitchMode は Phase 4 判定 | §5-2・§5-4 |
-| ⑧' 二段階（⑧'-1 幾何変換〔colorless の base.RGB=nearest〕→ ⑧'-2 補正後α基準の再defringe〔④と同一関数〕）・swan は confirmed=false のため歪み>3% で停止 | §5-2 |
+| ⑧' 二段階（⑧'-1 幾何変換〔colorless の base.RGB=nearest〕→ ⑧'-2 補正後α基準の再defringe〔④と同一関数〕）・**sizeMmMeasured は全8種 confirmed=true（改訂16）— swan は preDistortion 7.081% のため補正適用対象・補正後値で検査3 判定** | §5-2・§0-D-1 |
+| **frenchie の cropSource {x:320, y:848, w:1105, h:1312}**（①で白余白を除去 → 長辺≤1200 縮小 → §7-4〔前景長辺≥600px〕を拡大なしで満たす。判定基準は不変・検査免除なし） | §5-4・§0-D-2・§7-4 |
 | 配置式は軸分離（y=前景 fgBboxPx 上端・x=革本体 bboxPx）・コンテンツ縦センタリング・81配置3条件 | §5-5 |
 | キャッシュキー **`charmKey|variantKey|materialKey|logo|stitch`**（丸カン金具は含めない）・LRU 8・退避時 `ImageBitmap.close()`・世代トークン | §5-7 |
 | サマリー文は §6-3 を一字一句（色名=canonicalLabel・材質表記は material 2種以上のときのみ・ロゴ/ステッチ表記の条件） | §6-3 |
@@ -189,7 +190,7 @@ const cacheKey = (job) => `${job.charmKey}|${job.variantKey}|${job.materialKey}|
 
 ## 10. リポジトリ内の参考ファイル
 
-- `plans/charm-combo-display-plan.md`（revision 15） — **技術仕様の正（最初に全文精読）**
+- `plans/charm-combo-display-plan.md`（revision 16） — **技術仕様の正（最初に全文精読）**
 - `plans/charm-combo-codex-claude-sync-plan.md` — 進行・commit chain・handoff・還流票の正本
 - `plans/charm-approved-source-freeze.json` / `plans/charm-approved-color-freeze.json` — 素材・色の凍結正本
 - `reports/charm-combo/rev14/phase-1-approvals.md` — 承認台帳（AE-20260718-01〜14）
