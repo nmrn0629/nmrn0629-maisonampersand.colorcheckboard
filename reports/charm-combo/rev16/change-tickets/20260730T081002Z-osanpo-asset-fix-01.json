@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "ticketId": "20260730T081002Z-osanpo-asset-fix-01",
+  "ticketPath": "reports/charm-combo/rev16/change-tickets/20260730T081002Z-osanpo-asset-fix-01.json",
+  "selectedLockCommit": "5cc72dd760257e52e46a636dac5d5064790e83a2",
+  "originPhase": "Phase 6",
+  "requestedRestartPhase": "Phase 4",
+  "implementationCommit": "ac2e9e686faf2cf6c90e5745a66a2be96da1ccdd",
+  "affectedCharms": ["osanpo"],
+  "changedArtifacts": [
+    {"path": "assets/charms/osanpo.base.png", "before": {"byteLength": 321200, "sha256": "518d6ac1eccc35af2aa0284d14688becd74c8ea66c6ab022de42c3b40f1ff1e6"}, "after": null},
+    {"path": "assets/charms/osanpo.masks.png", "before": {"byteLength": 14269, "sha256": "7cb8ddb6b291a6b4f7463bbf1b24a1ddf3cafdfae748bbca97db7954ac25d8e1"}, "after": null},
+    {"path": "assets/charms/osanpo.prep.json", "before": {"byteLength": 13041, "sha256": "326f148cfcbfa255aa5a381648010fdda1a6b93b7d3714ebbe78bceb08201a9c"}, "after": null},
+    {"path": "assets/charms/osanpo.manual-inpaint.png", "before": null, "after": null},
+    {"path": "assets/charms/osanpo.manual-owner.png", "before": {"byteLength": 12799, "sha256": "cd4dd2d4540061ce5f26271271a35f350e1e83eef9b4f69156551ad00ec25581"}, "after": null}
+  ],
+  "inputBefore": {"path": "source-photos/osanpo-colorless.png", "byteLength": 242184, "sha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e"},
+  "inputAfter": {"path": "source-photos/osanpo-colorless.png", "byteLength": 242184, "sha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e", "expected": "unchanged; inpaint is a derived manual layer"},
+  "contractChanged": [
+    "manual-inpaintの入力と検査8対象の最終base画素",
+    "osanpo manual-ownerのロゴROI除外とステッチB所有の共通述語",
+    "manual recipe range/selftest、検査5、検査8、Phase 4成果物SHA"
+  ],
+  "reason": "ユーザー確認で、osanpoのロゴ付近のステッチが白糸選択でも黒く残ること、および中央より上の水平傷が不要なことを確認した。前者は現行のlogoRoi全体exclusion、後者はcanonicalSource由来の不要画素が原因であり、charms.html単独の修正では契約を満たせない。",
+  "approvalEvidenceId": null,
+  "approvalEvidenceReason": "ユーザーの修正依頼は受領済み。正式なPhase 4再生成を承認するvisual-approval IDはClaude Code側の計画改訂後に発行する。",
+  "visualApproval": {"status": "pending", "reference": null, "note": "修正後の四面比較を再生成してユーザー確認を受ける。"},
+  "derivedImpact": {
+    "prep": true,
+    "manual": true,
+    "base": true,
+    "masks": true,
+    "CHARMS": true,
+    "DISPLAY_VARIANTS": false,
+    "layout": false,
+    "phase5ShapeApproval": true,
+    "phase6Charms": true
+  },
+  "verification": {
+    "diagnosticPath": "reports/charm-combo/rev16/change-tickets/20260730T081002Z-osanpo-asset-fix-01/diagnostic.json",
+    "diagnosticSha256": "d9f810f47e0143ba56d56239d998c54aa96c8cc16c667396e9dad388cf63bbcd",
+    "checks1to8": "not-run-after-change",
+    "M/F": "not-run-after-change",
+    "selftest": "not-run-after-change",
+    "visual": "bug-confirmed-before-change"
+  },
+  "planSections": ["§5-2", "§5-4", "§7", "§8 Phase 4", "§9", "sync §12-1", "sync §12-2"],
+  "stopStatus": {"stoppedUntilPlanRevision": true, "note": "計画改訂・Codexレビューok:true・新lock・Phase 4再生成の指示を受領するまで、osanpo派生アセットへの実装変更は行わない。"},
+  "ticketPayloadSha256": "aaa6b20a7ff593548763633205c062768499401c8a76a5ac6ba2d974b212c717"
+}

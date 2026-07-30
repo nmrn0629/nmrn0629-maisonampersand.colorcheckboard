@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "planRevision": 16,
+  "selectedLockCommit": "5cc72dd760257e52e46a636dac5d5064790e83a2",
+  "implementationCommit": "ac2e9e686faf2cf6c90e5745a66a2be96da1ccdd",
+  "affectedCharm": "osanpo",
+  "observedAt": "2026-07-30T08:10:02Z",
+  "source": {
+    "path": "source-photos/osanpo-colorless.png",
+    "byteLength": 242184,
+    "sha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e",
+    "role": "canonicalSource",
+    "unchanged": true
+  },
+  "baselineArtifacts": [
+    {
+      "path": "assets/charms/osanpo.base.png",
+      "byteLength": 321200,
+      "sha256": "518d6ac1eccc35af2aa0284d14688becd74c8ea66c6ab022de42c3b40f1ff1e6",
+      "decodedRgbaSha256": "94e8a0291c26ae0de53c0f358585577f59fea46ef0da7cc42f0e2d38587de806"
+    },
+    {
+      "path": "assets/charms/osanpo.masks.png",
+      "byteLength": 14269,
+      "sha256": "7cb8ddb6b291a6b4f7463bbf1b24a1ddf3cafdfae748bbca97db7954ac25d8e1",
+      "decodedRgbaSha256": "62a0c5a74e14bf3fa7a1bf0fb9b40c8cb30d73bada5043f9f5f83c18cb020b05"
+    },
+    {
+      "path": "assets/charms/osanpo.prep.json",
+      "byteLength": 13041,
+      "sha256": "326f148cfcbfa255aa5a381648010fdda1a6b93b7d3714ebbe78bceb08201a9c"
+    },
+    {
+      "path": "assets/charms/osanpo.manual-alpha.png",
+      "byteLength": 19269,
+      "sha256": "a4cd79ddfdd655a27d8f99d989a0aa9c8a18c4a10456f7b334dd754e6680e116"
+    },
+    {
+      "path": "assets/charms/osanpo.manual-owner.png",
+      "byteLength": 12799,
+      "sha256": "cd4dd2d4540061ce5f26271271a35f350e1e83eef9b4f69156551ad00ec25581"
+    }
+  ],
+  "horizontalArtifact": {
+    "presentIn": [
+      "source-photos/osanpo-colorless.png",
+      "assets/charms/osanpo.base.png"
+    ],
+    "assetRoiApprox": {"x": 510, "y": 530, "w": 189, "h": 8},
+    "brightCoreRoi": {"x": 513, "y": 532, "w": 183, "h": 3},
+    "interpretation": "革の意匠・ステッチ・ロゴマスクではなく、canonicalSourceから伝播した不要な水平傷。manual-inpaintで周辺テクスチャをサンプル置換する。"
+  },
+  "logoAdjacentStitch": {
+    "recipeId": "osanpo-colorless-20260728-v1",
+    "logoRoiWork": [0.53, 0.27, 0.68, 0.43],
+    "logoRoiAsset": {"x": 636, "y": 324, "w": 180, "h": 192},
+    "maskCountsWithinRoi": {"stitchB": 0, "logoG": 1221, "leatherR": 25170, "unownedMaskBackground": 8169},
+    "interpretation": "現行seedOsanpoOwnerがlogoRoi全体をstitch exclusionにしているため、ロゴ本体の外周付近のステッチがB所有にならず、white選択でもbaseの黒い糸が残る。ロゴ本体（G）を保護したまま周辺ステッチだけをBへ割り当てる生成契約へ変更する。"
+  },
+  "baselineVerification": {
+    "prepCheck1to8": "pass-before-change",
+    "prepCheck5": {"mode": "detect", "stitchPxCount": 16136, "diffPxCount": 16136},
+    "phase6Debug": "pass-before-change",
+    "afterChange": "not-run"
+  },
+  "requestedResolution": {
+    "manualInpaint": "既存manual-inpaintレイヤで水平傷の範囲を周辺の革テクスチャへ置換し、base/masks/prepの検査1〜8を再実行する。canonicalSource自体は変更しない。",
+    "manualOwner": "OSANPO_COLORLESS_MANUALの固定レシピを改訂し、ロゴ本体Gとその必要最小限の保護帯を除外しつつ、ロゴ周辺ステッチをB所有として機械生成する。定数・範囲・自己検査を同期更新する。",
+    "rerun": "Phase 4を再実施し、検査1〜8・M/F・検査8三者照合・Phase 5形状QA・Phase 6 debugを再発行する。"
+  }
+}
