@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "phase": 4,
+  "planRevision": 16,
+  "selectedLockCommit": "5cc72dd760257e52e46a636dac5d5064790e83a2",
+  "selectedPhase3EvidenceCommit": "9837c498794ce6a70ec471c7e73d4148543ddf78",
+  "phaseInputCommits": [
+    "9837c498794ce6a70ec471c7e73d4148543ddf78"
+  ],
+  "phaseOutputCommit": "e71a1d80d0bbfa0a05995d923f09eb288469cf30",
+  "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+  "sourceFreeze": {
+    "path": "plans/charm-approved-source-freeze.json",
+    "byteLength": 11365,
+    "sha256": "2e5f1bbbfba08aff37a6b512ed2f05dc48410f4a84272f4f5d56e1d29df1a1a6"
+  },
+  "colorFreeze": {
+    "path": "plans/charm-approved-color-freeze.json",
+    "byteLength": 36807,
+    "sha256": "93f38ddcce813fb3b43f145e53ff194383c85b5edf0c7f5b3f26c8971bae1fec"
+  },
+  "tool": {
+    "path": "tools/charm-prep.html",
+    "toolCommit": "8a363f297354d2c13016654f84cc1438db641018",
+    "byteLength": 459877,
+    "sha256": "88a7c8f7637b42509be9b555214caba5b42c2685b862da85b7aa752d25cfc282",
+    "toolVersion": "0.7.0",
+    "schemaVersion": 5
+  },
+  "protectedFiles": [
+    {
+      "path": "index.html",
+      "sha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b",
+      "gitDiffExitCode": 0
+    }
+  ],
+  "dedicatedWorktree": {
+    "path": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard/.worktrees/rev16-phase4",
+    "branch": "feature/charm-combo-codex-rev16-phase4",
+    "startHead": "9837c498794ce6a70ec471c7e73d4148543ddf78",
+    "head": "e71a1d80d0bbfa0a05995d923f09eb288469cf30",
+    "cleanAtStart": true
+  },
+  "artifacts": [
+    {"path":"assets/charms/cat.base.png","byteLength":176159,"sha256":"abbde2a2aed061835387765ae9de627c0848d76efd230b8943a35f2ea2530378"},
+    {"path":"assets/charms/cat.masks.png","byteLength":14260,"sha256":"a23be1b897087917ff9e79196bdcbe9391ca3241bdb539108ee77a73783ea081"},
+    {"path":"assets/charms/cat.prep.json","byteLength":11319,"sha256":"448197b7d84b639f6b04b26a41a18c0cbec456b2eb5be283abdb1cfda5b250b7"},
+    {"path":"assets/charms/dachshund.base.png","byteLength":202299,"sha256":"c39d8c6de1ea5832e789ba9182987cf4cb711896fda2a295020afc62f65f4131"},
+    {"path":"assets/charms/dachshund.masks.png","byteLength":14606,"sha256":"be4c59939add976d9fbae41ca2b1521d923a1330555247837e407a1832d91d72"},
+    {"path":"assets/charms/dachshund.prep.json","byteLength":11201,"sha256":"47cdce62b419a260148ce98aee9f6148c5bee0f1429c4730d475e5198f210d14"},
+    {"path":"assets/charms/frenchie.base.png","byteLength":236069,"sha256":"1d271e083be36a1d9916a788364815acca604f9bc9b194658f0f9e09107de630"},
+    {"path":"assets/charms/frenchie.masks.png","byteLength":16410,"sha256":"057c7ed7658d11cac6687b5e562b4dfd725e364c68ccc5a99dca8d8c4a56ad20"},
+    {"path":"assets/charms/frenchie.prep.json","byteLength":11338,"sha256":"693e29c071358bd3f70de5beed43e43518cf9627d95e08d5d50a3f5f780bfd31"},
+    {"path":"assets/charms/horse.base.png","byteLength":192448,"sha256":"2fd5ff98ea0ba449b591a561c6efc3421697b5ae32ca5726838afb6d9f1abb8a"},
+    {"path":"assets/charms/horse.masks.png","byteLength":15619,"sha256":"09fbd90b3d5fa85346ad1583565095d06b87e6c26acf8773b81fe7e91eb86e7f"},
+    {"path":"assets/charms/horse.prep.json","byteLength":11309,"sha256":"6c49f1a70c1b7d67b9a952355efb27dc840d817c4aa5974e8a70e1c16fe8c61d"},
+    {"path":"assets/charms/horseshoe.base.png","byteLength":561700,"sha256":"9e8b3b1aeb6d8257bc2d8824c1820c608384d15c990bb42b3c1b1e45515033d0"},
+    {"path":"assets/charms/horseshoe.manual-alpha.png","byteLength":57833,"sha256":"b13ca0cc9703adeba30a7f1b0dc8daf7954e22deba64370de3ab9bdd1a306b39"},
+    {"path":"assets/charms/horseshoe.manual-keep.png","byteLength":8096,"sha256":"a652adaaf45f971db75275b306e9c1eeb7da57e9d112e345188c9287079da5ce"},
+    {"path":"assets/charms/horseshoe.manual-owner.png","byteLength":16541,"sha256":"f479646c487b2fbbd3ee0d71a116f43e4864f5307bcd1cdb81acf7d507e0e4c4"},
+    {"path":"assets/charms/horseshoe.masks.png","byteLength":20856,"sha256":"06879903fd61db795d44ce3945b6e7d78001efc925a001a058d919d13d78e266"},
+    {"path":"assets/charms/horseshoe.prep.json","byteLength":13409,"sha256":"b7f957c23736af64e3faa13e89f640a2348bb3bb9d82e912877d4fb385eb1fbe"},
+    {"path":"assets/charms/osanpo.base.png","byteLength":321200,"sha256":"518d6ac1eccc35af2aa0284d14688becd74c8ea66c6ab022de42c3b40f1ff1e6"},
+    {"path":"assets/charms/osanpo.manual-alpha.png","byteLength":19269,"sha256":"a4cd79ddfdd655a27d8f99d989a0aa9c8a18c4a10456f7b334dd754e6680e116"},
+    {"path":"assets/charms/osanpo.manual-owner.png","byteLength":12799,"sha256":"cd4dd2d4540061ce5f26271271a35f350e1e83eef9b4f69156551ad00ec25581"},
+    {"path":"assets/charms/osanpo.masks.png","byteLength":14269,"sha256":"7cb8ddb6b291a6b4f7463bbf1b24a1ddf3cafdfae748bbca97db7954ac25d8e1"},
+    {"path":"assets/charms/osanpo.prep.json","byteLength":13041,"sha256":"326f148cfcbfa255aa5a381648010fdda1a6b93b7d3714ebbe78bceb08201a9c"},
+    {"path":"assets/charms/swan.base.png","byteLength":184968,"sha256":"abf8eef521fa0d46c6e6bb9e75afbcf2991df337ebb720181d16f97e0ea37ee8"},
+    {"path":"assets/charms/swan.masks.png","byteLength":14763,"sha256":"7928f9b527b75070c00d5495ad7cc5fd051c7e1ffac07e98f3bdaafbf88511a4"},
+    {"path":"assets/charms/swan.prep.json","byteLength":11333,"sha256":"0bcb1472de9b7ade0561ff9d00aa36c97dd9efa837be2039b22506a7cc5106c3"},
+    {"path":"assets/charms/toypoodle.base.png","byteLength":185744,"sha256":"9c8d8756f5d6e845c5982ed4095cca3198be3d2036495a3d897e3525df56c97f"},
+    {"path":"assets/charms/toypoodle.masks.png","byteLength":14137,"sha256":"ba694cdcec79ba081cde65ec2c570d89915d97c377341fda5e45e6b8cf61ec1f"},
+    {"path":"assets/charms/toypoodle.prep.json","byteLength":11240,"sha256":"ac3235c6ade8bb925e67d94a55891dd466d21d82823f199a1817930ab8d11d30"},
+    {"path":"assets/rings/ring-gold.png","byteLength":250399,"sha256":"f9d3b97b7c2938a34224871dc3eb72ec0bf50f9e21d76bd4758fcbe89c80bc94"},
+    {"path":"assets/rings/ring-silver.png","byteLength":169348,"sha256":"681f7c2198444f44461759d7d67e6ed58e32d3687a822c3307d92399ef2bccea"}
+  ],
+  "assetSummary": {
+    "charmCount": 8,
+    "ringCount": 2,
+    "manualFileCount": 5,
+    "assetFileCount": 31,
+    "schemaVersion": 5,
+    "toolVersion": "0.7.0"
+  },
+  "material": {
+    "profileCount": 2,
+    "profilesSha256": "646d2c8189bbd392f4f36a2b06809d7ff8ece580c2bad1ab89fbfbf4027bee95",
+    "variantCount": 27,
+    "finiteCases": 192,
+    "chevreAppliesToCharms": []
+  },
+  "stitchModes": {
+    "horse": {"stitchMode":"none","threadColor":null},
+    "horseshoe": {"stitchMode":"detect","threadColor":"light","stitchPxCount":69124,"stitchDiffPxCount":69124},
+    "frenchie": {"stitchMode":"none","threadColor":null},
+    "dachshund": {"stitchMode":"none","threadColor":null},
+    "toypoodle": {"stitchMode":"none","threadColor":null},
+    "osanpo": {"stitchMode":"detect","threadColor":"light","stitchPxCount":16136,"stitchDiffPxCount":16136},
+    "cat": {"stitchMode":"none","threadColor":null},
+    "swan": {"stitchMode":"detect","threadColor":"light","stitchPxCount":1027,"stitchDiffPxCount":1027}
+  },
+  "aspectCorrection": {
+    "horse": {"applied":false,"axis":null,"preDistortion":0.001056,"postDistortion":0.001056},
+    "horseshoe": {"applied":true,"axis":"W","preDistortion":0.0596,"postDistortion":0.00141},
+    "frenchie": {"applied":true,"axis":"W","preDistortion":0.03778,"postDistortion":0.00067},
+    "dachshund": {"applied":true,"axis":"H","preDistortion":0.06269,"postDistortion":0.00153},
+    "toypoodle": {"applied":true,"axis":"H","preDistortion":0.07872,"postDistortion":0.00038},
+    "osanpo": {"applied":false,"axis":null,"preDistortion":0.02078,"postDistortion":0.02078},
+    "cat": {"applied":false,"axis":null,"preDistortion":0.01737,"postDistortion":0.01737},
+    "swan": {"applied":true,"axis":"H","preDistortion":0.07080924855491316,"postDistortion":0}
+  },
+  "rev16Additions": {
+    "frenchieCropSource": {"x":320,"y":848,"w":1105,"h":1312,"foregroundLongSidePx":1127},
+    "osanpoRecipe": {
+      "id":"osanpo-colorless-20260728-v1",
+      "mainWhiteArea":133890,
+      "hangingHoleArea":1014,
+      "rawStitchComponentCount":25,
+      "finalStitchCount":16136,
+      "finalStitchComponentCount":1,
+      "logoCount":1221,
+      "logoComponentCount":1,
+      "rangeCheck":"pass"
+    },
+    "swanMeasured": {"widthMm":90,"heightMm":90,"confirmed":true,"receivedAt":"2026-07-28"}
+  },
+  "checks": {
+    "inspection1to7": "pass",
+    "inspectionM": "pass",
+    "inspectionF": "pass",
+    "inspection8": "pass",
+    "layout81": "pass",
+    "fixedVisualCaseCount": 44,
+    "fixedVisualCaseCountByCharm": {"horse":4,"horseshoe":8,"frenchie":4,"dachshund":4,"toypoodle":4,"osanpo":8,"cat":4,"swan":8},
+    "fOracleMutationRequired": 5,
+    "fOracleMutationDetected": 5,
+    "ownershipIdentityAll8": "pass",
+    "edgeDefringeRatioAll8Under005": true,
+    "straightRgbaMarkerAllAssets": true,
+    "independentDecode": "pass",
+    "regenerationEquality": "pass"
+  },
+  "evidenceArtifacts": [
+    {"path":"reports/charm-combo/rev16/prep-selftest.json","byteLength":9220,"sha256":"338000fc927d53de06b75b89a95568d1104fae9bb2954a964b880b6195e6aa1d"},
+    {"path":"reports/charm-combo/rev16/prep-inspection-1-8.json","byteLength":27911,"sha256":"d04605011762abfbe1aa1eae7aa7b4e42d118f93a69bdef41590ceb0cb2f4638"}
+  ],
+  "selftest": {
+    "path":"reports/charm-combo/rev16/prep-selftest.json",
+    "status":"pass",
+    "resultCount":33,
+    "rev16Additions":["frenchie cropSource","OSANPO_COLORLESS_MANUAL constants/ranges","swan measured/aspect"]
+  },
+  "codexCliReview": {
+    "status":"not-run-environment-failure",
+    "attempts":2,
+    "reason":"codex exec --sandbox read-only could not initialize because state_5.sqlite was readonly and the in-process app-server permission was denied"
+  },
+  "unresolved": [],
+  "nextPhaseReady": false,
+  "nextPhaseGate": {
+    "required": true,
+    "checkpoint": "Phase 4 checkpoint②",
+    "action": "ユーザーが素材検証レポートを確認し、再撮影要否・例外の有無を承認するまでPhase 5へ進まない"
+  },
+  "handoffPayloadSha256": "14256eeeaebcfc21d73ddb8d25bfb715c040804e043fc8a17656b15a85c7f384"
+}

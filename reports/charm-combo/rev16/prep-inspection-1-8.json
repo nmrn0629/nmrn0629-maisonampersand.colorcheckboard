@@ -1,0 +1,944 @@
+{
+  "schemaVersion": 1,
+  "phase": 4,
+  "planRevision": 16,
+  "status": "pass",
+  "generatedAt": "2026-07-30T05:13:56.055Z",
+  "selectedLockCommit": "5cc72dd760257e52e46a636dac5d5064790e83a2",
+  "selectedPhase3EvidenceCommit": "9837c498794ce6a70ec471c7e73d4148543ddf78",
+  "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+  "toolCommit": "8a363f297354d2c13016654f84cc1438db641018",
+  "canonicalSourceCheckpoint": {
+    "path": "plans/charm-approved-source-freeze.json",
+    "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+    "status": "pass",
+    "allPass": true,
+    "entries": [
+      {
+        "key": "horse",
+        "file": "source-photos/horse-colorless.png",
+        "sha256": "ec6ef0cc6a2da23c172b0f3d04a06c4c2e91958babe980ee1908683d7955e6f0",
+        "expectedSha256": "ec6ef0cc6a2da23c172b0f3d04a06c4c2e91958babe980ee1908683d7955e6f0",
+        "byteLength": 266704,
+        "expectedByteLength": 266704,
+        "width": 2158,
+        "height": 2233,
+        "expectedWidth": 2158,
+        "expectedHeight": 2233,
+        "pass": true
+      },
+      {
+        "key": "horseshoe",
+        "file": "source-photos/horseshoe-colorless.png",
+        "sha256": "111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c",
+        "expectedSha256": "111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c",
+        "byteLength": 1110405,
+        "expectedByteLength": 1110405,
+        "width": 2020,
+        "height": 2385,
+        "expectedWidth": 2020,
+        "expectedHeight": 2385,
+        "pass": true
+      },
+      {
+        "key": "frenchie",
+        "file": "source-photos/frenchie-colorless.png",
+        "sha256": "05c08873322c11f6ed48ef2b6e272f2582bd6f597fd2ced874ef15d84b9d6edf",
+        "expectedSha256": "05c08873322c11f6ed48ef2b6e272f2582bd6f597fd2ced874ef15d84b9d6edf",
+        "byteLength": 217668,
+        "expectedByteLength": 217668,
+        "width": 1808,
+        "height": 2664,
+        "expectedWidth": 1808,
+        "expectedHeight": 2664,
+        "pass": true
+      },
+      {
+        "key": "dachshund",
+        "file": "source-photos/dachshund-colorless.png",
+        "sha256": "e0e228f792b69eae074695ef020c9af1c2ad34306cf05fb735e7b131d17487da",
+        "expectedSha256": "e0e228f792b69eae074695ef020c9af1c2ad34306cf05fb735e7b131d17487da",
+        "byteLength": 288546,
+        "expectedByteLength": 288546,
+        "width": 2195,
+        "height": 2195,
+        "expectedWidth": 2195,
+        "expectedHeight": 2195,
+        "pass": true
+      },
+      {
+        "key": "toypoodle",
+        "file": "source-photos/toy-poodle-colorless.png",
+        "sha256": "b4251b764c0ca3f35af6d6f0904b52c909811bc44637dc64b12d8ccdf64bfcba",
+        "expectedSha256": "b4251b764c0ca3f35af6d6f0904b52c909811bc44637dc64b12d8ccdf64bfcba",
+        "byteLength": 280916,
+        "expectedByteLength": 280916,
+        "width": 2176,
+        "height": 2176,
+        "expectedWidth": 2176,
+        "expectedHeight": 2176,
+        "pass": true
+      },
+      {
+        "key": "osanpo",
+        "file": "source-photos/osanpo-colorless.png",
+        "sha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e",
+        "expectedSha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e",
+        "byteLength": 242184,
+        "expectedByteLength": 242184,
+        "width": 2304,
+        "height": 2304,
+        "expectedWidth": 2304,
+        "expectedHeight": 2304,
+        "pass": true
+      },
+      {
+        "key": "cat",
+        "file": "source-photos/cat-colorless.png",
+        "sha256": "563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7",
+        "expectedSha256": "563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7",
+        "byteLength": 215615,
+        "expectedByteLength": 215615,
+        "width": 2195,
+        "height": 2195,
+        "expectedWidth": 2195,
+        "expectedHeight": 2195,
+        "pass": true
+      },
+      {
+        "key": "swan",
+        "file": "source-photos/swan-colorless.png",
+        "sha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435",
+        "expectedSha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435",
+        "byteLength": 316073,
+        "expectedByteLength": 316073,
+        "width": 1701,
+        "height": 2560,
+        "expectedWidth": 1701,
+        "expectedHeight": 2560,
+        "pass": true
+      }
+    ]
+  },
+  "pipelineOrder": [
+    "input-sha-dimensions",
+    "background-alpha",
+    "ownership",
+    "defringe",
+    "logo",
+    "stitch",
+    "keep",
+    "material-grain",
+    "aspect-8prime-1",
+    "aspect-redefringe-8prime-2",
+    "derived-recompute",
+    "straight-png",
+    "independent-decode",
+    "checks-1-7-M-F",
+    "verification-8"
+  ],
+  "charms": [
+    {
+      "key": "horse",
+      "prep": {
+        "path": "assets/charms/horse.prep.json",
+        "byteLength": 11309,
+        "sha256": "6c49f1a70c1b7d67b9a952355efb27dc840d817c4aa5974e8a70e1c16fe8c61d"
+      },
+      "source": {
+        "file": "source-photos/horse-colorless.png",
+        "sha256": "ec6ef0cc6a2da23c172b0f3d04a06c4c2e91958babe980ee1908683d7955e6f0"
+      },
+      "sizeMm": {
+        "w": 95,
+        "h": 70
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 1160,
+        "h": 1200
+      },
+      "bboxPx": {
+        "x": 190,
+        "y": 368,
+        "w": 879,
+        "h": 647
+      },
+      "fgBboxPx": {
+        "x": 190,
+        "y": 368,
+        "w": 879,
+        "h": 647
+      },
+      "stitchMode": "none",
+      "threadColor": null,
+      "stitchPxCount": 0,
+      "aspectCorrection": {
+        "applied": false,
+        "axis": null,
+        "scale": 1,
+        "effectiveScale": 1,
+        "preMeasuredW": 879,
+        "preMeasuredH": 647,
+        "prePxPerMmW": 9.25263157894737,
+        "prePxPerMmH": 9.242857142857142,
+        "preDistortion": 0.001056395254347651
+      },
+      "postDistortion": 0.001056395254347651,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/horse.base.png",
+          "byteLength": 192448,
+          "sha256": "2fd5ff98ea0ba449b591a561c6efc3421697b5ae32ca5726838afb6d9f1abb8a",
+          "decodedRgbaSha256": "aec18df34f6fcec3576dc45d5a765773f96b72925a67407231578d16634dfd8b",
+          "width": 1160,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 192448
+        },
+        "masks": {
+          "path": "assets/charms/horse.masks.png",
+          "byteLength": 15619,
+          "sha256": "09fbd90b3d5fa85346ad1583565095d06b87e6c26acf8773b81fe7e91eb86e7f",
+          "decodedRgbaSha256": "541986912be34eb98690ba7433e5cd89668097ff70cea7e376e0686686f13c75",
+          "width": 1160,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 15619
+        }
+      },
+      "manual": {}
+    },
+    {
+      "key": "horseshoe",
+      "prep": {
+        "path": "assets/charms/horseshoe.prep.json",
+        "byteLength": 13409,
+        "sha256": "b7f957c23736af64e3faa13e89f640a2348bb3bb9d82e912877d4fb385eb1fbe"
+      },
+      "source": {
+        "file": "source-photos/horseshoe-colorless.png",
+        "sha256": "111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c"
+      },
+      "sizeMm": {
+        "w": 46,
+        "h": 54
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 955,
+        "h": 1200
+      },
+      "bboxPx": {
+        "x": 83,
+        "y": 102,
+        "w": 786,
+        "h": 924
+      },
+      "fgBboxPx": {
+        "x": 83,
+        "y": 102,
+        "w": 786,
+        "h": 924
+      },
+      "stitchMode": "detect",
+      "threadColor": "light",
+      "stitchPxCount": 69124,
+      "aspectCorrection": {
+        "applied": true,
+        "axis": "W",
+        "scale": 0.9403955927253418,
+        "effectiveScale": 0.9399606299212598,
+        "preMeasuredW": 837,
+        "preMeasuredH": 924,
+        "prePxPerMmW": 18.195652173913043,
+        "prePxPerMmH": 17.11111111111111,
+        "preDistortion": 0.05960440727465817
+      },
+      "postDistortion": 0.0014136273678258995,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/horseshoe.base.png",
+          "byteLength": 561700,
+          "sha256": "9e8b3b1aeb6d8257bc2d8824c1820c608384d15c990bb42b3c1b1e45515033d0",
+          "decodedRgbaSha256": "3316c4395e2cb1bfd52353f7bf59984d082cd817824ed32e4805432b5daf7b15",
+          "width": 955,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 561700
+        },
+        "masks": {
+          "path": "assets/charms/horseshoe.masks.png",
+          "byteLength": 20856,
+          "sha256": "06879903fd61db795d44ce3945b6e7d78001efc925a001a058d919d13d78e266",
+          "decodedRgbaSha256": "140baa64d531435fc7d078900d32f77c668597e1cc33abc2cd790a170c94b089",
+          "width": 955,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 20856
+        }
+      },
+      "manual": {
+        "alpha": {
+          "path": "assets/charms/horseshoe.manual-alpha.png",
+          "byteLength": 57833,
+          "sha256": "b13ca0cc9703adeba30a7f1b0dc8daf7954e22deba64370de3ab9bdd1a306b39",
+          "recordSha256": "b13ca0cc9703adeba30a7f1b0dc8daf7954e22deba64370de3ab9bdd1a306b39",
+          "match": true
+        },
+        "owner": {
+          "path": "assets/charms/horseshoe.manual-owner.png",
+          "byteLength": 16541,
+          "sha256": "f479646c487b2fbbd3ee0d71a116f43e4864f5307bcd1cdb81acf7d507e0e4c4",
+          "recordSha256": "f479646c487b2fbbd3ee0d71a116f43e4864f5307bcd1cdb81acf7d507e0e4c4",
+          "match": true
+        },
+        "keep": {
+          "path": "assets/charms/horseshoe.manual-keep.png",
+          "byteLength": 8096,
+          "sha256": "a652adaaf45f971db75275b306e9c1eeb7da57e9d112e345188c9287079da5ce",
+          "recordSha256": "a652adaaf45f971db75275b306e9c1eeb7da57e9d112e345188c9287079da5ce",
+          "match": true
+        }
+      }
+    },
+    {
+      "key": "frenchie",
+      "prep": {
+        "path": "assets/charms/frenchie.prep.json",
+        "byteLength": 11338,
+        "sha256": "693e29c071358bd3f70de5beed43e43518cf9627d95e08d5d50a3f5f780bfd31"
+      },
+      "source": {
+        "file": "source-photos/frenchie-colorless.png",
+        "sha256": "05c08873322c11f6ed48ef2b6e272f2582bd6f597fd2ced874ef15d84b9d6edf"
+      },
+      "sizeMm": {
+        "w": 60,
+        "h": 75
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 973,
+        "h": 1200
+      },
+      "bboxPx": {
+        "x": 37,
+        "y": 37,
+        "w": 901,
+        "h": 1127
+      },
+      "fgBboxPx": {
+        "x": 37,
+        "y": 37,
+        "w": 901,
+        "h": 1127
+      },
+      "stitchMode": "none",
+      "threadColor": null,
+      "stitchPxCount": 0,
+      "aspectCorrection": {
+        "applied": true,
+        "axis": "W",
+        "scale": 0.9622198505869798,
+        "effectiveScale": 0.9624134520276953,
+        "preMeasuredW": 937,
+        "preMeasuredH": 1127,
+        "prePxPerMmW": 15.616666666666667,
+        "prePxPerMmH": 15.026666666666667,
+        "preDistortion": 0.03778014941302027
+      },
+      "postDistortion": 0.0006659267480576994,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/frenchie.base.png",
+          "byteLength": 236069,
+          "sha256": "1d271e083be36a1d9916a788364815acca604f9bc9b194658f0f9e09107de630",
+          "decodedRgbaSha256": "6013cd08aff9ac03a402364ca621116998067a74559d516115112bc1bd769032",
+          "width": 973,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 236069
+        },
+        "masks": {
+          "path": "assets/charms/frenchie.masks.png",
+          "byteLength": 16410,
+          "sha256": "057c7ed7658d11cac6687b5e562b4dfd725e364c68ccc5a99dca8d8c4a56ad20",
+          "decodedRgbaSha256": "7bec284d1be276fb657a6ace7b1dd64b8c5b5d9bab879af3704b2f9b49a2ffa4",
+          "width": 973,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 16410
+        }
+      },
+      "manual": {}
+    },
+    {
+      "key": "dachshund",
+      "prep": {
+        "path": "assets/charms/dachshund.prep.json",
+        "byteLength": 11201,
+        "sha256": "47cdce62b419a260148ce98aee9f6148c5bee0f1429c4730d475e5198f210d14"
+      },
+      "source": {
+        "file": "source-photos/dachshund-colorless.png",
+        "sha256": "e0e228f792b69eae074695ef020c9af1c2ad34306cf05fb735e7b131d17487da"
+      },
+      "sizeMm": {
+        "w": 90,
+        "h": 60
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 1200,
+        "h": 1129
+      },
+      "bboxPx": {
+        "x": 81,
+        "y": 261,
+        "w": 981,
+        "h": 653
+      },
+      "fgBboxPx": {
+        "x": 81,
+        "y": 261,
+        "w": 981,
+        "h": 653
+      },
+      "stitchMode": "none",
+      "threadColor": null,
+      "stitchPxCount": 0,
+      "aspectCorrection": {
+        "applied": true,
+        "axis": "H",
+        "scale": 0.9410071942446043,
+        "effectiveScale": 0.9408333333333333,
+        "preMeasuredW": 981,
+        "preMeasuredH": 695,
+        "prePxPerMmW": 10.9,
+        "prePxPerMmH": 11.583333333333334,
+        "preDistortion": 0.06269113149847097
+      },
+      "postDistortion": 0.00152905198776766,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/dachshund.base.png",
+          "byteLength": 202299,
+          "sha256": "c39d8c6de1ea5832e789ba9182987cf4cb711896fda2a295020afc62f65f4131",
+          "decodedRgbaSha256": "79bd9ab4755ae4415858775beb238850c8b0616eae1894b1202b0657262fe926",
+          "width": 1200,
+          "height": 1129,
+          "decodedMatch": true,
+          "expectedByteLength": 202299
+        },
+        "masks": {
+          "path": "assets/charms/dachshund.masks.png",
+          "byteLength": 14606,
+          "sha256": "be4c59939add976d9fbae41ca2b1521d923a1330555247837e407a1832d91d72",
+          "decodedRgbaSha256": "5a2cff7552e41f8a6bce9f4e946a3adcb62404ecc0e3a9fe69da10ca5d6ff84f",
+          "width": 1200,
+          "height": 1129,
+          "decodedMatch": true,
+          "expectedByteLength": 14606
+        }
+      },
+      "manual": {}
+    },
+    {
+      "key": "toypoodle",
+      "prep": {
+        "path": "assets/charms/toypoodle.prep.json",
+        "byteLength": 11240,
+        "sha256": "ac3235c6ade8bb925e67d94a55891dd466d21d82823f199a1817930ab8d11d30"
+      },
+      "source": {
+        "file": "source-photos/toy-poodle-colorless.png",
+        "sha256": "b4251b764c0ca3f35af6d6f0904b52c909811bc44637dc64b12d8ccdf64bfcba"
+      },
+      "sizeMm": {
+        "w": 80,
+        "h": 60
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 1200,
+        "h": 1112
+      },
+      "bboxPx": {
+        "x": 126,
+        "y": 263,
+        "w": 885,
+        "h": 664
+      },
+      "fgBboxPx": {
+        "x": 126,
+        "y": 263,
+        "w": 885,
+        "h": 664
+      },
+      "stitchMode": "none",
+      "threadColor": null,
+      "stitchPxCount": 0,
+      "aspectCorrection": {
+        "applied": true,
+        "axis": "H",
+        "scale": 0.9270251396648045,
+        "effectiveScale": 0.9266666666666666,
+        "preMeasuredW": 885,
+        "preMeasuredH": 716,
+        "prePxPerMmW": 11.0625,
+        "prePxPerMmH": 11.933333333333334,
+        "preDistortion": 0.07871939736346519
+      },
+      "postDistortion": 0.0003766478342749315,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/toypoodle.base.png",
+          "byteLength": 185744,
+          "sha256": "9c8d8756f5d6e845c5982ed4095cca3198be3d2036495a3d897e3525df56c97f",
+          "decodedRgbaSha256": "57babf5da713adebfc4c508d18853f3277c43e90fd8f13807654c8c96cdb7c12",
+          "width": 1200,
+          "height": 1112,
+          "decodedMatch": true,
+          "expectedByteLength": 185744
+        },
+        "masks": {
+          "path": "assets/charms/toypoodle.masks.png",
+          "byteLength": 14137,
+          "sha256": "ba694cdcec79ba081cde65ec2c570d89915d97c377341fda5e45e6b8cf61ec1f",
+          "decodedRgbaSha256": "fd5ae4c731a96d7aeeefd3cbbe6d6a17eef15f2f5e54a00a0033868cf6634ac4",
+          "width": 1200,
+          "height": 1112,
+          "decodedMatch": true,
+          "expectedByteLength": 14137
+        }
+      },
+      "manual": {}
+    },
+    {
+      "key": "osanpo",
+      "prep": {
+        "path": "assets/charms/osanpo.prep.json",
+        "byteLength": 13041,
+        "sha256": "326f148cfcbfa255aa5a381648010fdda1a6b93b7d3714ebbe78bceb08201a9c"
+      },
+      "source": {
+        "file": "source-photos/osanpo-colorless.png",
+        "sha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e"
+      },
+      "sizeMm": {
+        "w": 92,
+        "h": 40
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 1200,
+        "h": 1200
+      },
+      "bboxPx": {
+        "x": 372,
+        "y": 252,
+        "w": 428,
+        "h": 691
+      },
+      "fgBboxPx": {
+        "x": 372,
+        "y": 252,
+        "w": 428,
+        "h": 691
+      },
+      "stitchMode": "detect",
+      "threadColor": "light",
+      "stitchPxCount": 16136,
+      "aspectCorrection": {
+        "applied": false,
+        "axis": null,
+        "scale": 1,
+        "effectiveScale": 1,
+        "preMeasuredW": 677.4710428416445,
+        "preMeasuredH": 300.67244153844325,
+        "prePxPerMmW": 7.363815683061353,
+        "prePxPerMmH": 7.516811038461081,
+        "preDistortion": 0.0207766410763996
+      },
+      "postDistortion": 0.0207766410763996,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/osanpo.base.png",
+          "byteLength": 321200,
+          "sha256": "518d6ac1eccc35af2aa0284d14688becd74c8ea66c6ab022de42c3b40f1ff1e6",
+          "decodedRgbaSha256": "94e8a0291c26ae0de53c0f358585577f59fea46ef0da7cc42f0e2d38587de806",
+          "width": 1200,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 321200
+        },
+        "masks": {
+          "path": "assets/charms/osanpo.masks.png",
+          "byteLength": 14269,
+          "sha256": "7cb8ddb6b291a6b4f7463bbf1b24a1ddf3cafdfae748bbca97db7954ac25d8e1",
+          "decodedRgbaSha256": "62a0c5a74e14bf3fa7a1bf0fb9b40c8cb30d73bada5043f9f5f83c18cb020b05",
+          "width": 1200,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 14269
+        }
+      },
+      "manual": {
+        "alpha": {
+          "path": "assets/charms/osanpo.manual-alpha.png",
+          "byteLength": 19269,
+          "sha256": "a4cd79ddfdd655a27d8f99d989a0aa9c8a18c4a10456f7b334dd754e6680e116",
+          "recordSha256": "a4cd79ddfdd655a27d8f99d989a0aa9c8a18c4a10456f7b334dd754e6680e116",
+          "match": true
+        },
+        "owner": {
+          "path": "assets/charms/osanpo.manual-owner.png",
+          "byteLength": 12799,
+          "sha256": "cd4dd2d4540061ce5f26271271a35f350e1e83eef9b4f69156551ad00ec25581",
+          "recordSha256": "cd4dd2d4540061ce5f26271271a35f350e1e83eef9b4f69156551ad00ec25581",
+          "match": true
+        }
+      }
+    },
+    {
+      "key": "cat",
+      "prep": {
+        "path": "assets/charms/cat.prep.json",
+        "byteLength": 11319,
+        "sha256": "448197b7d84b639f6b04b26a41a18c0cbec456b2eb5be283abdb1cfda5b250b7"
+      },
+      "source": {
+        "file": "source-photos/cat-colorless.png",
+        "sha256": "563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7"
+      },
+      "sizeMm": {
+        "w": 68,
+        "h": 65
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-13"
+      },
+      "assetSize": {
+        "w": 1200,
+        "h": 1200
+      },
+      "bboxPx": {
+        "x": 171,
+        "y": 282,
+        "w": 774,
+        "h": 727
+      },
+      "fgBboxPx": {
+        "x": 171,
+        "y": 282,
+        "w": 774,
+        "h": 727
+      },
+      "stitchMode": "none",
+      "threadColor": null,
+      "stitchPxCount": 0,
+      "aspectCorrection": {
+        "applied": false,
+        "axis": null,
+        "scale": 1,
+        "effectiveScale": 1,
+        "preMeasuredW": 774,
+        "preMeasuredH": 727,
+        "prePxPerMmW": 11.382352941176471,
+        "prePxPerMmH": 11.184615384615384,
+        "preDistortion": 0.017372291790896537
+      },
+      "postDistortion": 0.017372291790896537,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/cat.base.png",
+          "byteLength": 176159,
+          "sha256": "abbde2a2aed061835387765ae9de627c0848d76efd230b8943a35f2ea2530378",
+          "decodedRgbaSha256": "76ed40e393acf6ca24845a2944f0331a3df067df81ab9601defe43096a6c1125",
+          "width": 1200,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 176159
+        },
+        "masks": {
+          "path": "assets/charms/cat.masks.png",
+          "byteLength": 14260,
+          "sha256": "a23be1b897087917ff9e79196bdcbe9391ca3241bdb539108ee77a73783ea081",
+          "decodedRgbaSha256": "59f443ad31297ec2263e095d0dcdb8c5a6f39b7711ec5f4b781bb5e7028277d8",
+          "width": 1200,
+          "height": 1200,
+          "decodedMatch": true,
+          "expectedByteLength": 14260
+        }
+      },
+      "manual": {}
+    },
+    {
+      "key": "swan",
+      "prep": {
+        "path": "assets/charms/swan.prep.json",
+        "byteLength": 11333,
+        "sha256": "0bcb1472de9b7ade0561ff9d00aa36c97dd9efa837be2039b22506a7cc5106c3"
+      },
+      "source": {
+        "file": "source-photos/swan-colorless.png",
+        "sha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435"
+      },
+      "sizeMm": {
+        "w": 90,
+        "h": 90
+      },
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-28"
+      },
+      "assetSize": {
+        "w": 797,
+        "h": 1121
+      },
+      "bboxPx": {
+        "x": 58,
+        "y": 247,
+        "w": 692,
+        "h": 692
+      },
+      "fgBboxPx": {
+        "x": 58,
+        "y": 247,
+        "w": 692,
+        "h": 692
+      },
+      "stitchMode": "detect",
+      "threadColor": "light",
+      "stitchPxCount": 1027,
+      "aspectCorrection": {
+        "applied": true,
+        "axis": "H",
+        "scale": 0.9338731443994603,
+        "effectiveScale": 0.9341666666666667,
+        "preMeasuredW": 692,
+        "preMeasuredH": 741,
+        "prePxPerMmW": 7.688888888888889,
+        "prePxPerMmH": 8.233333333333333,
+        "preDistortion": 0.07080924855491316
+      },
+      "postDistortion": 0,
+      "checks": {
+        "1": "pass",
+        "2": "pass",
+        "3": "pass",
+        "4": "pass",
+        "5": "pass",
+        "6": "pass",
+        "7": "pass",
+        "M": "pass",
+        "F": "pass"
+      },
+      "files": {
+        "base": {
+          "path": "assets/charms/swan.base.png",
+          "byteLength": 184968,
+          "sha256": "abf8eef521fa0d46c6e6bb9e75afbcf2991df337ebb720181d16f97e0ea37ee8",
+          "decodedRgbaSha256": "4088f50a4fa046ea524c56b1292f2c0de7309c485a28ee2697520d2667ade355",
+          "width": 797,
+          "height": 1121,
+          "decodedMatch": true,
+          "expectedByteLength": 184968
+        },
+        "masks": {
+          "path": "assets/charms/swan.masks.png",
+          "byteLength": 14763,
+          "sha256": "7928f9b527b75070c00d5495ad7cc5fd051c7e1ffac07e98f3bdaafbf88511a4",
+          "decodedRgbaSha256": "f5883c61d68fd00d26a59e636af570e80a0ceeb67bc491486961aeb8c033a9d7",
+          "width": 797,
+          "height": 1121,
+          "decodedMatch": true,
+          "expectedByteLength": 14763
+        }
+      },
+      "manual": {}
+    }
+  ],
+  "rev16Additions": {
+    "frenchieCropSource": {
+      "x": 320,
+      "y": 848,
+      "w": 1105,
+      "h": 1312
+    },
+    "frenchiePostCropForegroundLongSidePx": 1127,
+    "osanpoRecipe": {
+      "id": "osanpo-colorless-20260728-v1",
+      "mainWhiteArea": 133890,
+      "hangingHoleArea": 1014,
+      "rawStitchComponentCount": 25,
+      "finalStitchCount": 16136,
+      "finalStitchComponentCount": 1,
+      "logoCount": 1221,
+      "logoComponentCount": 1,
+      "rangeCheck": "pass"
+    },
+    "swan": {
+      "sizeMmMeasured": {
+        "confirmed": true,
+        "receivedAt": "2026-07-28"
+      },
+      "stitchMode": "detect",
+      "threadColor": "light",
+      "stitchPxCount": 1027,
+      "stitchDiffPxCount": 1027,
+      "aspectCorrectionApplied": true,
+      "preDistortion": 0.07080924855491316,
+      "postDistortion": 0
+    }
+  },
+  "rings": {
+    "silver": {
+      "path": "assets/rings/ring-silver.png",
+      "byteLength": 169348,
+      "sha256": "681f7c2198444f44461759d7d67e6ed58e32d3687a822c3307d92399ef2bccea",
+      "width": 512,
+      "height": 512,
+      "centerAlphaZero": true,
+      "alphaBboxFull": true
+    },
+    "gold": {
+      "path": "assets/rings/ring-gold.png",
+      "byteLength": 250399,
+      "sha256": "f9d3b97b7c2938a34224871dc3eb72ec0bf50f9e21d76bd4758fcbe89c80bc94",
+      "width": 512,
+      "height": 512,
+      "centerAlphaZero": true,
+      "alphaBboxFull": true
+    }
+  },
+  "independentVerification": {
+    "pngDecodedRgbaExpectedHashesMatch": true,
+    "prepExpectedByteLengthsMatch": true,
+    "manualFileShaMatchesPrep": true,
+    "straightRgbaMarkerValidatedByTool": true,
+    "ownershipIdentityAll8Pass": true,
+    "edgeDefringeRatioAll8Under005": true,
+    "fOracleMutationRequired": 5,
+    "fOracleMutationDetected": 5,
+    "fixedVisualCaseCountByCharm": {
+      "horse": 4,
+      "horseshoe": 8,
+      "frenchie": 4,
+      "dachshund": 4,
+      "toypoodle": 4,
+      "osanpo": 8,
+      "cat": 4,
+      "swan": 8
+    },
+    "fixedVisualCaseCountTotal": 44
+  },
+  "checks": {
+    "allCharmChecks": "1-7+M/F pass",
+    "inspection8": "pass",
+    "materialProfile": "calf baked-base pass; chevre appliesToCharms=[]",
+    "selftest": "pass"
+  },
+  "unresolved": [],
+  "nextPhase": {
+    "phase5Ready": false,
+    "reason": "Phase 4 checkpoint②: user review of material inspection report required before Phase 5."
+  }
+}

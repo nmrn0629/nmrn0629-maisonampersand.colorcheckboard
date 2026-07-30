@@ -1,56 +1,183 @@
 {
   "schemaVersion": 1,
-  "phase": 3,
+  "phase": 4,
   "planRevision": 16,
-  "toolVersion": "0.7.0",
   "status": "pass",
-  "executedAt": "2026-07-30T04:48:23Z",
+  "toolVersion": "0.7.0",
+  "executedAt": "2026-07-30T05:19:56.000Z",
   "method": {
     "transport": "http",
-    "url": "http://127.0.0.1:8898/tools/charm-prep.html?selftest=1",
-    "browser": "Codex In-app Browser"
+    "url": "http://127.0.0.1:8899/tools/charm-prep.html?selftest=1",
+    "browser": "Codex In-app Browser (Chrome 150.0.0.0)"
   },
   "resultCount": 33,
   "results": [
-    { "name": "phase3-schema-and-version", "status": "pass", "detail": "toolVersion=0.7.0, schemaVersion=5" },
-    { "name": "phase3-counts", "status": "pass", "detail": "charms=8, materials=2, variants=27, calf=24, chevre=3" },
-    { "name": "phase3-source-tone-one-to-one", "status": "pass", "detail": "all canonical sources are colorless/flat" },
-    { "name": "phase3-source-manifest", "status": "pass", "detail": "source freeze 8件＋実ファイルSHA/寸法・grain freeze 2件＋実ファイルSHA/寸法" },
-    { "name": "phase3-color-reference-manifest", "status": "pass", "detail": "color freeze inventory 5件＋実ファイルSHA/寸法" },
-    { "name": "phase3-material-profiles", "status": "pass", "detail": "calf/chevre profile全メタデータをfreeze照合" },
-    { "name": "phase3-freeze-transfer", "status": "pass", "detail": "color freeze variants/materials exact join" },
-    { "name": "phase3-variant-transfer", "status": "pass", "detail": "approvedHex/textureProfileKey/appliesToCharms" },
-    { "name": "phase3-measured-inputs", "status": "pass", "detail": "8種 sizeMmMeasured confirmed=true（swan受領 2026-07-28）" },
-    { "name": "phase3-frenchie-crop-source", "status": "pass", "detail": "{\"x\":320,\"y\":848,\"w\":1105,\"h\":1312}" },
-    { "name": "phase3-osanpo-recipe-constants", "status": "pass", "detail": "OSANPO_COLORLESS_MANUAL id/全定数を計画書契約へ照合" },
-    { "name": "phase3-osanpo-recipe-generation-ranges", "status": "pass", "detail": "{\"width\":1200,\"height\":1200,\"mainWhiteArea\":133890,\"hangingHoleArea\":1014,\"rawStitchComponentCount\":25,\"finalStitchCount\":16136,\"finalStitchComponentCount\":1,\"logoCount\":1221,\"logoComponentCount\":1}" },
-    { "name": "swan-stitch-decision-gate", "status": "pass", "detail": "未確定／未適用draftは処理拒否、detect/none/fallback完全列挙、fixedVisualCaseCount=40/44（fallback含む）" },
-    { "name": "swan-stitch-editor-api-sync", "status": "pass", "detail": "pending/draft API拒否、JSON/editor/getState/getDraft同期、無効setterは原子性維持" },
-    { "name": "swan-production-ui-lock-and-editor-allowance", "status": "pass", "detail": "pending時production入口9種をロック、fallback manual import/editorは許可" },
-    { "name": "swan-stitch-modes-production-regeneration", "status": "pass", "detail": "共有recolor＋検査5で3モード正例、負例、fallback実描画、swan実処理PNG再生成一致 / horse processCurrent/buildChecksAndConfig+peerFinalize=pass / PNG+regenerate=pass / RGBA=equal" },
-    { "name": "stitch-detect-thread-polarity", "status": "pass", "detail": "light=高輝度側、dark=低輝度側を排他的に通常／再生成で検出" },
-    { "name": "batch-preview-memory-release", "status": "pass", "detail": "検査8再束縛を含め高々1件のImageDataを保持し、archive用Blob/manualRecordsと複製結果を保持" },
-    { "name": "png-low-alpha-straight-rgba", "status": "pass", "detail": "alpha 0/1/2/127/254/255" },
-    { "name": "png-marker-required", "status": "pass", "detail": "markerless/旧marker PNGをCanvasへフォールバックしない" },
-    { "name": "png-crc-rejection", "status": "pass", "detail": "corrupted IEND CRC" },
-    { "name": "png-encoder-paeth-vectors", "status": "pass", "detail": "expected=20,100,100,100,10" },
-    { "name": "png-decoder-paeth-vectors", "status": "pass", "detail": "expected=20,100,100,100,10" },
-    { "name": "manual-marker-and-alpha-contract", "status": "pass", "detail": "marker/source/work binding・alpha binary・owner RGB sum" },
-    { "name": "worker-generation-timeout-cleanup", "status": "pass", "detail": "worker 6/6 URL 6/6 timer 6/6 productionFirstRejected=true productionTimeout=true oracleFirstRejected=true oracleTimeout=true" },
-    { "name": "oracle-2x2-constant-gray", "status": "pass", "detail": "bakedPxCount=4, expectedMismatchPxCount=0, nonLeatherChangedPxCount=0, uniqueGrainPxCount=4, numericType=Float64" },
-    { "name": "oracle-production-bake", "status": "pass", "detail": "bakedPxCount=12, expectedMismatchPxCount=0, nonLeatherChangedPxCount=0, uniqueGrainPxCount=12, numericType=Float64" },
-    { "name": "oracle-mutation-float32", "status": "pass", "detail": "detected=true, expectedMismatchPxCount=1" },
-    { "name": "oracle-mutation-mirror", "status": "pass", "detail": "detected=true, expectedMismatchPxCount=4" },
-    { "name": "oracle-mutation-loop-order", "status": "pass", "detail": "detected=true, expectedMismatchPxCount=1" },
-    { "name": "oracle-mutation-grain-one", "status": "pass", "detail": "detected=true, expectedMismatchPxCount=12" },
-    { "name": "oracle-mutation-nonleather", "status": "pass", "detail": "detected=true, nonLeatherChangedPxCount=1" },
-    { "name": "stone-six-components", "status": "pass", "detail": "input/shrink positive cases pass; foreign/missing/duplicate negative probes rejected" }
+    {
+      "name": "phase3-schema-and-version",
+      "status": "pass",
+      "detail": "toolVersion=0.7.0, schemaVersion=5"
+    },
+    {
+      "name": "phase3-counts",
+      "status": "pass",
+      "detail": "charms=8, materials=2, variants=27, calf=24, chevre=3"
+    },
+    {
+      "name": "phase3-source-tone-one-to-one",
+      "status": "pass",
+      "detail": "all canonical sources are colorless/flat"
+    },
+    {
+      "name": "phase3-source-manifest",
+      "status": "pass",
+      "detail": "source freeze 8件＋実ファイルSHA/寸法・grain freeze 2件＋実ファイルSHA/寸法"
+    },
+    {
+      "name": "phase3-color-reference-manifest",
+      "status": "pass",
+      "detail": "color freeze inventory 5件＋実ファイルSHA/寸法"
+    },
+    {
+      "name": "phase3-material-profiles",
+      "status": "pass",
+      "detail": "calf/chevre profile全メタデータをfreeze照合"
+    },
+    {
+      "name": "phase3-freeze-transfer",
+      "status": "pass",
+      "detail": "color freeze variants/materials exact join"
+    },
+    {
+      "name": "phase3-variant-transfer",
+      "status": "pass",
+      "detail": "approvedHex/textureProfileKey/appliesToCharms"
+    },
+    {
+      "name": "phase3-measured-inputs",
+      "status": "pass",
+      "detail": "8種 sizeMmMeasured confirmed=true（swan受領 2026-07-28）"
+    },
+    {
+      "name": "phase3-frenchie-crop-source",
+      "status": "pass",
+      "detail": "{\"x\":320,\"y\":848,\"w\":1105,\"h\":1312}"
+    },
+    {
+      "name": "phase3-osanpo-recipe-constants",
+      "status": "pass",
+      "detail": "OSANPO_COLORLESS_MANUAL id/全定数を計画書契約へ照合"
+    },
+    {
+      "name": "phase3-osanpo-recipe-generation-ranges",
+      "status": "pass",
+      "detail": "{\"width\":1200,\"height\":1200,\"mainWhiteArea\":133890,\"hangingHoleArea\":1014,\"rawStitchComponentCount\":25,\"finalStitchCount\":16136,\"finalStitchComponentCount\":1,\"logoCount\":1221,\"logoComponentCount\":1}"
+    },
+    {
+      "name": "swan-stitch-decision-gate",
+      "status": "pass",
+      "detail": "未確定／未適用draftは処理拒否、detect/none/fallback完全列挙、fixedVisualCaseCount=40/44（fallback含む）"
+    },
+    {
+      "name": "swan-stitch-editor-api-sync",
+      "status": "pass",
+      "detail": "pending/draft API拒否、JSON/editor/getState/getDraft同期、無効setterは原子性維持"
+    },
+    {
+      "name": "swan-production-ui-lock-and-editor-allowance",
+      "status": "pass",
+      "detail": "pending時production入口9種をロック、fallback manual import/editorは許可"
+    },
+    {
+      "name": "swan-stitch-modes-production-regeneration",
+      "status": "pass",
+      "detail": "共有recolor＋検査5で3モード正例、負例、fallback実描画、swan実処理PNG再生成一致 / horse processCurrent/buildChecksAndConfig+peerFinalize=pass / PNG+regenerate=pass / RGBA=equal"
+    },
+    {
+      "name": "stitch-detect-thread-polarity",
+      "status": "pass",
+      "detail": "light=高輝度側、dark=低輝度側を排他的に通常／再生成で検出"
+    },
+    {
+      "name": "batch-preview-memory-release",
+      "status": "pass",
+      "detail": "検査8再束縛を含め高々1件のImageDataを保持し、archive用Blob/manualRecordsと複製結果を保持"
+    },
+    {
+      "name": "png-low-alpha-straight-rgba",
+      "status": "pass",
+      "detail": "alpha 0/1/2/127/254/255"
+    },
+    {
+      "name": "png-marker-required",
+      "status": "pass",
+      "detail": "markerless/旧marker PNGをCanvasへフォールバックしない"
+    },
+    {
+      "name": "png-crc-rejection",
+      "status": "pass",
+      "detail": "corrupted IEND CRC"
+    },
+    {
+      "name": "png-encoder-paeth-vectors",
+      "status": "pass",
+      "detail": "expected=20,100,100,100,10"
+    },
+    {
+      "name": "png-decoder-paeth-vectors",
+      "status": "pass",
+      "detail": "expected=20,100,100,100,10"
+    },
+    {
+      "name": "manual-marker-and-alpha-contract",
+      "status": "pass",
+      "detail": "marker/source/work binding・alpha binary・owner RGB sum"
+    },
+    {
+      "name": "worker-generation-timeout-cleanup",
+      "status": "pass",
+      "detail": "worker 6/6 URL 6/6 timer 6/6 productionFirstRejected=true productionTimeout=true oracleFirstRejected=true oracleTimeout=true"
+    },
+    {
+      "name": "oracle-2x2-constant-gray",
+      "status": "pass",
+      "detail": "{\"bakedPxCount\":4,\"expectedMismatchPxCount\":0,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":4,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"}"
+    },
+    {
+      "name": "oracle-production-bake",
+      "status": "pass",
+      "detail": "{\"bakedPxCount\":12,\"expectedMismatchPxCount\":0,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":12,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"}"
+    },
+    {
+      "name": "oracle-mutation-float32",
+      "status": "pass",
+      "detail": "{\"detected\":true,\"audit\":{\"bakedPxCount\":12,\"expectedMismatchPxCount\":1,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":12,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"},\"tuned\":true,\"grainIndex\":1,\"flatWhite\":0.9990549812089055}"
+    },
+    {
+      "name": "oracle-mutation-mirror",
+      "status": "pass",
+      "detail": "{\"detected\":true,\"audit\":{\"bakedPxCount\":12,\"expectedMismatchPxCount\":4,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":12,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"},\"tuned\":false}"
+    },
+    {
+      "name": "oracle-mutation-loop-order",
+      "status": "pass",
+      "detail": "{\"detected\":true,\"audit\":{\"bakedPxCount\":12,\"expectedMismatchPxCount\":1,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":12,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"},\"tuned\":true,\"grainIndex\":1,\"flatWhite\":0.9990549934404698}"
+    },
+    {
+      "name": "oracle-mutation-grain-one",
+      "status": "pass",
+      "detail": "{\"detected\":true,\"audit\":{\"bakedPxCount\":12,\"expectedMismatchPxCount\":12,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":12,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"},\"tuned\":false}"
+    },
+    {
+      "name": "oracle-mutation-nonleather",
+      "status": "pass",
+      "detail": "{\"detected\":true,\"baseline\":{\"bakedPxCount\":11,\"expectedMismatchPxCount\":0,\"nonLeatherChangedPxCount\":0,\"uniqueGrainPxCount\":11,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"},\"audit\":{\"bakedPxCount\":11,\"expectedMismatchPxCount\":0,\"nonLeatherChangedPxCount\":1,\"uniqueGrainPxCount\":11,\"numericType\":\"Float64\",\"loopOrder\":\"dy-outer/dx-inner\",\"mirrorImplementation\":\"independent\"}}"
+    },
+    {
+      "name": "stone-six-components",
+      "status": "pass",
+      "detail": "input={\"pass\":true,\"unionArea\":33000,\"componentCount8\":6,\"reason\":null} / shrink={\"pass\":true,\"actualArea\":31000,\"expectedArea\":31000,\"actualComponentCount8\":6,\"expectedComponentCount8\":6,\"missingPxCount\":0,\"extraPxCount\":0,\"reason\":null} / foreign={\"pass\":false,\"actualArea\":31001,\"expectedArea\":31000,\"actualComponentCount8\":6,\"expectedComponentCount8\":6,\"missingPxCount\":0,\"extraPxCount\":1,\"reason\":\"最終masksとcenter-nearest投影keepが不一致\"} / missing={\"pass\":false,\"actualArea\":30999,\"expectedArea\":31000,\"actualComponentCount8\":6,\"expectedComponentCount8\":6,\"missingPxCount\":1,\"extraPxCount\":0,\"reason\":\"最終masksとcenter-nearest投影keepが不一致\"} / duplicate={\"pass\":false,\"unionArea\":33105,\"componentCount8\":5,\"reason\":\"6成分・union 32000..34000契約外\"}"
+    }
   ],
-  "mutationProbes": {
-    "count": 5,
-    "allDetected": true,
-    "negativeProbeFailuresAreExpected": true
-  },
   "contractSnapshot": {
     "charms": 8,
     "materialProfiles": 2,
@@ -58,37 +185,28 @@
     "finiteCases": 192,
     "layouts": 81,
     "swanSizeMmMeasuredConfirmed": true,
-    "swanSizeMmMeasuredReceivedAt": "2026-07-28",
-    "swanStitchMode": "detect-provisional-phase4"
-  },
-  "rev16Additions": {
-    "frenchieCropSource": { "x": 320, "y": 848, "w": 1105, "h": 1312 },
-    "osanpoRecipeId": "osanpo-colorless-20260728-v1",
-    "osanpoRecipeGeneration": {
-      "mainWhiteArea": 133890,
-      "hangingHoleArea": 1014,
-      "rawStitchComponentCount": 25,
-      "finalStitchCount": 16136,
-      "finalStitchComponentCount": 1,
-      "logoCount": 1221,
-      "logoComponentCount": 1
-    }
+    "swanStitchMode": "detect",
+    "schemaVersion": 5,
+    "toolVersion": "0.7.0"
   },
   "staticChecks": {
+    "nodeSyntax": "pass",
     "gitDiffCheck": "pass",
-    "protectedIndexHtml": {
-      "status": "pass",
-      "gitDiffExitCode": 0,
-      "sha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b"
-    },
-    "codexCliReview": {
-      "status": "not-run-environment-failure",
-      "attempts": 2,
-      "reason": "初回はCodex state DBのreadonly書込みエラー、再試行はAPI/WebSocket/HTTPSの名前解決失敗でレビューJSON生成前に終了。"
-    }
+    "protectedIndexHtml": "pass",
+    "canonicalSourceShaAndDimensions": "pass",
+    "independentPngDecode": "pass",
+    "prepExpectedHashAndByteLength": "pass",
+    "assetArchiveRegeneration": "pass",
+    "ringGeneration": "pass"
   },
-  "unresolved": [
-    "swanのstitchModeはPhase 4で実画素からdetect/none/fallbackを確定する。",
-    "Phase 4開始前にcanonicalSource 8点のSHA/寸法照合結果を報告し、チェックポイント①のユーザー確認を得る。"
-  ]
+  "rev16Additions": {
+    "frenchieCropSource": "pass",
+    "osanpoRecipeConstantsAndRanges": "pass",
+    "swanMeasuredAndAspectCorrection": "pass"
+  },
+  "codexCliReview": {
+    "status": "not-run",
+    "reason": "環境制約"
+  },
+  "unresolved": []
 }
