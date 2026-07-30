@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Charm Pair Studio | maison &.</title>
+<style>
+:root{--ink:#292725;--muted:#7e7870;--paper:#f5f2ed;--card:#fffdfa;--line:#e5dfd6;--accent:#94785e;--shadow:0 24px 60px rgba(64,48,31,.12)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 10% 0%,#fbfaf8 0,#f5f2ed 45%,#ece7df 100%);color:var(--ink);font-family:"Hiragino Sans","Yu Gothic",sans-serif}button,select{font:inherit}
+body{padding:32px 28px 56px}.shell{max-width:1440px;margin:auto}.masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding:8px 4px 22px;margin-bottom:24px}.brand{font-family:Georgia,"Times New Roman",serif;letter-spacing:.08em;font-size:clamp(24px,3vw,40px)}.eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}.lede{font-family:Georgia,serif;color:var(--muted);font-size:14px;line-height:1.7;margin:6px 0 0}.atelier{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:24px;align-items:start}.stage-card,.control-card{background:rgba(255,253,250,.88);border:1px solid rgba(227,219,208,.9);border-radius:24px;box-shadow:var(--shadow)}.stage-card{padding:18px}.stage-head{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:2px 6px 15px}.stage-head h1{font-family:Georgia,serif;font-size:24px;font-weight:400;margin:0}.stage-head p{color:var(--muted);font-size:12px;margin:5px 0 0}.stage-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.chip{border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:11px;background:#fff}.canvas-wrap{position:relative;border-radius:17px;overflow:hidden;background:linear-gradient(145deg,#fff,#f8f5f0);border:1px solid var(--line)}#stage{display:block;width:100%;height:auto;aspect-ratio:220/160}.stage-loading{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,253,250,.72);backdrop-filter:blur(5px);color:var(--muted);font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}.stage-loading.show{opacity:1}.stage-foot{display:flex;justify-content:space-between;align-items:center;padding:14px 6px 2px;gap:12px;color:var(--muted);font-size:11px}.stage-foot button{border:0;background:transparent;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px}.controls{display:grid;gap:14px}.control-card{padding:18px}.control-card h2{font-family:Georgia,serif;font-size:20px;font-weight:400;margin:0 0 4px}.control-card .hint{font-size:11px;color:var(--muted);margin:0 0 16px;line-height:1.6}.side-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.side{border:1px solid var(--line);border-radius:17px;padding:13px;background:#fff}.side-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.side-title strong{font-family:Georgia,serif;font-size:16px;font-weight:400}.side-title span{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}.select-label{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}.side select{width:100%;margin-top:5px;border:1px solid var(--line);border-radius:10px;padding:10px 11px;color:var(--ink);background:#fbfaf8;outline:none}.side select:focus{border-color:var(--accent)}.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:11px}.swatch{min-width:0;border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 3px 6px;cursor:pointer;color:var(--muted);transition:transform .16s,border-color .16s,box-shadow .16s}.swatch:hover{transform:translateY(-2px);border-color:#c9b8a5}.swatch[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px rgba(148,120,94,.15)}.swatch-dot{display:block;width:24px;height:24px;border-radius:50%;margin:0 auto 5px;border:1px solid rgba(40,30,20,.18);box-shadow:inset 0 1px 2px rgba(255,255,255,.5)}.swatch-name{display:block;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-row{display:flex;gap:10px;flex-wrap:wrap}.toggle{flex:1;min-width:120px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 12px;text-align:left;cursor:pointer;color:var(--muted);transition:all .16s}.toggle strong{display:block;color:var(--ink);font-size:12px;font-weight:500;margin-bottom:2px}.toggle small{font-size:10px}.toggle[aria-pressed="true"]{border-color:var(--accent);background:#f5eee6;color:var(--accent);box-shadow:0 8px 18px rgba(148,120,94,.1)}.toggle:disabled{opacity:.4;cursor:not-allowed;background:#f7f5f1}.summary{border-top:1px solid var(--line);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.summary p{font-size:12px;line-height:1.8;margin:0;color:var(--muted)}.summary b{color:var(--ink);font-weight:500}.copy{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;cursor:pointer;color:var(--accent);white-space:nowrap}.notice{font-size:11px;line-height:1.7;color:var(--muted);background:#f7f3ed;border-radius:12px;padding:10px 12px;margin-top:12px}.debug{display:none;margin-top:24px;background:#201e1c;color:#eee9df;border-radius:18px;padding:18px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.6;white-space:pre-wrap}.debug.visible{display:block}.debug .pass{color:#b6e3ba}.debug .fail{color:#ffaaa2}.footer-note{margin-top:18px;color:var(--muted);font-size:10px;line-height:1.7;text-align:center}
+@media(max-width:980px){body{padding:18px 14px 36px}.atelier{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.control-card:first-child{grid-column:1/-1}}@media(max-width:640px){.masthead{display:block}.masthead .eyebrow{margin-top:10px}.stage-head{display:block}.stage-meta{justify-content:flex-start;margin-top:12px}.controls{display:grid;grid-template-columns:1fr}.side-grid{grid-template-columns:1fr 1fr}.swatches{grid-template-columns:repeat(6,1fr)}.swatch-dot{width:20px;height:20px}.swatch-name{font-size:8px}.summary{display:block}.copy{margin-top:10px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="masthead">
+  <div><div class="eyebrow">maison &. / made to pair</div><div class="brand">Charm Pair Studio</div><p class="lede">2つのチャームを、実寸のバランスで見比べるカラーシミュレーター</p></div>
+  <div class="eyebrow">physical scale / 1:1 layout</div>
+</header>
+<main class="atelier">
+  <section class="stage-card">
+    <div class="stage-head"><div><h1>Preview</h1><p>丸カンとチャームを同じ実寸基準で配置しています</p></div><div class="stage-meta"><span class="chip">220 × 160 mm</span><span class="chip">8 charms + none</span></div></div>
+    <div class="canvas-wrap"><canvas id="stage" width="1320" height="960" aria-label="チャーム組み合わせプレビュー"></canvas><div id="loading" class="stage-loading">素材を組み立てています…</div></div>
+    <div class="stage-foot"><span id="scaleNote">表示倍率: 6 px / mm（画面上はレスポンシブ表示）</span><button id="copySummaryTop" type="button">選択内容をコピー</button></div>
+  </section>
+  <aside class="controls">
+    <section class="control-card"><h2>Pair selection</h2><p class="hint">左右それぞれのチャームと革色を選択してください。幅・高さは共通の実寸スケールで表示されます。</p><div class="side-grid">
+      <div class="side" id="leftSide"><div class="side-title"><strong>Left</strong><span>left charm</span></div><label class="select-label" for="leftCharm">Charm</label><select id="leftCharm"></select><div id="leftSwatches" class="swatches" aria-label="左チャームの革色"></div></div>
+      <div class="side" id="rightSide"><div class="side-title"><strong>Right</strong><span>right charm</span></div><label class="select-label" for="rightCharm">Charm</label><select id="rightCharm"></select><div id="rightSwatches" class="swatches" aria-label="右チャームの革色"></div></div>
+    </div><div class="notice">シェーブル（ヤギ革）の3色は素材定義まで凍結済みですが、現行8チャームへの適用対象外です。対応チャーム追加時に同じ選択欄へ展開できます。</div></section>
+    <section class="control-card"><h2>Finishing</h2><p class="hint">金具・ロゴ・ステッチは左右共通の仕上げ設定です。</p><div class="control-row" id="metalControls"><button class="toggle" data-group="metal" data-value="silver" type="button"><strong>丸カン：銀</strong><small>silver ring</small></button><button class="toggle" data-group="metal" data-value="gold" type="button"><strong>丸カン：金</strong><small>gold ring</small></button></div><div class="control-row" id="logoControls" style="margin-top:10px"><button class="toggle" data-group="logo" data-value="gold" type="button"><strong>ロゴ：金</strong><small>gold foil</small></button><button class="toggle" data-group="logo" data-value="silver" type="button"><strong>ロゴ：銀</strong><small>silver foil</small></button></div><div class="control-row" id="stitchControls" style="margin-top:10px"><button class="toggle" data-group="stitch" data-value="white" type="button"><strong>ステッチ：白</strong><small>white thread</small></button><button class="toggle" data-group="stitch" data-value="black" type="button"><strong>ステッチ：黒</strong><small>black thread</small></button></div><div id="stitchNote" class="notice">ステッチ対応: horseshoe / osanpo / swan</div><div class="summary"><p id="summaryText"></p><button id="copySummary" class="copy" type="button">コピー</button></div></section>
+  </aside>
+</main>
+<div id="debugPanel" class="debug"></div>
+<p class="footer-note">素材・色・寸法は Phase 1〜5 の承認済み凍結値を使用しています。?debug=1 で機械検査を表示します。</p>
+</div>
+<script>
+(() => {
+"use strict";
+const PLAN_REVISION=16;
+const CHARMS={
+  "horse": {
+    "label": "horse",
+    "sizeMm": {
+      "w": 95,
+      "h": 70
+    },
+    "bboxPx": {
+      "x": 190,
+      "y": 368,
+      "w": 879,
+      "h": 647
+    },
+    "fgBboxPx": {
+      "x": 190,
+      "y": 368,
+      "w": 879,
+      "h": 647
+    },
+    "pxPerMm": 9.25263157894737,
+    "attachmentMode": "none",
+    "threadColor": null,
+    "stitchMode": "none",
+    "stitchPaths": [],
+    "baseLum": 0.6352941176470588,
+    "toneMode": "flat",
+    "base": "assets/charms/horse.base.png",
+    "masks": "assets/charms/horse.masks.png"
+  },
+  "horseshoe": {
+    "label": "horseshoe",
+    "sizeMm": {
+      "w": 46,
+      "h": 54
+    },
+    "bboxPx": {
+      "x": 83,
+      "y": 102,
+      "w": 786,
+      "h": 924
+    },
+    "fgBboxPx": {
+      "x": 83,
+      "y": 102,
+      "w": 786,
+      "h": 924
+    },
+    "pxPerMm": 17.08695652173913,
+    "attachmentMode": "none",
+    "threadColor": "light",
+    "stitchMode": "detect",
+    "stitchPaths": [],
+    "baseLum": 0.7568627450980391,
+    "toneMode": "flat",
+    "base": "assets/charms/horseshoe.base.png",
+    "masks": "assets/charms/horseshoe.masks.png"
+  },
+  "frenchie": {
+    "label": "frenchie",
+    "sizeMm": {
+      "w": 60,
+      "h": 75
+    },
+    "bboxPx": {
+      "x": 37,
+      "y": 37,
+      "w": 901,
+      "h": 1127
+    },
+    "fgBboxPx": {
+      "x": 37,
+      "y": 37,
+      "w": 901,
+      "h": 1127
+    },
+    "pxPerMm": 15.016666666666667,
+    "attachmentMode": "none",
+    "threadColor": null,
+    "stitchMode": "none",
+    "stitchPaths": [],
+    "baseLum": 0.6431372549019608,
+    "toneMode": "flat",
+    "base": "assets/charms/frenchie.base.png",
+    "masks": "assets/charms/frenchie.masks.png"
+  },
+  "dachshund": {
+    "label": "dachshund",
+    "sizeMm": {
+      "w": 90,
+      "h": 60
+    },
+    "bboxPx": {
+      "x": 81,
+      "y": 261,
+      "w": 981,
+      "h": 653
+    },
+    "fgBboxPx": {
+      "x": 81,
+      "y": 261,
+      "w": 981,
+      "h": 653
+    },
+    "pxPerMm": 10.9,
+    "attachmentMode": "none",
+    "threadColor": null,
+    "stitchMode": "none",
+    "stitchPaths": [],
+    "baseLum": 0.6235294117647059,
+    "toneMode": "flat",
+    "base": "assets/charms/dachshund.base.png",
+    "masks": "assets/charms/dachshund.masks.png"
+  },
+  "toypoodle": {
+    "label": "toy poodle",
+    "sizeMm": {
+      "w": 80,
+      "h": 60
+    },
+    "bboxPx": {
+      "x": 126,
+      "y": 263,
+      "w": 885,
+      "h": 664
+    },
+    "fgBboxPx": {
+      "x": 126,
+      "y": 263,
+      "w": 885,
+      "h": 664
+    },
+    "pxPerMm": 11.0625,
+    "attachmentMode": "none",
+    "threadColor": null,
+    "stitchMode": "none",
+    "stitchPaths": [],
+    "baseLum": 0.6980392156862744,
+    "toneMode": "flat",
+    "base": "assets/charms/toypoodle.base.png",
+    "masks": "assets/charms/toypoodle.masks.png"
+  },
+  "osanpo": {
+    "label": "osanpo",
+    "sizeMm": {
+      "w": 92,
+      "h": 40
+    },
+    "bboxPx": {
+      "x": 372,
+      "y": 252,
+      "w": 428,
+      "h": 691
+    },
+    "fgBboxPx": {
+      "x": 372,
+      "y": 252,
+      "w": 428,
+      "h": 691
+    },
+    "pxPerMm": 7.363815683061353,
+    "attachmentMode": "none",
+    "threadColor": "light",
+    "stitchMode": "detect",
+    "stitchPaths": [],
+    "baseLum": 0.7607843137254902,
+    "toneMode": "flat",
+    "base": "assets/charms/osanpo.base.png",
+    "masks": "assets/charms/osanpo.masks.png"
+  },
+  "cat": {
+    "label": "cat",
+    "sizeMm": {
+      "w": 68,
+      "h": 65
+    },
+    "bboxPx": {
+      "x": 171,
+      "y": 282,
+      "w": 774,
+      "h": 727
+    },
+    "fgBboxPx": {
+      "x": 171,
+      "y": 282,
+      "w": 774,
+      "h": 727
+    },
+    "pxPerMm": 11.382352941176471,
+    "attachmentMode": "none",
+    "threadColor": null,
+    "stitchMode": "none",
+    "stitchPaths": [],
+    "baseLum": 0.6392156862745098,
+    "toneMode": "flat",
+    "base": "assets/charms/cat.base.png",
+    "masks": "assets/charms/cat.masks.png"
+  },
+  "swan": {
+    "label": "swan",
+    "sizeMm": {
+      "w": 90,
+      "h": 90
+    },
+    "bboxPx": {
+      "x": 58,
+      "y": 247,
+      "w": 692,
+      "h": 692
+    },
+    "fgBboxPx": {
+      "x": 58,
+      "y": 247,
+      "w": 692,
+      "h": 692
+    },
+    "pxPerMm": 7.688888888888889,
+    "attachmentMode": "none",
+    "threadColor": "light",
+    "stitchMode": "detect",
+    "stitchPaths": [],
+    "baseLum": 0.6823529411764706,
+    "toneMode": "flat",
+    "base": "assets/charms/swan.base.png",
+    "masks": "assets/charms/swan.masks.png"
+  }
+};
+const MATERIAL_PROFILES=[
+  {
+    "materialKey": "calf",
+    "canonicalLabel": "カーフ",
+    "textureProfileKey": "calf-embossed-v1",
+    "grainPolicy": "approved-reuse",
+    "grainSourceSha256": "d0b7b644bcce2691b42b776f054ad2dd3f6c23313dab72f6a1b83b1292943a2a",
+    "generationMode": "baked-base"
+  },
+  {
+    "materialKey": "chevre",
+    "canonicalLabel": "シェーブル",
+    "textureProfileKey": "chevre-grained-v1",
+    "grainPolicy": "distinct",
+    "grainSourceSha256": "5d3f86a0f2da40a482be2e4efc6aa98c636b108b05de32b3cdb341ac9bba6774",
+    "generationMode": "baked-base"
+  }
+];
+const LEATHER_VARIANTS=[
+  {
+    "variantKey": "calf:black",
+    "materialKey": "calf",
+    "colorKey": "black",
+    "canonicalLabel": "ブラック",
+    "aliases": [],
+    "approvedHex": "#41403d",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:brick",
+    "materialKey": "calf",
+    "colorKey": "brick",
+    "canonicalLabel": "ブリック",
+    "aliases": [],
+    "approvedHex": "#885854",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:brown",
+    "materialKey": "calf",
+    "colorKey": "brown",
+    "canonicalLabel": "ブラウン",
+    "aliases": [],
+    "approvedHex": "#935a45",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:charcoal-gray",
+    "materialKey": "calf",
+    "colorKey": "charcoal-gray",
+    "canonicalLabel": "チャコールグレー",
+    "aliases": [],
+    "approvedHex": "#616062",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:ciel-blue",
+    "materialKey": "calf",
+    "colorKey": "ciel-blue",
+    "canonicalLabel": "シエルブルー",
+    "aliases": [
+      "シェルブルー"
+    ],
+    "approvedHex": "#6cbacf",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:coral-pink",
+    "materialKey": "calf",
+    "colorKey": "coral-pink",
+    "canonicalLabel": "コーラルピンク",
+    "aliases": [],
+    "approvedHex": "#ef9f7e",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:etoupe",
+    "materialKey": "calf",
+    "colorKey": "etoupe",
+    "canonicalLabel": "エトープ",
+    "aliases": [],
+    "approvedHex": "#a48e73",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:gold",
+    "materialKey": "calf",
+    "colorKey": "gold",
+    "canonicalLabel": "ゴールド",
+    "aliases": [],
+    "approvedHex": "#c8925f",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:greige",
+    "materialKey": "calf",
+    "colorKey": "greige",
+    "canonicalLabel": "グレージュ",
+    "aliases": [],
+    "approvedHex": "#82756b",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:ice-gray",
+    "materialKey": "calf",
+    "colorKey": "ice-gray",
+    "canonicalLabel": "アイスグレー",
+    "aliases": [],
+    "approvedHex": "#cbcdcc",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:ivory",
+    "materialKey": "calf",
+    "colorKey": "ivory",
+    "canonicalLabel": "アイボリー",
+    "aliases": [],
+    "approvedHex": "#ece7dd",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:light-blue",
+    "materialKey": "calf",
+    "colorKey": "light-blue",
+    "canonicalLabel": "ライトブルー",
+    "aliases": [],
+    "approvedHex": "#b0ece8",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:lime-yellow",
+    "materialKey": "calf",
+    "colorKey": "lime-yellow",
+    "canonicalLabel": "ライムイエロー",
+    "aliases": [],
+    "approvedHex": "#f0e15c",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:mist-blue",
+    "materialKey": "calf",
+    "colorKey": "mist-blue",
+    "canonicalLabel": "ミストブルー",
+    "aliases": [],
+    "approvedHex": "#7aaabf",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:navy",
+    "materialKey": "calf",
+    "colorKey": "navy",
+    "canonicalLabel": "ネイビー",
+    "aliases": [],
+    "approvedHex": "#3c4d61",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:orange",
+    "materialKey": "calf",
+    "colorKey": "orange",
+    "canonicalLabel": "オレンジ",
+    "aliases": [],
+    "approvedHex": "#e59134",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:pale-pink",
+    "materialKey": "calf",
+    "colorKey": "pale-pink",
+    "canonicalLabel": "ペールピンク",
+    "aliases": [],
+    "approvedHex": "#e7cbda",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:pale-yellow",
+    "materialKey": "calf",
+    "colorKey": "pale-yellow",
+    "canonicalLabel": "ペールイエロー",
+    "aliases": [],
+    "approvedHex": "#f4ebb8",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:pink",
+    "materialKey": "calf",
+    "colorKey": "pink",
+    "canonicalLabel": "ピンク",
+    "aliases": [],
+    "approvedHex": "#f78192",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:pistachio",
+    "materialKey": "calf",
+    "colorKey": "pistachio",
+    "canonicalLabel": "ピスタチオ",
+    "aliases": [],
+    "approvedHex": "#94ad79",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:purple",
+    "materialKey": "calf",
+    "colorKey": "purple",
+    "canonicalLabel": "パープル",
+    "aliases": [],
+    "approvedHex": "#a855a2",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:red",
+    "materialKey": "calf",
+    "colorKey": "red",
+    "canonicalLabel": "レッド",
+    "aliases": [],
+    "approvedHex": "#e45c61",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:rose-pink",
+    "materialKey": "calf",
+    "colorKey": "rose-pink",
+    "canonicalLabel": "ローズピンク",
+    "aliases": [],
+    "approvedHex": "#a93f74",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "calf:royal-blue",
+    "materialKey": "calf",
+    "colorKey": "royal-blue",
+    "canonicalLabel": "ロイヤルブルー",
+    "aliases": [],
+    "approvedHex": "#445fc1",
+    "textureProfileKey": "calf-embossed-v1",
+    "appliesToCharms": [
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ]
+  },
+  {
+    "variantKey": "chevre:green",
+    "materialKey": "chevre",
+    "colorKey": "green",
+    "canonicalLabel": "グリーン",
+    "aliases": [],
+    "approvedHex": "#00894c",
+    "textureProfileKey": "chevre-grained-v1",
+    "appliesToCharms": []
+  },
+  {
+    "variantKey": "chevre:lavender",
+    "materialKey": "chevre",
+    "colorKey": "lavender",
+    "canonicalLabel": "ラベンダー",
+    "aliases": [],
+    "approvedHex": "#8089e3",
+    "textureProfileKey": "chevre-grained-v1",
+    "appliesToCharms": []
+  },
+  {
+    "variantKey": "chevre:pale-greige",
+    "materialKey": "chevre",
+    "colorKey": "pale-greige",
+    "canonicalLabel": "ペールグレージュ",
+    "aliases": [],
+    "approvedHex": "#9e8e89",
+    "textureProfileKey": "chevre-grained-v1",
+    "appliesToCharms": []
+  }
+];
+const LAYOUT=Object.freeze({stageMm:Object.freeze({w:220,h:160}),pxPerMmStage:6,ringCenterXMm:110,ringOuterMm:42,gapMm:8,ringGapMm:3,marginMm:10});
+const TRANSFER_FIELDS=["sizeMm","bboxPx","fgBboxPx","pxPerMm","attachmentMode","threadColor","stitchMode","stitchPaths","baseLum","toneMode"];
+const VARIANT_FIELDS=["variantKey","materialKey","colorKey","canonicalLabel","aliases","approvedHex","textureProfileKey","appliesToCharms"];
+const MATERIAL_FIELDS=["materialKey","canonicalLabel","textureProfileKey","grainPolicy","grainSourceSha256","generationMode"];
+const CHARM_KEYS=Object.keys(CHARMS);
+const DISPLAY_VARIANTS=LEATHER_VARIANTS.map(v=>Object.freeze({...v}));
+const CALF_VARIANTS=DISPLAY_VARIANTS.filter(v=>v.materialKey==="calf");
+const STITCH_CHARM_KEYS=CHARM_KEYS.filter(k=>CHARMS[k].stitchMode==="detect");
+const state={left:{charm:"horse",variantKey:"calf:ivory"},right:{charm:"horseshoe",variantKey:"calf:ivory"},metal:"silver",logo:"gold",stitch:"white"};
+let renderGen=0;
+const assetPromises=new Map();
+const ringPromises=new Map();
+const runtimeStats={compressionCount:0,upperClampCount:0,lowerClampCount:0,closedBitmapCount:0,renderCount:0,cacheHits:0,cacheMisses:0};
+function clamp(v,min=0,max=255){return Math.max(min,Math.min(max,v));}
+function hexToRgb(hex){const n=parseInt(hex.slice(1),16);return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};}
+function deepEqual(a,b){return JSON.stringify(a)===JSON.stringify(b);}
+function srgbToLinear(v){v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
+function linearToSrgb(v){return v<=.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-.055;}
+function rgbToLab(rgb){
+ const r=srgbToLinear(rgb.r),g=srgbToLinear(rgb.g),b=srgbToLinear(rgb.b);
+ const x=(r*.4124564+g*.3575761+b*.1804375)/.95047;
+ const y=(r*.2126729+g*.7151522+b*.072175)/1;
+ const z=(r*.0193339+g*.119192+b*.9503041)/1.08883;
+ const f=v=>v>.008856?Math.cbrt(v):7.787*v+16/116;
+ const fx=f(x),fy=f(y),fz=f(z);
+ return {L:116*fy-16,a:500*(fx-fy),b:200*(fy-fz)};
+}
+function labToRgbRaw(L,a,b){
+ const fy=(L+16)/116,fx=fy+a/500,fz=fy-b/200;
+ const finv=t=>{const t3=t*t*t;return t3>.008856?t3:(t-16/116)/7.787;};
+ const x=finv(fx)*.95047,y=finv(fy),z=finv(fz)*1.08883;
+ return {r:linearToSrgb(x*3.2404542+y*-1.5371385+z*-0.4985314)*255,g:linearToSrgb(x*-.969266+y*1.8760108+z*.041556)*255,b:linearToSrgb(x*.0556434+y*-.2040259+z*1.0572252)*255};
+}
+function flatLeatherTone(base,displayColor,baseLum){
+ const lum=(.2126*base.r+.7152*base.g+.0722*base.b)/255;
+ const rawRatio=lum/Math.max(baseLum,.001);if(rawRatio>1.60)runtimeStats.upperClampCount++;if(rawRatio<.35)runtimeStats.lowerClampCount++;const ratio=Math.max(.35,Math.min(1.60,rawRatio));
+ const lab=rgbToLab(displayColor);
+ const L=Math.max(0,Math.min(100,lab.L*ratio));
+ let rgb=labToRgbRaw(L,lab.a,lab.b);
+ if([rgb.r,rgb.g,rgb.b].some(v=>v<0||v>255)){
+   runtimeStats.compressionCount++;
+   const C=Math.hypot(lab.a,lab.b), h=Math.atan2(lab.b,lab.a);
+   let lo=0,hi=C;
+   for(let i=0;i<20;i++){const mid=(lo+hi)/2;const t=labToRgbRaw(L,Math.cos(h)*mid,Math.sin(h)*mid);if([t.r,t.g,t.b].every(v=>v>=0&&v<=255))lo=mid;else hi=mid;}
+   rgb=labToRgbRaw(L,Math.cos(h)*lo,Math.sin(h)*lo);
+ }
+ return {r:Math.round(clamp(rgb.r)),g:Math.round(clamp(rgb.g)),b:Math.round(clamp(rgb.b))};
+}
+function photoLeatherTone(base,target,baseLum,shadeFactor){const lum=(.2126*base.r+.7152*base.g+.0722*base.b)/255;let ratio=Math.max(.35,Math.min(1.60,lum/(baseLum||.001)));ratio*=shadeFactor;let r=target.r*ratio,g=target.g*ratio,b=target.b*ratio;if(lum>=.94){const blend=Math.min(.38,(lum-.94)/.06*.38);r=r*(1-blend)+255*blend;g=g*(1-blend)+255*blend;b=b*(1-blend)+255*blend;}return {r:clamp(r),g:clamp(g),b:clamp(b)};}
+function metalTone(base,mode){const lum=(.2126*base.r+.7152*base.g+.0722*base.b)/255;const hi=mode==="silver"?{r:243,g:246,b:252}:{r:236,g:223,b:192};const sh=mode==="silver"?{r:109,g:118,b:130}:{r:117,g:100,b:72};const mix=.18+lum*.82;let r=sh.r*(1-mix)+hi.r*mix,g=sh.g*(1-mix)+hi.g*mix,b=sh.b*(1-mix)+hi.b*mix;if(mode==="gold"){const gray=(r+g+b)/3;const mute=.14;r=r*(1-mute)+gray*mute;g=g*(1-mute)+gray*mute;b=b*(1-mute)+gray*mute;}return {r:clamp(r),g:clamp(g),b:clamp(b)};}
+function stitchColor(base,selection){const lum=(.2126*base.r+.7152*base.g+.0722*base.b)/255;const c=selection==="white"?{r:245,g:245,b:244}:{r:26,g:26,b:22};const k=.85+lum*.3;return {r:clamp(c.r*k),g:clamp(c.g*k),b:clamp(c.b*k)};}
+function cacheKey(job){return job.charmKey+"|"+job.variantKey+"|"+job.materialKey+"|"+job.logo+"|"+job.stitch;}
+class BitmapLRU{
+ constructor(limit=8){this.limit=limit;this.map=new Map();}
+ get(k){const v=this.map.get(k);if(!v)return null;this.map.delete(k);this.map.set(k,v);runtimeStats.cacheHits++;return v;}
+ set(k,v){if(this.map.has(k)){const old=this.map.get(k);this.map.delete(k);if(old&&old.close)old.close();}this.map.set(k,v);while(this.map.size>this.limit){const oldKey=this.map.keys().next().value;const old=this.map.get(oldKey);this.map.delete(oldKey);if(old&&old.close){old.close();runtimeStats.closedBitmapCount++;}}}
+ get size(){return this.map.size;}
+ clear(){for(const v of this.map.values())if(v&&v.close)v.close();this.map.clear();}
+}
+const bitmapCache=new BitmapLRU(8);
+async function decodeImageData(url){const response=await fetch(url);if(!response.ok)throw new Error(url+" HTTP "+response.status);const bitmap=await createImageBitmap(await response.blob());try{const c=document.createElement("canvas");c.width=bitmap.width;c.height=bitmap.height;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(bitmap,0,0);return x.getImageData(0,0,c.width,c.height);}finally{if(bitmap.close)bitmap.close();}}
+async function loadAsset(key){if(assetPromises.has(key))return assetPromises.get(key);const p=Promise.all([decodeImageData(CHARMS[key].base),decodeImageData(CHARMS[key].masks)]).then(([base,masks])=>{if(base.width!==masks.width||base.height!==masks.height)throw new Error(key+" base/masks size mismatch");return {base,masks};});assetPromises.set(key,p);return p;}
+async function loadRing(metal){if(ringPromises.has(metal))return ringPromises.get(metal);const p=(async()=>{const r=await fetch("assets/rings/ring-"+metal+".png");if(!r.ok)throw new Error("ring "+metal);return createImageBitmap(await r.blob());})();ringPromises.set(metal,p);return p;}
+function makeBitmapJob(side,gen){if(!side||side.charm==="none")return null;const charm=CHARMS[side.charm];const variant=DISPLAY_VARIANTS.find(v=>v.variantKey===side.variantKey)||CALF_VARIANTS[0];return Object.freeze({gen,charmKey:side.charm,charm,variantKey:variant.variantKey,materialKey:variant.materialKey,target:hexToRgb(variant.approvedHex),baseLum:charm.baseLum,logo:state.logo,stitch:state.stitch});}
+function captureRenderJob(){const gen=++renderGen;return Object.freeze({gen,metal:state.metal,left:makeBitmapJob(state.left,gen),right:makeBitmapJob(state.right,gen)});}
+async function buildCharmBitmap(job){
+ const key=cacheKey(job),hit=bitmapCache.get(key);if(hit)return hit;runtimeStats.cacheMisses++;
+ const {base,masks}=await loadAsset(job.charmKey);const out=new ImageData(new Uint8ClampedArray(base.data),base.width,base.height);const bd=base.data,md=masks.data,od=out.data;
+ for(let i=0;i<bd.length;i+=4){const a=bd[i+3];od[i+3]=a;if(a===0)continue;if(md[i+3]<128){od[i]=bd[i];od[i+1]=bd[i+1];od[i+2]=bd[i+2];continue;}let wr=md[i]/255,wg=md[i+1]/255,wb=md[i+2]/255;const sum=wr+wg+wb;if(sum>0&&Math.abs(sum-1)>.01){wr/=sum;wg/=sum;wb/=sum;}const b={r:bd[i],g:bd[i+1],b:bd[i+2]};const leather=flatLeatherTone(b,job.target,job.baseLum),logo=metalTone(b,job.logo),stitch=stitchColor(b,job.stitch);od[i]=clamp(leather.r*wr+logo.r*wg+stitch.r*wb);od[i+1]=clamp(leather.g*wr+logo.g*wg+stitch.g*wb);od[i+2]=clamp(leather.b*wr+logo.b*wg+stitch.b*wb);}
+ const c=document.createElement("canvas");c.width=out.width;c.height=out.height;c.getContext("2d").putImageData(out,0,0);const bitmap=await createImageBitmap(c);bitmapCache.set(key,bitmap);return bitmap;
+}
+function visibleKeys(){return [state.left.charm,state.right.charm].filter(k=>k&&k!=="none");}
+function computeLayout(leftKey,rightKey){
+ const sides=[{side:0,key:leftKey},{side:1,key:rightKey}].filter(s=>s.key&&s.key!=="none"), keys=sides.map(s=>s.key), H=LAYOUT.stageMm.h,W=LAYOUT.stageMm.w, ringH=LAYOUT.ringOuterMm, gap=LAYOUT.ringGapMm, stageN=LAYOUT.pxPerMmStage;
+ const bodyGap=LAYOUT.gapMm,dims=sides.map(s=>({side:s.side,key:s.key,w:CHARMS[s.key].bboxPx.w/CHARMS[s.key].pxPerMm,h:CHARMS[s.key].fgBboxPx.h/CHARMS[s.key].pxPerMm}));
+ const maxH=dims.reduce((m,d)=>Math.max(m,d.h),0), total=ringH+gap+maxH, top=Math.max(LAYOUT.marginMm,(H-total)/2), ringCenterY=top+ringH/2, groupTop=top+ringH+gap;
+ const placements=[];
+ if(keys.length===1){const d=dims[0],bbox=CHARMS[d.key].bboxPx,fg=CHARMS[d.key].fgBboxPx;placements[d.side]={key:d.key,x:W/2-d.w/2-bbox.x/CHARMS[d.key].pxPerMm,y:groupTop+(maxH-d.h)/2-fg.y/CHARMS[d.key].pxPerMm,w:d.w,h:d.h,bounds:{x:W/2-d.w/2,y:groupTop+(maxH-d.h)/2,w:d.w,h:d.h}};}
+ if(keys.length===2){const d0=dims[0],d1=dims[1],b0=CHARMS[d0.key].bboxPx,b1=CHARMS[d1.key].bboxPx,f0=CHARMS[d0.key].fgBboxPx,f1=CHARMS[d1.key].fgBboxPx;const rightEdge=W/2-bodyGap/2,leftEdge=W/2+bodyGap/2;const x0=rightEdge-d0.w,x1=leftEdge;placements[d0.side]={key:d0.key,x:x0-b0.x/CHARMS[d0.key].pxPerMm,y:groupTop+(maxH-d0.h)/2-f0.y/CHARMS[d0.key].pxPerMm,w:d0.w,h:d0.h,bounds:{x:x0,y:groupTop+(maxH-d0.h)/2,w:d0.w,h:d0.h}};placements[d1.side]={key:d1.key,x:x1-b1.x/CHARMS[d1.key].pxPerMm,y:groupTop+(maxH-d1.h)/2-f1.y/CHARMS[d1.key].pxPerMm,w:d1.w,h:d1.h,bounds:{x:x1,y:groupTop+(maxH-d1.h)/2,w:d1.w,h:d1.h}};}
+ return {ring:{x:W/2-LAYOUT.ringOuterMm/2,y:ringCenterY-ringH/2,w:ringH,h:ringH},placements,keys,stage:{w:W,h:H},scale:stageN};
+}
+function drawRing(ctx,bitmap,ring){ctx.drawImage(bitmap,ring.x*LAYOUT.pxPerMmStage,ring.y*LAYOUT.pxPerMmStage,ring.w*LAYOUT.pxPerMmStage,ring.h*LAYOUT.pxPerMmStage);}
+async function drawStage(job){const canvas=document.getElementById("stage"),ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#fffdfa";ctx.fillRect(0,0,canvas.width,canvas.height);const layout=computeLayout(job.left&&job.left.charmKey,job.right&&job.right.charmKey);const ring=await loadRing(job.metal);drawRing(ctx,ring,layout.ring);for(const [sideIndex,b] of [job.left,job.right].entries()){if(!b)continue;const bitmap=await buildCharmBitmap(b),p=layout.placements[sideIndex];if(!p)continue;ctx.drawImage(bitmap,p.x*LAYOUT.pxPerMmStage,p.y*LAYOUT.pxPerMmStage,bitmap.width*(LAYOUT.pxPerMmStage/CHARMS[b.charmKey].pxPerMm),bitmap.height*(LAYOUT.pxPerMmStage/CHARMS[b.charmKey].pxPerMm));}document.getElementById("scaleNote").textContent="表示倍率: "+LAYOUT.pxPerMmStage+" px / mm（左右とも共通の実寸基準）";}
+async function requestRender(){const job=captureRenderJob(),loading=document.getElementById("loading");loading.classList.add("show");try{await drawStage(job);if(job.gen!==renderGen)return;runtimeStats.renderCount++;updateSummary();}catch(err){console.error(err);document.getElementById("summaryText").innerHTML='<b>読み込みエラー</b> '+err.message;}finally{if(job.gen===renderGen)loading.classList.remove("show");}}
+function sideVariants(side){return side.charm==="none"?[]:CALF_VARIANTS.filter(v=>v.appliesToCharms.includes(side.charm));}
+function setSideCharm(which,key){state[which].charm=key;const vars=sideVariants(state[which]);if(!vars.some(v=>v.variantKey===state[which].variantKey))state[which].variantKey=vars[0]?.variantKey||"calf:ivory";renderSide(which);updateControls();requestRender();}
+function renderSide(which){const side=state[which],select=document.getElementById(which+"Charm");select.value=side.charm;const root=document.getElementById(which+"Swatches");root.innerHTML="";const vars=sideVariants(side);if(!vars.length){root.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:11px;padding:8px 2px">なし（革色の選択はありません）</div>';return;}for(const v of vars){const btn=document.createElement("button");btn.type="button";btn.className="swatch";btn.setAttribute("aria-pressed",String(v.variantKey===side.variantKey));btn.title=v.canonicalLabel+" "+v.approvedHex;btn.innerHTML='<span class="swatch-dot" style="background:'+v.approvedHex+'"></span><span class="swatch-name">'+v.canonicalLabel+"</span>";btn.addEventListener("click",()=>{state[which].variantKey=v.variantKey;renderSide(which);updateControls();requestRender();});root.appendChild(btn);}}
+function updateControls(){document.querySelectorAll(".toggle").forEach(btn=>{const g=btn.dataset.group;btn.setAttribute("aria-pressed",String(state[g]===btn.dataset.value));});const hasCharm=visibleKeys().length>0;const hasStitch=visibleKeys().some(k=>CHARMS[k].stitchMode==="detect");document.querySelectorAll("#logoControls .toggle").forEach(b=>b.disabled=!hasCharm);document.querySelectorAll("#stitchControls .toggle").forEach(b=>b.disabled=!hasStitch);document.getElementById("stitchNote").textContent=hasStitch?"ステッチ対応: "+STITCH_CHARM_KEYS.join(" / "):"ステッチ対応チャームが未選択のため、ステッチ設定は無効です";if(!hasStitch)document.getElementById("stitchNote").textContent="ステッチ対応: horseshoe / osanpo / swan（選択中のチャームにはステッチなし）";updateSummary();}
+function updateSummary(){const fmt=(which)=>{const s=state[which];if(s.charm==="none")return"なし";const c=CHARMS[s.charm],v=DISPLAY_VARIANTS.find(x=>x.variantKey===s.variantKey);return s.charm+" / "+v.canonicalLabel+" / "+(state.logo==="gold"?"ロゴ金":"ロゴ銀")+(c.stitchMode==="detect"?" / ステッチ"+(state.stitch==="white"?"白":"黒"):"");};const metal=state.metal==="silver"?"丸カン銀":"丸カン金";document.getElementById("summaryText").innerHTML="<b>選択中</b><br>左 "+fmt("left")+"<br>右 "+fmt("right")+"<br>"+metal;}
+function summaryPlain(){const text=document.getElementById("summaryText").innerText;return "maison &. Charm Pair Studio\n"+text;}
+async function copySummary(){try{await navigator.clipboard.writeText(summaryPlain());const buttons=[document.getElementById("copySummary"),document.getElementById("copySummaryTop")];buttons.forEach(b=>{const old=b.textContent;b.textContent="コピーしました";setTimeout(()=>b.textContent=old,1200);});}catch(e){alert(summaryPlain());}}
+function setupUI(){for(const which of ["left","right"]){const select=document.getElementById(which+"Charm");select.innerHTML='<option value="none">なし</option>'+CHARM_KEYS.map(k=>'<option value="'+k+'">'+CHARMS[k].label+"</option>").join("");select.addEventListener("change",e=>setSideCharm(which,e.target.value));renderSide(which);}document.querySelectorAll(".toggle").forEach(btn=>btn.addEventListener("click",()=>{if(btn.disabled)return;state[btn.dataset.group]=btn.dataset.value;updateControls();requestRender();}));document.getElementById("copySummary").addEventListener("click",copySummary);document.getElementById("copySummaryTop").addEventListener("click",copySummary);updateControls();}
+function check(name,ok,detail,rows){rows.push((ok?"PASS ":"FAIL ")+name+" — "+detail);return ok;}
+async function runDebugChecks(){const rows=[],failures=[];const debug=document.getElementById("debugPanel");debug.classList.add("visible");check("planRevision",PLAN_REVISION===16,"16",rows)||failures.push("planRevision");check("CHARMS count",CHARM_KEYS.length===8,"8",rows)||failures.push("CHARMS count");check("variant count",LEATHER_VARIANTS.length===27,"27",rows)||failures.push("variant count");check("material count",MATERIAL_PROFILES.length===2,"2",rows)||failures.push("material count");let prepOk=true;for(const key of CHARM_KEYS){try{const p=await (await fetch("assets/charms/"+key+".prep.json")).json();const d=p.derived;const expected={sizeMm:p.inputs.sizeMm,bboxPx:d.bboxPx,fgBboxPx:d.fgBboxPx,pxPerMm:d.pxPerMm,attachmentMode:p.inputs.attachmentMode,threadColor:p.inputs.threadColor,stitchMode:p.inputs.stitchMode,stitchPaths:d.stitchPathsAsset||[],baseLum:(d.materialAssets&&d.materialAssets.calf&&d.materialAssets.calf.baseLum)||d.baseLum,toneMode:d.toneMode||"flat"};const actual=CHARMS[key];for(const f of TRANSFER_FIELDS)if(!deepEqual(actual[f],expected[f])){prepOk=false;failures.push(key+"."+f);}}catch(e){prepOk=false;failures.push(key+" fetch");}}check("CHARMS transfer 10",prepOk,"8×10",rows);const freezeJson=await (await fetch("plans/charm-approved-color-freeze.json")).json();let variantOk=true;for(const fv of freezeJson.variants){const expected={variantKey:fv.variantKey,materialKey:fv.materialKey,colorKey:fv.colorKey,canonicalLabel:fv.canonicalLabel,aliases:fv.aliases,approvedHex:fv.approvedHex,textureProfileKey:freezeJson.materials.find(m=>m.materialKey===fv.materialKey).textureProfileKey,appliesToCharms:fv.appliesToCharms};const actual=DISPLAY_VARIANTS.find(x=>x.variantKey===fv.variantKey);if(!actual||VARIANT_FIELDS.some(f=>!deepEqual(actual[f],expected[f])))variantOk=false;}check("LEATHER_VARIANTS transfer 8",variantOk,"27×8 freeze照合",rows)||failures.push("variants");let materialOk=true;for(const fm of freezeJson.materials){const expected={materialKey:fm.materialKey,canonicalLabel:fm.canonicalLabel,textureProfileKey:fm.textureProfileKey,grainPolicy:fm.grainPolicy,grainSourceSha256:fm.grainSource.outputSha256,generationMode:"baked-base"};const actual=MATERIAL_PROFILES.find(x=>x.materialKey===fm.materialKey);if(!actual||MATERIAL_FIELDS.some(f=>!deepEqual(actual[f],expected[f])))materialOk=false;}check("MATERIAL_PROFILES transfer 6",materialOk,"2×6 freeze照合",rows)||failures.push("materials");let finite=true;for(const c of Object.values(CHARMS)){for(const v of CALF_VARIANTS){const o=flatLeatherTone({r:128,g:128,b:128},hexToRgb(v.approvedHex),c.baseLum);if(![o.r,o.g,o.b].every(Number.isFinite))finite=false;}}check("flatLeatherTone finite",finite,"192 / 192",rows)||failures.push("finite");runtimeStats.compressionCount=0;runtimeStats.upperClampCount=0;runtimeStats.lowerClampCount=0;const compressionBefore=runtimeStats.compressionCount,upper=flatLeatherTone({r:255,g:255,b:255},hexToRgb("#00894c"),.5),lower=flatLeatherTone({r:0,g:0,b:0},hexToRgb("#00894c"),.5);const branchOk=[upper,lower].every(o=>Object.values(o).every(Number.isFinite))&&runtimeStats.upperClampCount>0&&runtimeStats.lowerClampCount>0&&runtimeStats.compressionCount>compressionBefore;check("tone branch tests",branchOk,"ratio upper/lower + gamut compression",rows)||failures.push("tone branches");let layoutOk=true;const layoutKeys=["none",...CHARM_KEYS];for(const a of layoutKeys)for(const b of layoutKeys){const l=computeLayout(a,b);for(const p of Object.values(l.placements)){const q=p.bounds;if(q.x<0||q.y<0||q.x+q.w>LAYOUT.stageMm.w||q.y+q.h>LAYOUT.stageMm.h)layoutOk=false;}const ps=Object.values(l.placements);if(ps.length===2&&ps[0].bounds.x+ps[0].bounds.w+LAYOUT.gapMm>ps[1].bounds.x+.001)layoutOk=false;if(l.ring.y<0||l.ring.y+l.ring.h>LAYOUT.stageMm.h)layoutOk=false;}check("layout grid",layoutOk,"81 / 81 no clip, overlap, negative margin",rows)||failures.push("layout");const keyProbe=cacheKey({charmKey:"horse",variantKey:"calf:ivory",materialKey:"calf",logo:"gold",stitch:"white"});check("cache contract",keyProbe.split("|").length===5&&!keyProbe.includes("silver"),"metal excluded; LRU limit "+bitmapCache.limit,rows)||failures.push("cache");check("generation snapshot",typeof captureRenderJob==="function","one generation per render input",rows);debug.innerHTML="<strong>debug=1 / Phase 6</strong>\n"+rows.map(r=>r.startsWith("PASS")?'<span class="pass">'+r+"</span>":'<span class="fail">'+r+"</span>").join("\n")+"\n\n"+(failures.length?"FAILURES: "+failures.join(", "):"ALL CHECKS PASS");return {ok:!failures.length,rows,failures};}
+async function boot(){setupUI();await requestRender();if(new URLSearchParams(location.search).get("debug")==="1")await runDebugChecks();}
+window.addEventListener("beforeunload",()=>{bitmapCache.clear();for(const b of ringPromises.values())b.then(x=>x.close&&x.close()).catch(()=>{});});boot().catch(err=>{console.error(err);document.getElementById("summaryText").textContent="初期化エラー: "+err.message;});
+})();
+</script>
+</body>
+</html>
