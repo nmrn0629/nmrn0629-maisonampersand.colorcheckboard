@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "phase": 3,
+  "planRevision": 16,
+  "selectedLockCommit": "5cc72dd760257e52e46a636dac5d5064790e83a2",
+  "selectedPhase2EvidenceCommit": "47646a8f9908f7250200dfe116f3606e122f7498",
+  "phase3StartHead": "47646a8f9908f7250200dfe116f3606e122f7498",
+  "phaseInputCommits": [
+    "47646a8f9908f7250200dfe116f3606e122f7498"
+  ],
+  "phaseOutputCommit": "8a363f297354d2c13016654f84cc1438db641018",
+  "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+  "sourceFreeze": {
+    "path": "plans/charm-approved-source-freeze.json",
+    "byteLength": 11365,
+    "sha256": "2e5f1bbbfba08aff37a6b512ed2f05dc48410f4a84272f4f5d56e1d29df1a1a6"
+  },
+  "colorFreeze": {
+    "path": "plans/charm-approved-color-freeze.json",
+    "byteLength": 36807,
+    "sha256": "93f38ddcce813fb3b43f145e53ff194383c85b5edf0c7f5b3f26c8971bae1fec"
+  },
+  "dedicatedWorktree": {
+    "path": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard/.worktrees/rev16-phase3",
+    "branch": "feature/charm-combo-codex-rev16",
+    "head": "8a363f297354d2c13016654f84cc1438db641018",
+    "startHead": "47646a8f9908f7250200dfe116f3606e122f7498",
+    "cleanAtStart": true,
+    "worktreeImplementation": "independent no-hardlinks clone because the repository's main .git ref store was readonly; no merge/cherry-pick was used"
+  },
+  "originalWorktree": {
+    "path": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard",
+    "branch": "feature/charm-combo-codex",
+    "tipAtPhase3Start": "9ffc9cde804717d641e82056f508e7de368b80d0",
+    "statusAndSHA": "recorded-before-phase3-and-left-untouched",
+    "readOnlyAfterStart": true
+  },
+  "lockedDocuments": [
+    { "path": "plans/charm-combo-display-plan.md", "sha256": "7f92f9308ceebc3fed1c019de70274c77cc6d968da740bbad4b010dd82466647" },
+    { "path": "plans/impl-instructions-charm-combo-display-v2.md", "sha256": "2f9c8cb262f429834cff81ba8f52c69d6e3347b59f241f2a12148dc068fd1d1d" },
+    { "path": "plans/impl-instructions-charm-combo-display.md", "sha256": "db6307d9689055d7082a657bc4a5be52ff0aa9055aea735af44a6831a8e75974" }
+  ],
+  "protectedFiles": [
+    {
+      "path": "index.html",
+      "phase3StartSha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b",
+      "worktreeSha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b",
+      "gitDiffExitCode": 0
+    }
+  ],
+  "bagsHtml": {
+    "status": "excluded-by-revision-16-protectedFiles",
+    "reason": "改訂16のoverride mapでprotectedFilesはindex.htmlの1点のみ",
+    "readOnlyReference": "b29274f:bags.html"
+  },
+  "tool": {
+    "path": "tools/charm-prep.html",
+    "byteLength": 459877,
+    "sha256": "88a7c8f7637b42509be9b555214caba5b42c2685b862da85b7aa752d25cfc282",
+    "toolCommit": "8a363f297354d2c13016654f84cc1438db641018",
+    "toolCommitParent": "47646a8f9908f7250200dfe116f3606e122f7498"
+  },
+  "artifacts": [
+    { "path": "tools/charm-prep.html", "byteLength": 459877, "sha256": "88a7c8f7637b42509be9b555214caba5b42c2685b862da85b7aa752d25cfc282" },
+    { "path": "reports/charm-combo/rev16/prep-selftest.json", "byteLength": 6828, "sha256": "113d457eb0a8533515cd0d87b793822082df19412dc22f76897d179bcaf0036c" }
+  ],
+  "manifestChecks": {
+    "inputManifestSha256": "ebec30a9c625531a3be48c09f522be5a607e33424647944e03735e258bd306b5",
+    "colorReferenceManifestSha256": "0b6421d94cf1816f61aaa491dc8c1782bcb311464f90f041f2087e5a3a875ddb",
+    "materialProfilesSha256": "646d2c8189bbd392f4f36a2b06809d7ff8ece580c2bad1ab89fbfbf4027bee95",
+    "leatherVariantsSha256": "5ac6f61cd0afd88f6358aeaf1e373e3bac8dcb9665c4d6ac0a76e5fcaf1f2fa0",
+    "toolVersion": "0.7.0",
+    "schemaVersion": 5,
+    "charms": 8,
+    "materialProfiles": 2,
+    "leatherVariants": 27,
+    "calfVariants": 24,
+    "chevreVariants": 3,
+    "finiteCases": 192,
+    "layouts": 81
+  },
+  "selftest": {
+    "path": "reports/charm-combo/rev16/prep-selftest.json",
+    "byteLength": 6828,
+    "sha256": "113d457eb0a8533515cd0d87b793822082df19412dc22f76897d179bcaf0036c",
+    "status": "pass",
+    "resultCount": 33,
+    "rev16Checks": [
+      "phase3-frenchie-crop-source",
+      "phase3-osanpo-recipe-constants",
+      "phase3-osanpo-recipe-generation-ranges"
+    ]
+  },
+  "checks": {
+    "revisionLock": "pass",
+    "selectedPhase2Parent": "pass",
+    "selectedPhase2AllowedPaths": "pass",
+    "selectedPhase2HandoffPayload": "pass",
+    "toolOnlyDiff": "pass",
+    "toolCommitDirectParent": "pass",
+    "protectedIndexHtml": "pass",
+    "lockedDocuments": "pass",
+    "sourceAndColorFreezeSHA": "pass",
+    "browserSelftest": "pass",
+    "codexCliReview": "not-run-environment-failure"
+  },
+  "reviewNotes": [
+    "Codex CLIレビューはstate DB readonly書込みエラーとAPI/WebSocket/HTTPS名前解決失敗の2回で実行不能。ブラウザselftest=1、git差分・保護ファイル・freeze SHAの静的照合はPASS。",
+    "旧WIP 763cf1eの内容はswanステッチ判定UI/selftest堅牢化として新toolCommitへ正規取り込み済み。旧SHAを親や成果物識別子には使用していない。"
+  ],
+  "unresolved": [
+    "swanのstitchModeはPhase 4で実画素からdetect/none/fallbackを確定する。",
+    "Phase 4開始前にcanonicalSource 8点のSHA/寸法照合結果を報告し、チェックポイント①のユーザー確認を得る。"
+  ],
+  "nextPhaseReady": false,
+  "canStartPhase4": false,
+  "nextPhaseGate": {
+    "required": true,
+    "checkpoint": "Phase 4 checkpoint ①",
+    "action": "canonicalSource 8点のSHA/寸法照合を報告し、ユーザー確認後に全8種再生成へ進む"
+  },
+  "handoffPayloadSha256": "aaa389f06e6ecadf5cf2691883f376e1eb7be38df1427c1faa9f557dec16c7c9"
+}
