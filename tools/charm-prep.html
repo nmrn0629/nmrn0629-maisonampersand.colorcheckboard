@@ -34,9 +34,9 @@
         var(--paper);
     }
 
-    button, select, input { font: inherit; }
+    button, select, input, textarea { font: inherit; }
     button, select, input[type="number"] { min-height: 40px; }
-    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid rgba(154,117,63,.35); outline-offset: 2px; }
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid rgba(154,117,63,.35); outline-offset: 2px; }
 
     .masthead {
       display: flex;
@@ -91,7 +91,8 @@
     .field { display: grid; gap: 6px; margin-bottom: 12px; }
     .field:last-child { margin-bottom: 0; }
     .field > span, .field label > span { color: var(--muted); font-size: 11px; letter-spacing: .06em; font-weight: 700; }
-    select, input[type="number"] { width: 100%; border: 1px solid #cfc5b3; border-radius: 9px; background: #fffdf8; color: var(--ink); padding: 7px 10px; }
+    select, input[type="number"], textarea { width: 100%; border: 1px solid #cfc5b3; border-radius: 9px; background: #fffdf8; color: var(--ink); padding: 7px 10px; }
+    textarea { min-height: 104px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.5; }
     input[type="range"] { width: 100%; accent-color: var(--brass); }
     .range-row { display: grid; grid-template-columns: 1fr 58px; gap: 9px; align-items: center; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -225,6 +226,27 @@
         </div>
       </section>
 
+      <section id="swanStitchCard" class="card hidden">
+        <div class="card-head"><h2>swan ステッチ判定</h2><span id="swanStitchBadge" class="tag">PENDING</span></div>
+        <div class="card-body">
+          <label class="field"><span>Phase 4 判定</span><select id="swanStitchMode"><option value="pending">未確定</option><option value="detect">detect</option><option value="none">none</option><option value="fallback">fallback</option></select></label>
+          <label id="swanThreadColorField" class="field hidden"><span>元糸色</span><select id="swanThreadColor"><option value="light">light</option><option value="dark">dark</option></select></label>
+          <label id="swanStitchPathsField" class="field hidden"><span>fallback stitchPathsWork (JSON)</span><textarea id="swanStitchPaths" spellcheck="false">[]</textarea></label>
+          <div id="swanStitchEditor" class="hidden">
+            <label class="field"><span>キャンバス操作</span><select id="swanCanvasEditMode"><option value="stitch">ステッチパス頂点を編集</option><option value="manual">手動補正ブラシを編集</option></select></label>
+            <div class="field"><span>破線プレビュー (width / dash / gap mm)</span><div class="two-col"><input id="swanStitchWidthMm" type="number" min="0.1" step="0.1" value="0.8"><input id="swanStitchDashMm" type="number" min="0.1" step="0.1" value="1.8"></div><input id="swanStitchGapMm" type="number" min="0.1" step="0.1" value="1.2"></div>
+            <div class="button-row">
+              <button id="swanNewStitchPathButton" type="button">新しいパス</button>
+              <button id="swanUndoStitchPointButton" type="button">点を戻す</button>
+              <button id="swanClearStitchPathsButton" type="button">全パス消去</button>
+            </div>
+            <p class="tiny">「新しいパス」後、左上の元写真キャンバスを順にクリックして頂点を置きます。JSON・頂点・破線プレビューは同じドラフトへ同期します。</p>
+          </div>
+          <div class="button-row"><button id="applySwanStitchButton" type="button">判定を適用</button></div>
+          <p id="swanStitchStatus" class="tiny">実画素を確認し、完全列挙条件に従って確定するまで処理・書き出しはロックされます。</p>
+        </div>
+      </section>
+
       <section class="card">
         <div class="card-head"><h2>書き出し</h2><span id="exportGate" class="tag">LOCKED</span></div>
         <div class="card-body">
@@ -300,7 +322,7 @@
   <script>
     "use strict";
 
-    const TOOL_VERSION = "0.6.0";
+    const TOOL_VERSION = "0.7.0";
     const SCHEMA_VERSION = 5;
     const WORK_MAX = 1200;
     const ARCHIVE_FORMAT = "maison-charm-prep-archive";
@@ -311,7 +333,8 @@
     const RING_ASSET_PX = 512;
     const RING_GENERATOR_VERSION = 1;
     const SIZE_MM_MEASURED = Object.freeze({ confirmed: true, receivedAt: "2026-07-13" });
-    const SWAN_SIZE_MM_MEASURED = Object.freeze({ confirmed: false, receivedAt: null });
+    const SWAN_SIZE_MM_MEASURED = Object.freeze({ confirmed: true, receivedAt: "2026-07-28" });
+    const FRENCHIE_CROP_SOURCE = Object.freeze({ x: 320, y: 848, w: 1105, h: 1312 });
     const LAYOUT = Object.freeze({
       stageMm: { w: 220, h: 160 },
       pxPerMmStage: 6,
@@ -432,16 +455,37 @@
       stitch: Object.freeze({ seedBoundaryMin: 16, seedBoundaryMax: 60, finalBoundaryMin: 13, finalBoundaryMax: 63, dilatePasses: 3, exclusionDilatePasses: 2 })
     });
 
+    // Plan revision 16 deterministic manual recipe for the colorless osanpo
+    // source. All constants are contractual; changes require a plan revision.
+    const OSANPO_COLORLESS_MANUAL = Object.freeze({
+      id: "osanpo-colorless-20260728-v1",
+      backgroundDistance: 14,
+      autoAlphaLow: 12,
+      autoAlphaHigh: 32,
+      featureDistance: 4,
+      designPaddingPx: 12,
+      mainWhiteRange: Object.freeze({ areaMin: 120000, areaMax: 146000, widthMin: 400, widthMax: 435, heightMin: 660, heightMax: 700 }),
+      hangingHoleSeed: Object.freeze([.495, .273]),
+      hangingHoleRoi: Object.freeze([.465, .245, .525, .305]),
+      hangingHoleRange: Object.freeze({ areaMin: 850, areaMax: 1150, widthMin: 30, widthMax: 40, heightMin: 30, heightMax: 42 }),
+      minorClosedWhiteMaxArea: 500,
+      logoRoi: Object.freeze([.53, .27, .68, .43]),
+      logoBoundaryMin: 45,
+      logoRange: Object.freeze({ countMin: 1000, countMax: 1500, componentMin: 1, componentMax: 2 }),
+      stitch: Object.freeze({ seedBoundaryMin: 15, seedBoundaryMax: 40, finalBoundaryMin: 12, finalBoundaryMax: 43, dilatePasses: 3, exclusionDilatePasses: 2 }),
+      stitchRange: Object.freeze({ rawComponentMin: 18, rawComponentMax: 34, finalCountMin: 14000, finalCountMax: 20000, finalComponentMin: 1, finalComponentMax: 3 })
+    });
+
     const BBOX_REASON = "正立素材の革本体外接矩形を実測W/Hへ対応付けるため";
     const CHARM_SPECS = Object.freeze({
       horse: { label: "horse", source: "../source-photos/horse-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 95, h: 70 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.54,.49,.68,.63], grain: GRAIN_DEFAULTS },
       horseshoe: { label: "horseshoe", source: "../source-photos/horseshoe-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 46, h: 54 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: HORSESHOE_COLORLESS_MANUAL.logoRoi, manualRecipe: HORSESHOE_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
-      frenchie: { label: "frenchie", source: "../source-photos/frenchie-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 60, h: 75 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.50,.55,.76,.82], grain: GRAIN_DEFAULTS },
+      frenchie: { label: "frenchie", source: "../source-photos/frenchie-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 60, h: 75 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.50,.55,.76,.82], cropSource: FRENCHIE_CROP_SOURCE, grain: GRAIN_DEFAULTS },
       dachshund: { label: "dachshund", source: "../source-photos/dachshund-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.64,.56,.78,.72], grain: GRAIN_DEFAULTS },
       toypoodle: { label: "toy poodle", source: "../source-photos/toy-poodle-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 80, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.61,.58,.75,.73], grain: GRAIN_DEFAULTS },
-      osanpo: { label: "osanpo", source: "../source-photos/osanpo-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", reason: "canonicalSource上の主軸・短軸を再計測（2026-07-22）。2304px原寸の計測線をWORK_MAX=1200の作業座標へ25/48倍変換し、幅線は長軸92mm、高さ線は短軸40mmに対応", widthLine: [[693.2291666667,254.6875],[495.3125,902.6041666667]], heightLine: [[662.5,871.875],[375,783.8541666667]] }, logoRoi: [.53,.27,.68,.43], grain: GRAIN_DEFAULTS },
+      osanpo: { label: "osanpo", source: "../source-photos/osanpo-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", reason: "canonicalSource上の主軸・短軸を再計測（2026-07-22）。2304px原寸の計測線をWORK_MAX=1200の作業座標へ25/48倍変換し、幅線は長軸92mm、高さ線は短軸40mmに対応", widthLine: [[693.2291666667,254.6875],[495.3125,902.6041666667]], heightLine: [[662.5,871.875],[375,783.8541666667]] }, logoRoi: [.53,.27,.68,.43], manualRecipe: OSANPO_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
       cat: { label: "cat", source: "../source-photos/cat-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 68, h: 65 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.43,.66,.58,.82], grain: GRAIN_DEFAULTS },
-      swan: { label: "swan", source: "../source-photos/swan-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 90 }, sizeMmMeasured: SWAN_SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.48,.70,.76,.90], grain: GRAIN_DEFAULTS }
+      swan: { label: "swan", source: "../source-photos/swan-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 90 }, sizeMmMeasured: SWAN_SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: null, stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.48,.70,.76,.90], grain: GRAIN_DEFAULTS }
     });
 
     function deepFreeze(value) {
@@ -463,7 +507,9 @@
     const dom = Object.fromEntries([
       "globalStatus","charmSelect","loadButton","processButton","sourceMeta","cropX","cropY","cropW","cropH","bgLow","bgLowNumber","bgHigh","bgHighNumber","logoThreshold","logoThresholdNumber","stitchContrast","stitchContrastNumber","grainScaleMm",
       "manualLayer","brushMode","brushSize","brushSizeNumber","undoButton","clearLayerButton","exportLayerButton","importLayerButton","layerFileInput","manualBadge",
-      "calibrationMode","calibrationModeBadge","lineFields","widthP1","widthP2","heightP1","heightP2","aspectStatus","exportCurrentButton","exportRegressionButton","exportBatchButton","verifyArchiveButton","archiveFileInput","exportGate",
+      "calibrationMode","calibrationModeBadge","lineFields","widthP1","widthP2","heightP1","heightP2","aspectStatus",
+      "swanStitchCard","swanStitchBadge","swanStitchMode","swanThreadColorField","swanThreadColor","swanStitchPathsField","swanStitchPaths","swanStitchEditor","swanCanvasEditMode","swanStitchWidthMm","swanStitchDashMm","swanStitchGapMm","swanNewStitchPathButton","swanUndoStitchPointButton","swanClearStitchPathsButton","applySwanStitchButton","swanStitchStatus",
+      "exportCurrentButton","exportRegressionButton","exportBatchButton","verifyArchiveButton","archiveFileInput","exportGate",
       "generateRingButton","downloadRingButton","ringGate","ringStatus","ringMetrics","ringSilverDarkCanvas","ringSilverLightCanvas","ringGoldDarkCanvas","ringGoldLightCanvas",
       "workspaceTitle","workDims","sourceCanvas","darkCanvas","lightCanvas","overlayCanvas","metricGrid","metricsBadge","checkList","checkBadge","batchBody","configPreview","copyConfigButton"
     ].map(function (id) { return [id, document.getElementById(id)]; }));
@@ -485,6 +531,7 @@
       painting: false,
       lastPoint: null,
       manualRevision: 0,
+      manualRecipeStats: null,
       grainResource: null,
       productionGrainGeneration: 0,
       productionGrainWorker: null,
@@ -493,16 +540,238 @@
       oracleGeneration: 0,
       oracleWorker: null,
       oracleReject: null,
+      flatMutationGate: null,
+      swanStitchDecision: null,
+      swanStitchDecisionBinding: null,
+      swanStitchDraftDirty: false,
+      swanStitchEditorActivePath: -1,
       colorFreeze: null,
       sourceFreeze: null,
       operationSerial: 0,
       operation: null,
       operationControlSnapshot: null,
-      operationPointerEvents: ""
+      operationPointerEvents: "",
+      selfTestActive: false,
+      selfTestInternalPhase: false,
+      selfTestProbeDepth: 0
     };
 
+    function normalizeSwanStitchDecision(input, workSize) {
+      if (!input || input.stitchMode === null || input.stitchMode === "pending") return null;
+      const mode = input.stitchMode;
+      if (!["detect", "none", "fallback"].includes(mode)) throw new Error("swan stitchMode は detect / none / fallback のいずれかです");
+      const threadColor = mode === "none" ? null : input.threadColor;
+      if (mode === "none" && input.threadColor !== null && input.threadColor !== undefined) throw new Error("swan none の threadColor は null 必須です");
+      if (mode !== "none" && threadColor !== "light" && threadColor !== "dark") throw new Error("swan detect/fallback の threadColor は light または dark 必須です");
+      const paths = cloneStitchPaths(input.stitchPathsWork || []);
+      if (mode !== "fallback" && paths.length !== 0) throw new Error("swan detect/none の stitchPathsWork は空配列必須です");
+      if (mode === "fallback" && paths.length < 1) throw new Error("swan fallback は stitchPathsWork が1本以上必要です");
+      paths.forEach(function (path, pathIndex) {
+        const label = "swan stitchPathsWork[" + pathIndex + "]";
+        if (!path || !Array.isArray(path.points) || path.points.length < 2) throw new Error(label + ".points は2点以上必要です");
+        if (!path.points.every(function (point) {
+          return Array.isArray(point) && point.length === 2 && point.every(Number.isFinite)
+            && (!workSize || pointInBounds(point, workSize.w, workSize.h));
+        })) throw new Error(label + " に不正または作業範囲外の点があります");
+        if (new Set(path.points.map(function (point) { return point[0] + "," + point[1]; })).size < 2) throw new Error(label + " は相異なる2点以上が必要です");
+        if (![path.widthMm, path.dashMm, path.gapMm].every(function (value) { return Number.isFinite(value) && value > 0; })) {
+          throw new Error(label + " の widthMm / dashMm / gapMm は正の有限値必須です");
+        }
+      });
+      return deepFreeze({ stitchMode: mode, threadColor: threadColor, stitchPathsWork: paths });
+    }
+
+    function swanDecisionTransformBinding() {
+      if (state.loadedKey !== "swan" || !state.work) return null;
+      const crop = state.cropInputs.swan ? jsonClone(state.cropInputs.swan) : null;
+      return {
+        crop: crop,
+        workSize: { w: state.work.w, h: state.work.h },
+        scale: { x: state.work.scaleX, y: state.work.scaleY },
+        rotation: state.work.rotation || 0
+      };
+    }
+
+    function assertSwanDecisionTransform() {
+      if (state.selectedKey !== "swan" || !state.swanStitchDecision || !state.swanStitchDecisionBinding) return;
+      if (!jsonEqual(state.swanStitchDecisionBinding, swanDecisionTransformBinding())) {
+        throw new Error("swan のステッチ判定が現在のcrop/work変換と一致しません。再判定してください");
+      }
+    }
+
+    function invalidateSwanDecisionForTransformChange(message) {
+      if (state.selectedKey !== "swan" || !state.swanStitchDecision) return false;
+      const nextResult = invalidateSwanDependentResults(state.batch, state.result);
+      state.swanStitchDecision = null;
+      state.swanStitchDecisionBinding = null;
+      state.swanStitchDraftDirty = false;
+      state.swanStitchEditorActivePath = -1;
+      state.result = nextResult;
+      dom.swanStitchMode.value = "pending";
+      dom.swanThreadColor.value = "light";
+      dom.swanStitchPaths.value = "[]";
+      dom.exportGate.textContent = "LOCKED";
+      dom.exportGate.className = "tag";
+      syncSwanStitchControls();
+      renderBatch();
+      if (message) setStatus(message, "idle");
+      updateInteractivity();
+      return true;
+    }
+
+    function bindSwanDecisionAfterLoad(key) {
+      if (key !== "swan" || !state.swanStitchDecision) return;
+      const current = swanDecisionTransformBinding();
+      if (state.swanStitchDecisionBinding && !jsonEqual(state.swanStitchDecisionBinding, current)) {
+        invalidateSwanDecisionForTransformChange("swan の読み込み変換が判定時と異なるため、ステッチ判定を未確定へ戻しました");
+        throw new Error("swan のステッチ判定が現在のcrop/work変換と一致しません。再判定してください");
+      }
+      state.swanStitchDecisionBinding = current;
+    }
+
+    function effectiveCharmSpec(key, requireResolved) {
+      const base = CHARM_SPECS[key];
+      if (!base) throw new Error("未知のチャームです: " + key);
+      if (key !== "swan") return base;
+      const decision = state.swanStitchDecision;
+      if (!decision) {
+        if (requireResolved) throw new Error("swan の stitchMode はPhase 4の実画素確認で未確定です。detect / none / fallback を確定してください");
+        return base;
+      }
+      if (requireResolved && state.swanStitchDraftDirty) {
+        throw new Error("swan のステッチ判定に未適用の変更があります。「判定を適用」してから処理してください");
+      }
+      if (requireResolved) assertSwanDecisionTransform();
+      return Object.assign({}, base, {
+        stitchMode: decision.stitchMode,
+        threadColor: decision.threadColor,
+        stitchPathsWork: cloneStitchPaths(decision.stitchPathsWork)
+      });
+    }
+
+    function requireSwanStitchDecision() {
+      return effectiveCharmSpec("swan", true);
+    }
+
+    function swanOutputReady() {
+      return !!state.swanStitchDecision && !state.swanStitchDraftDirty;
+    }
+
+    function captureSwanProductionGuard() {
+      const spec = requireSwanStitchDecision();
+      return Object.freeze({
+        decision: JSON.stringify({
+          stitchMode: spec.stitchMode,
+          threadColor: spec.threadColor,
+          stitchPathsWork: spec.stitchPathsWork
+        })
+      });
+    }
+
+    function assertSwanProductionGuard(guard) {
+      const current = captureSwanProductionGuard();
+      if (guard && guard.decision !== current.decision) throw new Error("swan のステッチ判定が処理中に変更されました。出力を破棄して再実行してください");
+      return current;
+    }
+
+    function markSwanStitchDraftDirty(message) {
+      state.swanStitchDraftDirty = true;
+      state.lastArchive = null;
+      dom.exportGate.textContent = "LOCKED";
+      dom.exportGate.className = "tag";
+      syncSwanStitchControls();
+      updateInteractivity();
+      if (message) setStatus(message, "idle");
+    }
+
+    function parseSwanStitchPathsDraft() {
+      let paths;
+      try { paths = JSON.parse(dom.swanStitchPaths.value); }
+      catch (error) { throw new Error("fallback stitchPathsWork のJSONが不正です: " + error.message); }
+      if (!Array.isArray(paths)) throw new Error("fallback stitchPathsWork は配列必須です");
+      return paths;
+    }
+
+    function writeSwanStitchPathsDraft(paths, options) {
+      const settings = options || {};
+      dom.swanStitchPaths.value = JSON.stringify(paths, null, 2);
+      if (state.swanStitchEditorActivePath >= paths.length) state.swanStitchEditorActivePath = paths.length - 1;
+      syncActiveSwanStitchPathMetricsToInputs(paths);
+      if (settings.dirty !== false) markSwanStitchDraftDirty(settings.message || "swan fallback パスに未適用の変更があります");
+      renderSource();
+    }
+
+    function syncSwanStitchControls() {
+      const selected = state.selectedKey === "swan";
+      dom.swanStitchCard.classList.toggle("hidden", !selected);
+      const mode = dom.swanStitchMode.value;
+      dom.swanThreadColorField.classList.toggle("hidden", mode === "pending" || mode === "none");
+      dom.swanStitchPathsField.classList.toggle("hidden", mode !== "fallback");
+      dom.swanStitchEditor.classList.toggle("hidden", mode !== "fallback");
+      const decision = state.swanStitchDecision;
+      dom.swanStitchBadge.textContent = state.swanStitchDraftDirty ? "DRAFT" : decision ? decision.stitchMode.toUpperCase() : "PENDING";
+      dom.swanStitchBadge.className = "tag " + (decision && !state.swanStitchDraftDirty ? "pass" : "");
+      dom.swanStitchStatus.textContent = state.swanStitchDraftDirty
+        ? "未適用の変更があります。「判定を適用」するまで処理・成果物取得はロックされます。"
+        : decision
+          ? "確定値: " + decision.stitchMode + " / threadColor=" + (decision.threadColor || "null") + " / paths=" + decision.stitchPathsWork.length
+          : "実画素を確認し、完全列挙条件に従って確定するまで処理・書き出しはロックされます。";
+    }
+
+    function readSwanStitchDecisionControls() {
+      const mode = dom.swanStitchMode.value;
+      if (mode === "pending") return null;
+      const paths = mode === "fallback" ? parseSwanStitchPathsDraft() : [];
+      return {
+        stitchMode: mode,
+        threadColor: mode === "none" ? null : dom.swanThreadColor.value,
+        stitchPathsWork: mode === "fallback" ? paths : []
+      };
+    }
+
+    function invalidateSwanDependentResults(batch, currentResult) {
+      const nextBatch = batch;
+      const previous = nextBatch.swan && nextBatch.swan.result;
+      if (previous) releaseBatchPreviewMemory(previous);
+      if (currentResult && currentResult.key === "swan" && currentResult !== previous) releaseBatchPreviewMemory(currentResult);
+      nextBatch.swan = { status: "pending", verify: "pending" };
+      return currentResult && currentResult.key === "swan" ? null : currentResult;
+    }
+
+    function setSwanStitchDecision(input, message) {
+      if (state.operation) throw new Error("処理中はswanのステッチ判定を変更できません");
+      if (state.selfTestActive && !state.selfTestInternalPhase && state.selfTestProbeDepth === 0) throw new Error("自己検査中はswanのステッチ判定を変更できません");
+      const workSize = state.loadedKey === "swan" && state.work ? { w: state.work.w, h: state.work.h } : null;
+      const decision = normalizeSwanStitchDecision(input, workSize);
+      const nextResult = invalidateSwanDependentResults(state.batch, state.result);
+      state.swanStitchDecision = decision;
+      state.swanStitchDecisionBinding = decision ? swanDecisionTransformBinding() : null;
+      state.swanStitchDraftDirty = false;
+      state.swanStitchEditorActivePath = decision && decision.stitchMode === "fallback" ? Math.max(0, decision.stitchPathsWork.length - 1) : -1;
+      state.lastArchive = null;
+      if (state.result !== nextResult) {
+        state.result = nextResult;
+        resetDerivedViews();
+      }
+      if (decision) {
+        dom.swanStitchMode.value = decision.stitchMode;
+        if (decision.threadColor) dom.swanThreadColor.value = decision.threadColor;
+        writeSwanStitchPathsDraft(decision.stitchPathsWork, { dirty: false });
+      } else {
+        dom.swanStitchMode.value = "pending";
+        writeSwanStitchPathsDraft([], { dirty: false });
+      }
+      syncSwanStitchControls();
+      dom.exportGate.textContent = "LOCKED";
+      dom.exportGate.className = "tag";
+      renderBatch();
+      updateInteractivity();
+      setStatus(message || (decision ? "swan のステッチ判定を適用しました。再実行してください" : "swan のステッチ判定を未確定へ戻しました"), decision ? "ok" : "idle");
+      return decision;
+    }
+
     function operationControls() {
-      return Array.from(document.querySelectorAll("button, input, select"));
+      return Array.from(document.querySelectorAll("button, input, select, textarea"));
     }
 
     function applyOperationLock() {
@@ -513,6 +782,7 @@
 
     function beginOperation(kind) {
       if (state.operation) throw new Error("別の処理が実行中です: " + state.operation.kind);
+      if (state.selfTestActive && !state.selfTestInternalPhase && state.selfTestProbeDepth === 0) throw new Error("自己検査中はproduction処理を開始できません");
       if (state.painting) throw new Error("手動補正の描画中は処理を開始できません。描画を完了してから再実行してください");
       const token = ++state.operationSerial;
       state.operationControlSnapshot = operationControls().map(function (element) { return { element: element, disabled: element.disabled }; });
@@ -536,6 +806,16 @@
       snapshot.forEach(function (item) { item.element.disabled = item.disabled; });
       dom.sourceCanvas.style.pointerEvents = pointerEvents;
       updateInteractivity();
+    }
+
+    function assertProductionAvailable() {
+      if (state.selfTestActive && !state.selfTestInternalPhase && state.selfTestProbeDepth === 0) throw new Error("自己検査中はproduction入口を実行できません");
+    }
+
+    function withSelfTestPublicProbe(callback) {
+      state.selfTestProbeDepth += 1;
+      try { return callback(); }
+      finally { state.selfTestProbeDepth -= 1; }
     }
 
     function setStatus(message, tone) {
@@ -610,6 +890,53 @@
       result.preDerived = null;
       result.grainContext = null;
       result.previews = null;
+      if (result.artifacts) {
+        result.artifacts.base = null;
+        result.artifacts.masks = null;
+        result.artifacts.previews = null;
+        result.artifacts.correction = null;
+      }
+    }
+
+    function cloneResultEnvelope(result, overrides) {
+      if (!result) return null;
+      return Object.assign({}, result, {
+        artifacts: result.artifacts ? Object.assign({}, result.artifacts) : result.artifacts
+      }, overrides || {});
+    }
+
+    function resultHasRenderablePreview(result) {
+      return !!result && !!result.base && !!result.masks && !!result.previews
+        && !!result.previews.blackGoldWhite && !!result.artifacts;
+    }
+
+    function retainSinglePreviewResult(batch, candidate, previousBatch, previousResult) {
+      const keep = resultHasRenderablePreview(candidate) ? candidate : null;
+      const seen = new Set();
+      function release(result) {
+        if (!result || result === keep || seen.has(result)) return;
+        seen.add(result);
+        releaseBatchPreviewMemory(result);
+      }
+      Object.values(previousBatch || {}).forEach(function (item) { release(item && item.result); });
+      Object.values(batch || {}).forEach(function (item) { release(item && item.result); });
+      release(previousResult);
+      return keep;
+    }
+
+    function publishVerificationState(nextBatch, report, previousBatch, previousResult) {
+      const selected = nextBatch[state.selectedKey];
+      const candidate = state.selectedKey === state.loadedKey && selected ? selected.result : null;
+      const displayResult = retainSinglePreviewResult(nextBatch, candidate, previousBatch, previousResult);
+      Object.assign(state, { batch: nextBatch, result: displayResult, lastArchive: report });
+      renderBatch();
+      if (displayResult) {
+        renderResult(displayResult);
+      } else {
+        resetDerivedViews();
+        dom.configPreview.textContent = "{}";
+      }
+      return displayResult;
     }
 
     async function loadSource(key, ownerToken) {
@@ -650,8 +977,10 @@
         state.sourceBytes = bytes;
         state.sourceImageData = sourceImageData;
         state.work = work;
+        bindSwanDecisionAfterLoad(key);
         state.transformDirty = false;
         state.manual = { alpha: emptyLayer(work.w, work.h), owner: emptyLayer(work.w, work.h), keep: emptyLayer(work.w, work.h), inpaint: emptyLayer(work.w, work.h) };
+        state.manualRecipeStats = null;
         seedDeterministicManualLayers(spec, sourceImageData);
         markManualEdited();
         state.history = [];
@@ -682,9 +1011,55 @@
       dom.cropH.value = crop.h;
     }
 
+    function snapshotTransformUi() {
+      return {
+        cropInputs: jsonClone(state.cropInputs),
+        cropX: dom.cropX.value,
+        cropY: dom.cropY.value,
+        cropW: dom.cropW.value,
+        cropH: dom.cropH.value,
+        calibrationMode: dom.calibrationMode.value,
+        calibrationModeBadge: dom.calibrationModeBadge.textContent,
+        lineFieldsHidden: dom.lineFields.classList.contains("hidden"),
+        widthP1: dom.widthP1.value,
+        widthP2: dom.widthP2.value,
+        heightP1: dom.heightP1.value,
+        heightP2: dom.heightP2.value,
+        aspectStatus: dom.aspectStatus.textContent,
+        swanCanvasEditMode: dom.swanCanvasEditMode.value,
+        workspaceTitle: dom.workspaceTitle.textContent,
+        sourceMeta: dom.sourceMeta.textContent,
+        workDims: dom.workDims.textContent,
+        manualBadge: dom.manualBadge.textContent
+      };
+    }
+
+    function restoreTransformUi(snapshot) {
+      if (!snapshot) return;
+      state.cropInputs = jsonClone(snapshot.cropInputs);
+      dom.cropX.value = snapshot.cropX;
+      dom.cropY.value = snapshot.cropY;
+      dom.cropW.value = snapshot.cropW;
+      dom.cropH.value = snapshot.cropH;
+      dom.calibrationMode.value = snapshot.calibrationMode;
+      dom.calibrationModeBadge.textContent = snapshot.calibrationModeBadge;
+      dom.lineFields.classList.toggle("hidden", snapshot.lineFieldsHidden);
+      dom.widthP1.value = snapshot.widthP1;
+      dom.widthP2.value = snapshot.widthP2;
+      dom.heightP1.value = snapshot.heightP1;
+      dom.heightP2.value = snapshot.heightP2;
+      dom.aspectStatus.textContent = snapshot.aspectStatus;
+      dom.swanCanvasEditMode.value = snapshot.swanCanvasEditMode;
+      dom.workspaceTitle.textContent = snapshot.workspaceTitle;
+      dom.sourceMeta.textContent = snapshot.sourceMeta;
+      dom.workDims.textContent = snapshot.workDims;
+      dom.manualBadge.textContent = snapshot.manualBadge;
+    }
+
     function updateCropInput() {
       const crop = { x: Number(dom.cropX.value), y: Number(dom.cropY.value), w: Number(dom.cropW.value), h: Number(dom.cropH.value) };
       state.cropInputs[state.selectedKey] = crop;
+      if (state.selectedKey === "swan") invalidateSwanDecisionForTransformChange("swan のcropを変更したため、ステッチ判定を未確定へ戻しました。再判定してください");
       state.transformDirty = true;
       invalidateResult("クロップ入力を変更しました。「元写真を読み込む」で①を再実行してください");
       updateInteractivity();
@@ -702,12 +1077,15 @@
       } else {
         dom.widthP1.value = dom.widthP2.value = dom.heightP1.value = dom.heightP2.value = "0,0";
       }
+      syncSwanStitchControls();
     }
 
     function renderSource() {
       if (!state.sourceImageData) return;
       imageDataToCanvas(state.sourceImageData, dom.sourceCanvas);
-      renderManualOverlay(getContext(dom.sourceCanvas));
+      const ctx = getContext(dom.sourceCanvas);
+      renderManualOverlay(ctx);
+      renderSwanStitchPathOverlay(ctx);
     }
 
     function renderManualOverlay(ctx) {
@@ -727,6 +1105,145 @@
       setCanvasSize(temp, layer.width, layer.height);
       getContext(temp).putImageData(overlay, 0, 0);
       ctx.drawImage(temp, 0, 0);
+    }
+
+    function swanStitchPreviewPxPerMm() {
+      const spec = CHARM_SPECS.swan;
+      if (state.result && state.result.key === "swan" && state.result.derived && Number.isFinite(state.result.derived.pxPerMm) && state.result.derived.pxPerMm > 0) {
+        return state.result.derived.pxPerMm;
+      }
+      if (!state.work) return 1;
+      const calibration = currentCalibrationInput();
+      if (calibration.mode === "manual-line") {
+        const widthMeasure = lineLength(calibration.widthLine);
+        if (Number.isFinite(widthMeasure) && widthMeasure > 0) return widthMeasure / spec.sizeMm.w;
+      }
+      if (state.sourceImageData) {
+        const source = state.sourceImageData;
+        const visible = rectFromPredicate(source.width, source.height, function (x, y) {
+          const offset = rgbaIndex(x, y, source.width);
+          return source.data[offset + 3] > 0
+            && (source.data[offset] < 250 || source.data[offset + 1] < 250 || source.data[offset + 2] < 250);
+        });
+        if (visible && visible.w > 0) return visible.w / spec.sizeMm.w;
+      }
+      return Math.max(1, state.work.w / spec.sizeMm.w);
+    }
+
+    function renderSwanStitchPathOverlay(ctx) {
+      if (state.selectedKey !== "swan" || state.loadedKey !== "swan" || dom.swanStitchMode.value !== "fallback") return;
+      let paths;
+      try { paths = parseSwanStitchPathsDraft(); }
+      catch (error) { return; }
+      const pxPerMm = swanStitchPreviewPxPerMm();
+      ctx.save();
+      paths.forEach(function (path, pathIndex) {
+        if (!path || !Array.isArray(path.points)) return;
+        const widthMm = Number.isFinite(path.widthMm) && path.widthMm > 0 ? path.widthMm : Number(dom.swanStitchWidthMm.value);
+        const dashMm = Number.isFinite(path.dashMm) && path.dashMm > 0 ? path.dashMm : Number(dom.swanStitchDashMm.value);
+        const gapMm = Number.isFinite(path.gapMm) && path.gapMm > 0 ? path.gapMm : Number(dom.swanStitchGapMm.value);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = Math.max(1, widthMm * pxPerMm);
+        ctx.strokeStyle = pathIndex === state.swanStitchEditorActivePath ? "rgba(14, 116, 144, .96)" : "rgba(154, 117, 63, .88)";
+        ctx.setLineDash([Math.max(1, dashMm * pxPerMm), Math.max(1, gapMm * pxPerMm)]);
+        ctx.beginPath();
+        path.points.forEach(function (point, pointIndex) {
+          if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite)) return;
+          if (pointIndex === 0) ctx.moveTo(point[0], point[1]);
+          else ctx.lineTo(point[0], point[1]);
+        });
+        if (path.points.length >= 2) ctx.stroke();
+        ctx.setLineDash([]);
+        path.points.forEach(function (point, pointIndex) {
+          if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite)) return;
+          ctx.beginPath();
+          ctx.arc(point[0], point[1], pathIndex === state.swanStitchEditorActivePath ? 5 : 4, 0, Math.PI * 2);
+          ctx.fillStyle = pointIndex === 0 ? "#fff" : "#0e7490";
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#0e5669";
+          ctx.stroke();
+        });
+      });
+      ctx.restore();
+    }
+
+    function currentSwanStitchPathMetrics() {
+      const values = [Number(dom.swanStitchWidthMm.value), Number(dom.swanStitchDashMm.value), Number(dom.swanStitchGapMm.value)];
+      if (!values.every(function (value) { return Number.isFinite(value) && value > 0; })) {
+        throw new Error("fallback の width / dash / gap は正の有限値必須です");
+      }
+      return { widthMm: values[0], dashMm: values[1], gapMm: values[2] };
+    }
+
+    function syncActiveSwanStitchPathMetricsToInputs(paths) {
+      const list = paths || [];
+      const active = state.swanStitchEditorActivePath;
+      if (active < 0 || active >= list.length) return;
+      const path = list[active];
+      if (!path) return;
+      if (Number.isFinite(path.widthMm) && path.widthMm > 0) dom.swanStitchWidthMm.value = String(path.widthMm);
+      if (Number.isFinite(path.dashMm) && path.dashMm > 0) dom.swanStitchDashMm.value = String(path.dashMm);
+      if (Number.isFinite(path.gapMm) && path.gapMm > 0) dom.swanStitchGapMm.value = String(path.gapMm);
+    }
+
+    function beginSwanStitchPath() {
+      if (state.loadedKey !== "swan" || state.selectedKey !== "swan" || dom.swanStitchMode.value !== "fallback") {
+        throw new Error("swan を読み込み、fallback を選択してください");
+      }
+      const paths = parseSwanStitchPathsDraft();
+      const metrics = currentSwanStitchPathMetrics();
+      paths.push({ points: [], widthMm: metrics.widthMm, dashMm: metrics.dashMm, gapMm: metrics.gapMm });
+      state.swanStitchEditorActivePath = paths.length - 1;
+      writeSwanStitchPathsDraft(paths, { message: "新しいfallbackパスを開始しました。キャンバスへ頂点を置いてください" });
+    }
+
+    function appendSwanStitchPoint(point) {
+      let paths = parseSwanStitchPathsDraft();
+      let active = state.swanStitchEditorActivePath;
+      if (active < 0 || active >= paths.length) {
+        const metrics = currentSwanStitchPathMetrics();
+        paths.push({ points: [], widthMm: metrics.widthMm, dashMm: metrics.dashMm, gapMm: metrics.gapMm });
+        active = paths.length - 1;
+        state.swanStitchEditorActivePath = active;
+      }
+      if (!Array.isArray(paths[active].points)) paths[active].points = [];
+      paths[active].points.push([point.x, point.y]);
+      writeSwanStitchPathsDraft(paths, { message: "fallbackパスの頂点を追加しました。「判定を適用」して確定してください" });
+    }
+
+    function undoSwanStitchPoint() {
+      const paths = parseSwanStitchPathsDraft();
+      let active = state.swanStitchEditorActivePath;
+      if (active < 0 || active >= paths.length) active = paths.length - 1;
+      if (active < 0) return;
+      if (Array.isArray(paths[active].points) && paths[active].points.length) paths[active].points.pop();
+      if (!paths[active].points.length) {
+        paths.splice(active, 1);
+        active = paths.length - 1;
+      }
+      state.swanStitchEditorActivePath = active;
+      writeSwanStitchPathsDraft(paths, { message: "fallbackパスの最後の頂点を戻しました" });
+    }
+
+    function clearSwanStitchPathsDraft() {
+      state.swanStitchEditorActivePath = -1;
+      writeSwanStitchPathsDraft([], { message: "fallbackパスを全て消去しました" });
+    }
+
+    function updateActiveSwanStitchPathMetrics() {
+      const paths = parseSwanStitchPathsDraft();
+      const active = state.swanStitchEditorActivePath;
+      if (active < 0 || active >= paths.length) {
+        renderSource();
+        return;
+      }
+      const metrics = currentSwanStitchPathMetrics();
+      paths[active].widthMm = metrics.widthMm;
+      paths[active].dashMm = metrics.dashMm;
+      paths[active].gapMm = metrics.gapMm;
+      writeSwanStitchPathsDraft(paths, { message: "fallbackパスの破線設定に未適用の変更があります" });
     }
 
     function resetDerivedViews() {
@@ -772,9 +1289,9 @@
     function renderBatch() {
       dom.batchBody.innerHTML = "";
       CHARM_KEYS.forEach(function (key) {
-        const spec = CHARM_SPECS[key], item = state.batch[key];
+        const spec = effectiveCharmSpec(key, false), item = state.batch[key];
         const row = document.createElement("tr");
-        [spec.label, spec.stitchMode, item.foreground || "—", item.status, item.verify].forEach(function (value, i) {
+        [spec.label, spec.stitchMode || "pending", item.foreground || "—", item.status, item.verify].forEach(function (value, i) {
           const td = document.createElement("td");
           if (i >= 3) { const tag = document.createElement("span"); tag.className = "tag " + (value === "pass" ? "pass" : value === "fail" ? "fail" : ""); tag.textContent = value; td.appendChild(tag); }
           else td.textContent = value;
@@ -788,16 +1305,31 @@
       const loaded = !!state.sourceImageData && state.loadedKey === state.selectedKey;
       const currentResult = state.result && state.result.key === state.selectedKey ? state.result : null;
       const currentPass = currentResult && currentResult.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
-      dom.processButton.disabled = !loaded || state.transformDirty;
+      const swanReady = swanOutputReady();
+      const fallbackEditing = loaded && state.selectedKey === "swan" && dom.swanStitchMode.value === "fallback";
+      const selfTestLock = !!state.selfTestActive;
+      dom.loadButton.disabled = selfTestLock;
+      dom.processButton.disabled = selfTestLock || !loaded || state.transformDirty || !swanReady;
       dom.undoButton.disabled = !loaded || state.history.length === 0;
       dom.clearLayerButton.disabled = !loaded;
-      dom.exportLayerButton.disabled = !loaded;
+      dom.exportLayerButton.disabled = selfTestLock || !loaded || !swanReady;
       dom.importLayerButton.disabled = !loaded;
-      dom.copyConfigButton.disabled = !currentResult;
-      dom.exportRegressionButton.disabled = !currentPass || CHARM_SPECS[state.selectedKey].sourceMode !== "colorless";
-      dom.exportCurrentButton.disabled = !currentPass || !allBatchPeerPass();
-      dom.exportBatchButton.disabled = !allBatchPass1to7() || !allBatchPeerPass();
-      dom.sourceCanvas.style.pointerEvents = loaded ? "" : "none";
+      dom.copyConfigButton.disabled = selfTestLock || !currentResult || !swanReady;
+      dom.exportRegressionButton.disabled = selfTestLock || !currentPass || !swanReady || CHARM_SPECS[state.selectedKey].sourceMode !== "colorless";
+      dom.exportCurrentButton.disabled = selfTestLock || !currentPass || !swanReady || !allBatchPeerPass();
+      dom.exportBatchButton.disabled = selfTestLock || !swanReady || !allBatchPass1to7() || !allBatchPeerPass();
+      dom.verifyArchiveButton.disabled = selfTestLock || !swanReady;
+      dom.swanStitchMode.disabled = selfTestLock;
+      dom.swanThreadColor.disabled = selfTestLock;
+      dom.swanStitchPaths.disabled = selfTestLock;
+      dom.applySwanStitchButton.disabled = selfTestLock;
+      dom.swanNewStitchPathButton.disabled = !fallbackEditing;
+      dom.swanUndoStitchPointButton.disabled = !fallbackEditing;
+      dom.swanClearStitchPathsButton.disabled = !fallbackEditing;
+      dom.generateRingButton.disabled = selfTestLock || !swanReady || !!state.operation;
+      dom.downloadRingButton.disabled = selfTestLock || !swanReady || !state.rings || state.rings.status !== "pass";
+      dom.sourceCanvas.style.pointerEvents = loaded && !selfTestLock ? "" : "none";
+      syncSwanStitchControls();
       applyOperationLock();
     }
 
@@ -1722,17 +2254,22 @@
 
     async function generateRingAssets(options) {
       const settings = options || {};
+      const shouldDownload = settings.download === true;
+      const swanGuard = captureSwanProductionGuard();
+      const operationToken = beginOperation("ring-assets");
       const definitions = [
         { key: "silver", label: "silver", source: "../シルバーキーリング.jpg", file: "assets/rings/ring-silver.png" },
         { key: "gold", label: "gold", source: "../ゴールドキーリング.jpg", file: "assets/rings/ring-gold.png" }
       ];
-      state.rings = null;
-      dom.generateRingButton.disabled = true;
-      dom.downloadRingButton.disabled = true;
-      setRingGate("busy", "銀・金の丸カンを抽出し、512×512へ正規化しています");
-      dom.ringMetrics.textContent = "検証中…";
       try {
+        state.rings = null;
+        dom.generateRingButton.disabled = true;
+        dom.downloadRingButton.disabled = true;
+        setRingGate("busy", "銀・金の丸カンを抽出し、512×512へ正規化しています");
+        dom.ringMetrics.textContent = "検証中…";
         const generated = await Promise.all(definitions.map(generateOneRingAsset));
+        assertOperationToken(operationToken);
+        assertSwanProductionGuard(swanGuard);
         const rings = { silver: generated[0], gold: generated[1] };
         const failures = generated.flatMap(function (item) {
           return item.summary.failures.map(function (failure) { return item.summary.label + ": " + failure; });
@@ -1750,9 +2287,11 @@
         renderRingPreviews(rings);
         dom.ringMetrics.textContent = JSON.stringify(summary, null, 2);
         if (summary.status !== "pass") throw new Error(failures.join(" / "));
+        assertSwanProductionGuard(swanGuard);
         dom.downloadRingButton.disabled = false;
         setRingGate("pass", "丸カン2点の生成・検証 PASS（42mm共通基準枠）");
-        if (settings.download) {
+        if (shouldDownload) {
+          assertSwanProductionGuard(swanGuard);
           downloadBlob(rings.silver.blob, "ring-silver.png");
           downloadBlob(rings.gold.blob, "ring-gold.png");
         }
@@ -1763,12 +2302,14 @@
         if (!state.rings) dom.ringMetrics.textContent = JSON.stringify({ status: "fail", error: error.message }, null, 2);
         throw error;
       } finally {
-        dom.generateRingButton.disabled = false;
+        endOperation(operationToken);
       }
     }
 
     function downloadGeneratedRingAssets() {
+      const swanGuard = captureSwanProductionGuard();
       if (!state.rings || state.rings.status !== "pass") throw new Error("丸カン検証がPASSしていません");
+      assertSwanProductionGuard(swanGuard);
       downloadBlob(state.rings.silver.blob, "ring-silver.png");
       downloadBlob(state.rings.gold.blob, "ring-gold.png");
     }
@@ -1989,6 +2530,8 @@
     }
 
     function invalidateResult(message) {
+      const previous = state.result;
+      if (previous) releaseBatchPreviewMemory(previous);
       state.result = null;
       state.batch[state.selectedKey] = { status: "pending", verify: "pending" };
       dom.exportCurrentButton.disabled = true;
@@ -2107,6 +2650,10 @@
     function startPainting(event) {
       if (!state.manual || state.loadedKey !== state.selectedKey || event.button !== 0) return;
       event.preventDefault();
+      if (state.selectedKey === "swan" && dom.swanStitchMode.value === "fallback" && dom.swanCanvasEditMode.value === "stitch") {
+        appendSwanStitchPoint(pointerToCanvas(event));
+        return;
+      }
       dom.sourceCanvas.setPointerCapture(event.pointerId);
       pushHistory(dom.manualLayer.value);
       state.painting = true;
@@ -2133,6 +2680,7 @@
 
     async function exportManualLayer() {
       if (!state.manual) throw new Error("manual layerが未読み込みです");
+      requireSwanStitchDecision();
       const operationToken = beginOperation("export-manual:" + state.selectedKey);
       try {
         const key = state.selectedKey;
@@ -2217,12 +2765,185 @@
     }
 
     function seedDeterministicManualLayers(spec, source) {
+      state.manualRecipeStats = null;
       if (!state.manual || !spec.manualRecipe) return;
       if (spec.sourceMode !== "colorless" || spec.toneMode !== "flat") throw new Error(spec.label + " manualRecipeはcolorless/flat専用です");
-      if (spec.manualRecipe.id !== HORSESHOE_COLORLESS_MANUAL.id) throw new Error(spec.label + " 未知のmanualRecipeです");
-      seedHorseshoeAlpha(source, spec.manualRecipe);
-      seedHorseshoeOwnerAndKeep(source, spec.manualRecipe);
+      if (spec.manualRecipe.id === HORSESHOE_COLORLESS_MANUAL.id) {
+        seedHorseshoeAlpha(source, spec.manualRecipe);
+        seedHorseshoeOwnerAndKeep(source, spec.manualRecipe);
+      } else if (spec.manualRecipe.id === OSANPO_COLORLESS_MANUAL.id) {
+        state.manualRecipeStats = seedOsanpoManualLayers(source, spec.manualRecipe);
+      } else {
+        throw new Error(spec.label + " 未知のmanualRecipeです");
+      }
       dom.manualBadge.textContent = "新素材manual生成済み";
+    }
+
+    function countMaskComponents8(mask, width, height) {
+      const visited = new Uint8Array(mask.length);
+      let components = 0;
+      for (let start = 0; start < mask.length; start += 1) {
+        if (!mask[start] || visited[start]) continue;
+        components += 1;
+        const queue = [start];
+        visited[start] = 1;
+        for (let head = 0; head < queue.length; head += 1) {
+          const index = queue[head], x = index % width, y = (index - x) / width;
+          for (let oy = -1; oy <= 1; oy += 1) for (let ox = -1; ox <= 1; ox += 1) {
+            if (!ox && !oy) continue;
+            const xx = x + ox, yy = y + oy;
+            if (xx < 0 || yy < 0 || xx >= width || yy >= height) continue;
+            const next = yy * width + xx;
+            if (mask[next] && !visited[next]) { visited[next] = 1; queue.push(next); }
+          }
+        }
+      }
+      return components;
+    }
+
+    function classifyOsanpoClosedWhite(passable, reachable, width, height, recipe) {
+      const visited = new Uint8Array(width * height);
+      const queue = new Int32Array(width * height);
+      const holeRoi = roiBounds(recipe.hangingHoleRoi, width, height);
+      const seedX = Math.round(recipe.hangingHoleSeed[0] * width), seedY = Math.round(recipe.hangingHoleSeed[1] * height);
+      let main = null, hole = null;
+      const minor = [];
+      for (let start = 0; start < visited.length; start += 1) {
+        if (visited[start] || !passable[start] || reachable[start]) continue;
+        let head = 0, tail = 0, minDistance = Infinity;
+        let minX = width, minY = height, maxX = -1, maxY = -1;
+        const pixels = [];
+        queue[tail++] = start; visited[start] = 1;
+        while (head < tail) {
+          const index = queue[head++]; pixels.push(index);
+          const x = index % width, y = (index - x) / width;
+          minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+          minDistance = Math.min(minDistance, (x - seedX) * (x - seedX) + (y - seedY) * (y - seedY));
+          for (let oy = -1; oy <= 1; oy += 1) for (let ox = -1; ox <= 1; ox += 1) {
+            if (!ox && !oy) continue;
+            const xx = x + ox, yy = y + oy;
+            if (xx < 0 || yy < 0 || xx >= width || yy >= height) continue;
+            const next = yy * width + xx;
+            if (!visited[next] && passable[next] && !reachable[next]) { visited[next] = 1; queue[tail++] = next; }
+          }
+        }
+        const component = { pixels: pixels, area: pixels.length, bbox: { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 }, minDistance: minDistance, firstIndex: start };
+        if (!main || component.area > main.area || (component.area === main.area && component.firstIndex < main.firstIndex)) main = component;
+        const insideRoi = component.bbox.x >= holeRoi.x0 && component.bbox.y >= holeRoi.y0
+          && component.bbox.x + component.bbox.w <= holeRoi.x1 && component.bbox.y + component.bbox.h <= holeRoi.y1;
+        if (insideRoi && (!hole || component.minDistance < hole.minDistance || (component.minDistance === hole.minDistance && component.firstIndex < hole.firstIndex))) hole = component;
+        if (component !== main && component !== hole) minor.push(component);
+      }
+      if (!main) throw new Error("osanpo主閉白成分を確定できません");
+      if (!hole) throw new Error("osanpo吊り穴の閉白成分をROI内で確定できません");
+      const mainRange = recipe.mainWhiteRange;
+      if (main.area < mainRange.areaMin || main.area > mainRange.areaMax || main.bbox.w < mainRange.widthMin || main.bbox.w > mainRange.widthMax || main.bbox.h < mainRange.heightMin || main.bbox.h > mainRange.heightMax) {
+        throw new Error("osanpo主閉白成分が素材固定レンジ外です: area=" + main.area + " / bbox=" + JSON.stringify(main.bbox));
+      }
+      const holeRange = recipe.hangingHoleRange;
+      if (hole.area < holeRange.areaMin || hole.area > holeRange.areaMax || hole.bbox.w < holeRange.widthMin || hole.bbox.w > holeRange.widthMax || hole.bbox.h < holeRange.heightMin || hole.bbox.h > holeRange.heightMax) {
+        throw new Error("osanpo吊り穴成分が素材固定レンジ外です: area=" + hole.area + " / bbox=" + JSON.stringify(hole.bbox));
+      }
+      const oversizedMinor = minor.filter(function (component) { return component !== main && component !== hole && component.area > recipe.minorClosedWhiteMaxArea; });
+      if (oversizedMinor.length) throw new Error("osanpo許容外の閉白成分があります: " + oversizedMinor.map(function (component) { return component.area; }).join(","));
+      return { main: main, hole: hole, minorCount: minor.length, minorAreas: minor.map(function (component) { return component.area; }) };
+    }
+
+    function seedOsanpoAlpha(source, recipe) {
+      const width = source.width, height = source.height, count = width * height;
+      const background = sampleBackground(source);
+      const passable = new Uint8Array(count), reachable = new Uint8Array(count), rawAutoAlpha = new Uint8ClampedArray(count), queue = new Int32Array(count);
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        const distance = Math.hypot(source.data[offset] - background.r, source.data[offset + 1] - background.g, source.data[offset + 2] - background.b);
+        rawAutoAlpha[index] = Math.round(smoothstep(recipe.autoAlphaLow, recipe.autoAlphaHigh, distance) * 255);
+        if (distance <= recipe.backgroundDistance) passable[index] = 1;
+      }
+      let head = 0, tail = 0;
+      function enqueue(index) {
+        if (index < 0 || index >= count || reachable[index] || !passable[index]) return;
+        reachable[index] = 1; queue[tail++] = index;
+      }
+      for (let x = 0; x < width; x += 1) { enqueue(x); enqueue((height - 1) * width + x); }
+      for (let y = 1; y + 1 < height; y += 1) { enqueue(y * width); enqueue(y * width + width - 1); }
+      while (head < tail) {
+        const index = queue[head++], x = index % width, y = (index - x) / width;
+        enqueue(index - 1); enqueue(index + 1); enqueue(index - width); enqueue(index + width);
+      }
+      const components = classifyOsanpoClosedWhite(passable, reachable, width, height, recipe);
+      const holeMask = new Uint8Array(count);
+      components.hole.pixels.forEach(function (index) { holeMask[index] = 1; });
+      const holeFeather = componentFeatherBands(components.hole.pixels, width, height);
+      const design = { x0: Math.max(0, components.main.bbox.x - recipe.designPaddingPx), y0: Math.max(0, components.main.bbox.y - recipe.designPaddingPx), x1: Math.min(width, components.main.bbox.x + components.main.bbox.w + recipe.designPaddingPx), y1: Math.min(height, components.main.bbox.y + components.main.bbox.h + recipe.designPaddingPx) };
+      const layer = state.manual.alpha;
+      for (let index = 0; index < count; index += 1) {
+        if (holeMask[index]) continue;
+        const x = index % width, y = (index - x) / width;
+        const closedWhite = passable[index] && !reachable[index];
+        const insideDesign = x >= design.x0 && x < design.x1 && y >= design.y0 && y < design.y1;
+        const featherBand = holeFeather.bands[index];
+        const value = featherBand === 1 ? clamp(rawAutoAlpha[index], 32, 127) : featherBand === 2 ? clamp(rawAutoAlpha[index], 128, 223) : closedWhite ? 255 : insideDesign ? rawAutoAlpha[index] : 0;
+        if (value === 0) continue;
+        const offset = index * 4;
+        layer.data[offset] = value; layer.data[offset + 1] = layer.data[offset + 2] = 0; layer.data[offset + 3] = 255;
+      }
+      return { background: background, components: components, mainWhiteArea: components.main.area, mainWhiteBbox: components.main.bbox, hangingHoleArea: components.hole.area, hangingHoleBbox: components.hole.bbox, featherInnerCount: holeFeather.innerCount, featherOuterCount: holeFeather.outerCount };
+    }
+
+    function seedOsanpoOwner(source, recipe, alphaStats) {
+      const width = source.width, height = source.height, count = width * height;
+      const background = alphaStats.background;
+      const owner = state.manual.owner;
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        owner.data[offset] = 255; owner.data[offset + 1] = owner.data[offset + 2] = 0; owner.data[offset + 3] = 255;
+      }
+      const matte = buildMatte(source, state.manual.alpha, recipe.autoAlphaLow, recipe.autoAlphaHigh);
+      const boundaryDistance = distanceFromTransparent(matte.alpha, width, height, 70);
+      const exclusion = new Uint8Array(count);
+      const logoRoi = roiBounds(recipe.logoRoi, width, height), holeRoi = roiBounds(recipe.hangingHoleRoi, width, height);
+      for (let y = logoRoi.y0; y < logoRoi.y1; y += 1) for (let x = logoRoi.x0; x < logoRoi.x1; x += 1) exclusion[y * width + x] = 1;
+      for (let y = holeRoi.y0; y < holeRoi.y1; y += 1) for (let x = holeRoi.x0; x < holeRoi.x1; x += 1) exclusion[y * width + x] = 1;
+      const exclusionDilated = dilateMask(exclusion, width, height, recipe.stitch.exclusionDilatePasses);
+      const rawStitch = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) {
+        const x = index % width, y = (index - x) / width;
+        if (matte.alpha[index] === 0 || boundaryDistance[index] < recipe.stitch.seedBoundaryMin || boundaryDistance[index] > recipe.stitch.seedBoundaryMax || exclusionDilated[index]) continue;
+        if (sourceDistance(source, background, x, y) > recipe.featureDistance) rawStitch[index] = 1;
+      }
+      const rawComponentCount = countMaskComponents8(rawStitch, width, height);
+      if (rawComponentCount < recipe.stitchRange.rawComponentMin || rawComponentCount > recipe.stitchRange.rawComponentMax) throw new Error("osanpo rawStitch成分数が素材固定レンジ外です: " + rawComponentCount);
+      let finalMask = dilateMask(filterComponents(rawStitch, width, height, 2, count), width, height, recipe.stitch.dilatePasses);
+      let finalCount = 0;
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        const distance = boundaryDistance[index];
+        const finalStitch = finalMask[index] && !exclusionDilated[index] && distance >= recipe.stitch.finalBoundaryMin && distance <= recipe.stitch.finalBoundaryMax;
+        if (finalStitch) { owner.data[offset] = 0; owner.data[offset + 1] = 0; owner.data[offset + 2] = 255; finalCount += 1; }
+      }
+      const finalComponentMask = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (owner.data[index * 4 + 2] === 255) finalComponentMask[index] = 1;
+      const finalComponentCount = countMaskComponents8(finalComponentMask, width, height);
+      const logoMask = new Uint8Array(count);
+      const logoBoundary = recipe.logoBoundaryMin;
+      let logoCount = 0;
+      for (let index = 0; index < count; index += 1) {
+        const x = index % width, y = (index - x) / width;
+        const inLogoRoi = x >= logoRoi.x0 && x < logoRoi.x1 && y >= logoRoi.y0 && y < logoRoi.y1;
+        if (inLogoRoi && sourceDistance(source, background, x, y) > recipe.featureDistance && boundaryDistance[index] >= logoBoundary) { logoMask[index] = 1; const offset = index * 4; owner.data[offset] = 0; owner.data[offset + 1] = 255; owner.data[offset + 2] = 0; logoCount += 1; }
+      }
+      const logoComponentCount = countMaskComponents8(logoMask, width, height);
+      const logoRange = recipe.logoRange;
+      if (logoCount < logoRange.countMin || logoCount > logoRange.countMax || logoComponentCount < logoRange.componentMin || logoComponentCount > logoRange.componentMax) throw new Error("osanpo logoが素材固定レンジ外です: count=" + logoCount + " / components=" + logoComponentCount);
+      let overlap = 0;
+      for (let index = 0; index < count; index += 1) if (finalMask[index] && logoMask[index]) overlap += 1;
+      if (finalCount < recipe.stitchRange.finalCountMin || finalCount > recipe.stitchRange.finalCountMax || finalComponentCount < recipe.stitchRange.finalComponentMin || finalComponentCount > recipe.stitchRange.finalComponentMax || overlap !== 0) throw new Error("osanpo final stitchが素材固定レンジ外です: count=" + finalCount + " / components=" + finalComponentCount + " / overlap=" + overlap);
+      return Object.assign({}, alphaStats, { rawStitchComponentCount: rawComponentCount, finalStitchCount: finalCount, finalStitchComponentCount: finalComponentCount, logoCount: logoCount, logoComponentCount: logoComponentCount, overlap: overlap });
+    }
+
+    function seedOsanpoManualLayers(source, recipe) {
+      const alphaStats = seedOsanpoAlpha(source, recipe);
+      return seedOsanpoOwner(source, recipe, alphaStats);
     }
 
     function classifyHorseshoeClosedWhite(passable, reachable, width, height, recipe) {
@@ -2942,8 +3663,15 @@
       return current;
     }
 
+    function stitchLuminanceCandidate(lum, local, contrast, threadColor) {
+      if (threadColor === "light") return lum > .52 && lum - local > contrast;
+      if (threadColor === "dark") return lum < .48 && local - lum > contrast;
+      throw new Error("detect の threadColor は light または dark 必須です");
+    }
+
     function detectStitch(base, alpha, spec, contrast) {
       if (spec.stitchMode !== "detect") return new Uint8Array(base.width * base.height);
+      if (spec.threadColor !== "light" && spec.threadColor !== "dark") throw new Error("detect の threadColor が不正です");
       const width = base.width, height = base.height;
       const boundaryDistance = distanceFromTransparent(alpha, width, height, 70);
       const integral = buildLuminanceIntegral(base);
@@ -2955,7 +3683,7 @@
         const offset = index * 4;
         const lum = luminance(base.data[offset], base.data[offset + 1], base.data[offset + 2]);
         const local = boxAverage(integral, x, y, localRadius, width, height);
-        if (lum > .52 && lum - local > contrast) raw[index] = 1;
+        if (stitchLuminanceCandidate(lum, local, contrast, spec.threadColor)) raw[index] = 1;
       }
       return dilateMask(filterComponents(raw, width, height, 2, Math.round(width * height * .02)), width, height, 1);
     }
@@ -3391,10 +4119,12 @@
 
     function makeProcessJob(operationToken) {
       assertOperationToken(operationToken);
-      const key = state.selectedKey, spec = CHARM_SPECS[key];
+      requireSwanStitchDecision();
+      const key = state.selectedKey, spec = effectiveCharmSpec(key, true);
       if (!spec || state.loadedKey !== key || !state.sourceBytes || !state.sourceImageData || !state.work) {
         throw new Error("選択中のチャームの元写真を再読み込みしてください");
       }
+      if (key === "swan") normalizeSwanStitchDecision(state.swanStitchDecision, { w: state.work.w, h: state.work.h });
       const batchPeerPreps = [];
       Object.keys(state.batch).forEach(function (batchKey) {
         const prep = state.batch[batchKey] && state.batch[batchKey].result && state.batch[batchKey].result.prep;
@@ -3408,6 +4138,7 @@
         sourceBytes: state.sourceBytes.slice(0),
         sourceImageData: cloneImageData(state.sourceImageData),
         manual: cloneManualLayers(state.manual),
+        manualRecipeStats: state.manualRecipeStats ? jsonClone(state.manualRecipeStats) : null,
         work: jsonClone(state.work),
         calibrationInput: jsonClone(currentCalibrationInput()),
         thresholds: Object.freeze({
@@ -3674,7 +4405,7 @@
       return { r: clamp(color.r * factor), g: clamp(color.g * factor), b: clamp(color.b * factor) };
     }
 
-    function recolor(base, masks, derived, target, logoSelection, stitchSelection, spec) {
+    function recolor(base, masks, derived, target, logoSelection, stitchSelection, spec, stitchPathsAsset) {
       const output = new ImageData(new Uint8ClampedArray(base.data.length), base.width, base.height);
       for (let offset = 0; offset < base.data.length; offset += 4) {
         const baseAlpha = base.data[offset + 3]; output.data[offset + 3] = baseAlpha;
@@ -3691,7 +4422,25 @@
         output.data[offset + 1] = leather.g * wr + logo.g * wg + stitch.g * wb;
         output.data[offset + 2] = leather.b * wr + logo.b * wg + stitch.b * wb;
       }
+      if (spec && spec.stitchMode === "fallback") {
+        const raster = rasterizeFallbackStitchPaths(stitchPathsAsset, masks, derived.pxPerMm);
+        if (!raster.pass) throw new Error("fallback stitchPathsAsset が不正です: " + raster.failures.join("; "));
+        for (let pixelIndex = 0; pixelIndex < raster.pixels.length; pixelIndex += 1) {
+          if (!raster.pixels[pixelIndex]) continue;
+          const offset = pixelIndex * 4;
+          const color = stitchColor({ r: base.data[offset], g: base.data[offset + 1], b: base.data[offset + 2] }, stitchSelection);
+          output.data[offset] = color.r;
+          output.data[offset + 1] = color.g;
+          output.data[offset + 2] = color.b;
+        }
+      }
       return output;
+    }
+
+    function stitchVerificationOutputs(base, masks, derived, target, spec, stitchPathsAsset) {
+      const white = recolor(base, masks, derived, target, "gold", "white", spec, stitchPathsAsset);
+      const black = recolor(base, masks, derived, target, "gold", "black", spec, stitchPathsAsset);
+      return { white: white, black: black, diffPxCount: countRgbDiff(white, black) };
     }
 
     function countRgbDiff(a, b) {
@@ -3795,17 +4544,151 @@
       };
     }
 
-    function flatCheckDetail(finalCoreCount, finalCoreNonGray, peerComplete, failures) {
+    function flatCheckDetail(finalCoreCount, finalCoreNonGray, peerComplete, failures, mutationGate) {
+      const detected = mutationGate && Number.isInteger(mutationGate.detectedCount) ? mutationGate.detectedCount : 0;
+      const required = mutationGate && Number.isInteger(mutationGate.requiredCount) ? mutationGate.requiredCount : 5;
       return "F-1 core=" + finalCoreCount + "/nonGray=" + finalCoreNonGray
+        + " / F-oracle mutation " + detected + "/" + required + (mutationGate && mutationGate.pass === true ? " PASS" : " FAIL")
         + " / F-2 grain / F-3 material / F-4 variants"
         + (peerComplete ? "" : " / peer deferred until batch complete")
         + (failures.length ? " / " + failures.join("; ") : "");
+    }
+
+    async function runFlatOracleMutationSuite(operationToken) {
+      if (operationToken !== undefined) assertOperationToken(operationToken);
+      const width = 4, height = 3, radius = 2, amp = .25;
+      const rgba = new Uint8ClampedArray(width * height * 4);
+      for (let index = 0; index < width * height; index += 1) {
+        const offset = index * 4;
+        rgba[offset] = (index * 37 + 11) & 255;
+        rgba[offset + 1] = (index * 91 + 7) & 255;
+        rgba[offset + 2] = (index * 53 + 19) & 255;
+        rgba[offset + 3] = 255;
+      }
+      const grainImage = new ImageData(rgba, width, height);
+      const grainBlob = await imageDataToBlob(grainImage);
+      const rawBytes = await grainBlob.arrayBuffer();
+      const resource = { file: "flat-oracle-mutation.png", sha256: await sha256(rawBytes), width: width, height: height, rawBytes: rawBytes, sourceImageData: grainImage };
+      const defaultRecord = { grainRadiusPx: radius, grainAmp: amp, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
+      const oracleResource = await getFlatOracleResource(resource, defaultRecord, operationToken);
+      const productionG0 = new Float64Array(width * height);
+      for (let index = 0; index < productionG0.length; index += 1) {
+        const offset = index * 4;
+        productionG0[index] = luminance(rgba[offset], rgba[offset + 1], rgba[offset + 2]);
+      }
+      const correct = await exactMirrorBoxRatioMap(productionG0, width, height, radius, amp, operationToken);
+      const before = cloneImageData(grainImage), masks = emptyLayer(width, height);
+      for (let offset = 0; offset < masks.data.length; offset += 4) {
+        masks.data[offset] = 255;
+        masks.data[offset + 3] = 255;
+      }
+      async function auditMap(map, record, selectedMasks) {
+        const activeMasks = selectedMasks || masks;
+        const baked = bakeFlatGrainMap(before, activeMasks, { width: width, height: height, map: map }, record);
+        return { baked: baked, audit: await auditFlatBakeOracle(oracleResource, before, baked.afterBake, activeMasks, record) };
+      }
+      const normal = await auditMap(correct, defaultRecord);
+      const normalPass = normal.audit.expectedMismatchPxCount === 0 && normal.audit.nonLeatherChangedPxCount === 0;
+
+      function mutatedMap(kind) {
+        const g0 = new Float64Array(width * height);
+        for (let index = 0; index < g0.length; index += 1) {
+          const offset = index * 4;
+          const value = (.2126 * rgba[offset] + .7152 * rgba[offset + 1] + .0722 * rgba[offset + 2]) / 255;
+          g0[index] = kind === "float32" ? Math.fround(value) : value;
+        }
+        function indexFor(value, size) {
+          if (kind === "mirror") return ((value % size) + size) % size;
+          const period = 2 * size, t = ((value % period) + period) % period;
+          return t < size ? t : period - 1 - t;
+        }
+        const output = new Float64Array(g0.length), divisor = (2 * radius + 1) ** 2;
+        for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+          let sum = 0;
+          if (kind === "loop-order") {
+            for (let dx = -radius; dx <= radius; dx += 1) for (let dy = -radius; dy <= radius; dy += 1) {
+              sum += g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)];
+            }
+          } else {
+            for (let dy = -radius; dy <= radius; dy += 1) for (let dx = -radius; dx <= radius; dx += 1) {
+              const value = g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)];
+              sum = kind === "float32" ? Math.fround(sum + value) : sum + value;
+            }
+          }
+          const ratio = g0[y * width + x] / (sum / divisor);
+          output[y * width + x] = Math.max(1 - amp, Math.min(1 + amp, ratio));
+        }
+        return output;
+      }
+
+      async function detectIntegratedMutation(mutation) {
+        let candidate = await auditMap(mutation, defaultRecord);
+        if (candidate.audit.expectedMismatchPxCount > 0) return { detected: true, audit: candidate.audit, tuned: false };
+        for (let index = 0; index < mutation.length; index += 1) {
+          if (Object.is(mutation[index], correct[index])) continue;
+          const offset = index * 4;
+          const sourceLum = luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]);
+          const midpoint = (mutation[index] + correct[index]) / 2;
+          if (!(sourceLum > 0) || !(midpoint > 0)) continue;
+          for (let boundary = 1.5; boundary < defaultRecord.grainBase * midpoint; boundary += 1) {
+            const scale = boundary / midpoint;
+            if (!(scale > 0) || scale > defaultRecord.grainBase) continue;
+            const tunedFlatWhite = sourceLum * defaultRecord.grainBase / scale;
+            if (!(tunedFlatWhite > 0) || tunedFlatWhite > 1) continue;
+            const tunedRecord = Object.assign({}, defaultRecord, { flatWhite: tunedFlatWhite });
+            const normalTuned = await auditMap(correct, tunedRecord);
+            const mutationTuned = await auditMap(mutation, tunedRecord);
+            if (normalTuned.audit.expectedMismatchPxCount === 0 && mutationTuned.audit.expectedMismatchPxCount > 0) {
+              return { detected: true, audit: mutationTuned.audit, tuned: true, grainIndex: index, flatWhite: tunedRecord.flatWhite };
+            }
+          }
+        }
+        return { detected: false, audit: candidate.audit, tuned: false };
+      }
+
+      const mutations = {};
+      for (const kind of ["float32", "mirror", "loop-order"]) {
+        mutations[kind] = await detectIntegratedMutation(mutatedMap(kind));
+      }
+      const fixedOne = new Float64Array(correct.length);
+      fixedOne.fill(1);
+      mutations["grain-one"] = await detectIntegratedMutation(fixedOne);
+      const nonLeatherMasks = cloneImageData(masks);
+      const nonLeatherOffset = (width * height - 1) * 4;
+      nonLeatherMasks.data[nonLeatherOffset] = 0;
+      const nonLeatherBaseline = await auditMap(correct, defaultRecord, nonLeatherMasks);
+      const nonLeatherAfter = cloneImageData(nonLeatherBaseline.baked.afterBake);
+      nonLeatherAfter.data[nonLeatherOffset] = (nonLeatherAfter.data[nonLeatherOffset] + 1) & 255;
+      const nonLeatherAudit = await auditFlatBakeOracle(oracleResource, before, nonLeatherAfter, nonLeatherMasks, defaultRecord);
+      mutations.nonleather = {
+        detected: nonLeatherBaseline.audit.expectedMismatchPxCount === 0
+          && nonLeatherBaseline.audit.nonLeatherChangedPxCount === 0
+          && nonLeatherAudit.nonLeatherChangedPxCount > 0,
+        baseline: nonLeatherBaseline.audit,
+        audit: nonLeatherAudit
+      };
+      const detectedCount = Object.values(mutations).filter(function (item) { return item.detected; }).length;
+      return {
+        pass: normalPass && detectedCount === 5,
+        normal: { pass: normalPass, audit: normal.audit },
+        requiredCount: 5,
+        detectedCount: detectedCount,
+        mutations: mutations
+      };
+    }
+
+    async function getFlatOracleMutationGate(operationToken) {
+      if (state.flatMutationGate && state.flatMutationGate.pass === true) return state.flatMutationGate;
+      const result = await runFlatOracleMutationSuite(operationToken);
+      if (result.pass) state.flatMutationGate = deepFreeze(jsonClone(result));
+      return result;
     }
 
     async function computeFlatCheck(spec, base, masks, grainContext, options) {
       if (spec.sourceMode !== "colorless") return makeCheck(true, "photo素材のため対象外", { applicable: false });
       const settings = options || {};
       const failures = [];
+      const operationToken = settings.operationToken !== undefined ? settings.operationToken : (state.operation ? state.operation.token : undefined);
       if (!grainContext) failures.push("grain context missing");
       const record = grainContext && grainContext.record;
       let f1a = null;
@@ -3818,11 +4701,16 @@
       let oracle = null;
       try {
         if (!grainContext || !grainContext.oracleGrainResource || !record) throw new Error("raw grain context missing");
-        const operationToken = settings.operationToken !== undefined ? settings.operationToken : (state.operation ? state.operation.token : undefined);
         const oracleResource = await getFlatOracleResource(grainContext.oracleGrainResource, record, operationToken);
         oracle = await auditFlatBakeOracle(oracleResource, grainContext.before, grainContext.afterBake, grainContext.workMasks, record);
       } catch (error) { failures.push("F oracle: " + error.message); }
       if (!oracle || oracle.bakedPxCount < 1 || oracle.expectedMismatchPxCount !== 0 || oracle.nonLeatherChangedPxCount !== 0) failures.push("F oracle expected bake mismatch");
+      let mutationGate = null;
+      try { mutationGate = await getFlatOracleMutationGate(operationToken); }
+      catch (error) { failures.push("F oracle mutation gate: " + error.message); }
+      if (!mutationGate || mutationGate.pass !== true || mutationGate.requiredCount !== 5 || mutationGate.detectedCount !== 5) {
+        failures.push("F oracle mutation gate did not detect all 5 mutations");
+      }
       let finalCoreCount = 0, finalCoreNonGray = 0;
       for (let offset = 0; offset < base.data.length; offset += 4) {
         if (base.data[offset + 3] !== 255 || masks.data[offset + 3] < 128 || masks.data[offset] < 128) continue;
@@ -3859,8 +4747,8 @@
       const actualVariants = variantTransferProjection(DISPLAY_VARIANTS, Object.values(MATERIAL_PROFILES), false);
       if (!freeze || expectedVariants.length !== 27 || !jsonEqual(actualVariants, expectedVariants)) failures.push("F-4 DISPLAY_VARIANTS mismatch");
       return makeCheck(peerComplete && failures.length === 0,
-        flatCheckDetail(finalCoreCount, finalCoreNonGray, peerComplete, failures),
-        { applicable: true, f1a: f1a, oracle: oracle, finalCoreCount: finalCoreCount, finalCoreNonGray: finalCoreNonGray,
+        flatCheckDetail(finalCoreCount, finalCoreNonGray, peerComplete, failures, mutationGate),
+        { applicable: true, f1a: f1a, oracle: oracle, mutationGate: mutationGate, finalCoreCount: finalCoreCount, finalCoreNonGray: finalCoreNonGray,
           grain: record, grainScalePeerCount: grainScalePeers.length, grainScalePeers: grainScalePeers, batchPeersComplete: peerComplete,
           recomputedWork: recomputedWork, materialProfile: profileAudit, variantCount: actualVariants.length, expectedColorlessCount: expectedColorlessCount, failures: failures });
     }
@@ -3977,7 +4865,7 @@
       return masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
     }
 
-    function validateFallbackStitchPaths(paths, masks, pxPerMm) {
+    function rasterizeFallbackStitchPaths(paths, masks, pxPerMm) {
       const failures = [];
       const clipped = new Uint8Array(masks.width * masks.height);
       let totalLengthPx = 0;
@@ -4021,19 +4909,52 @@
       let clippedDiffPx = 0;
       for (let index = 0; index < clipped.length; index += 1) clippedDiffPx += clipped[index];
       if (!(clippedDiffPx > 0)) failures.push("clipped drawing diff is zero");
-      return { pass: failures.length === 0, failures: failures, totalLengthPx: totalLengthPx, clippedDiffPx: clippedDiffPx };
+      return { pass: failures.length === 0, failures: failures, totalLengthPx: totalLengthPx, clippedDiffPx: clippedDiffPx, pixels: clipped };
+    }
+
+    function validateFallbackStitchPaths(paths, masks, pxPerMm) {
+      const raster = rasterizeFallbackStitchPaths(paths, masks, pxPerMm);
+      return {
+        pass: raster.pass,
+        failures: raster.failures,
+        totalLengthPx: raster.totalLengthPx,
+        clippedDiffPx: raster.clippedDiffPx
+      };
+    }
+
+    function evaluateStitchContract(spec, masks, derived, whiteOutput, blackOutput, correction, manual) {
+      const stitchPaths = correction.stitchPathsAsset;
+      const outputDiffPxCount = countRgbDiff(whiteOutput, blackOutput);
+      const fallbackGate = spec.stitchMode === "fallback" ? validateFallbackStitchPaths(stitchPaths, masks, derived.pxPerMm) : null;
+      const manualInpaintPxCount = countManualInpaint(manual);
+      let pass = false;
+      if (spec.stitchMode === "detect") {
+        pass = stitchPaths.length === 0 && derived.stitchPxCount > 0 && outputDiffPxCount > 0
+          && (spec.threadColor === "dark" || spec.threadColor === "light");
+      }
+      if (spec.stitchMode === "none") {
+        pass = stitchPaths.length === 0 && derived.stitchPxCount === 0 && outputDiffPxCount === 0 && spec.threadColor === null;
+      }
+      if (spec.stitchMode === "fallback") {
+        pass = fallbackGate.pass && derived.stitchPxCount === 0 && manualInpaintPxCount >= 1
+          && outputDiffPxCount > 0 && outputDiffPxCount === fallbackGate.clippedDiffPx
+          && (spec.threadColor === "dark" || spec.threadColor === "light");
+      }
+      return {
+        pass: pass,
+        mode: spec.stitchMode,
+        stitchPxCount: derived.stitchPxCount,
+        diffPxCount: outputDiffPxCount,
+        threadColor: spec.threadColor,
+        stitchPaths: stitchPaths,
+        fallback: fallbackGate,
+        manualInpaintPxCount: manualInpaintPxCount
+      };
     }
 
     function computeChecks1to7(key, spec, baseBlob, masksBlob, masks, derived, whiteOutput, blackOutput, correction, manual) {
-      const maskStitchDiff = countRgbDiff(whiteOutput, blackOutput);
       const edgeBadRatio = derived.edgePxCount ? derived.edgeBadPxCount / derived.edgePxCount : Infinity;
-      const stitchPaths = correction.stitchPathsAsset;
-      const fallbackGate = spec.stitchMode === "fallback" ? validateFallbackStitchPaths(stitchPaths, masks, derived.pxPerMm) : null;
-      const stitchDiff = fallbackGate ? fallbackGate.clippedDiffPx : maskStitchDiff;
-      let stitchPass = false;
-      if (spec.stitchMode === "detect") stitchPass = stitchPaths.length === 0 && derived.stitchPxCount > 0 && stitchDiff > 0 && (spec.threadColor === "dark" || spec.threadColor === "light");
-      if (spec.stitchMode === "none") stitchPass = stitchPaths.length === 0 && derived.stitchPxCount === 0 && stitchDiff === 0 && spec.threadColor === null;
-      if (spec.stitchMode === "fallback") stitchPass = fallbackGate.pass && derived.stitchPxCount === 0 && countManualInpaint(manual) >= 1 && stitchDiff > 0 && (spec.threadColor === "dark" || spec.threadColor === "light");
+      const stitchGate = evaluateStitchContract(spec, masks, derived, whiteOutput, blackOutput, correction, manual);
       const transferBytes = baseBlob.size + masksBlob.size;
       const calibrationGate = calibrationValidation(key, spec, derived, correction);
       const keepInputTopology = key === "horseshoe" ? validateHorseshoeManualKeep(manual && manual.keep) : { pass: true, unionArea: null, componentCount8: null, reason: null };
@@ -4053,7 +4974,7 @@
           failures: calibrationGate.failures
         }),
         makeCheck(derived.edgePxCount >= 1 && edgeBadRatio < .005, "edge " + derived.edgePxCount + " px / d>32 " + derived.edgeBadPxCount + " px", { edgePxCount: derived.edgePxCount, badPxCount: derived.edgeBadPxCount, badRatio: edgeBadRatio }),
-        makeCheck(stitchPass, spec.stitchMode + " / B " + derived.stitchPxCount + " px / diff " + stitchDiff + " px" + (fallbackGate && fallbackGate.failures.length ? " / " + fallbackGate.failures.join("; ") : ""), { mode: spec.stitchMode, stitchPxCount: derived.stitchPxCount, diffPxCount: stitchDiff, maskDiffPxCount: maskStitchDiff, threadColor: spec.threadColor, stitchPaths: stitchPaths, fallback: fallbackGate, manualInpaintPxCount: countManualInpaint(manual) }),
+        makeCheck(stitchGate.pass, spec.stitchMode + " / B " + derived.stitchPxCount + " px / diff " + stitchGate.diffPxCount + " px" + (stitchGate.fallback && stitchGate.fallback.failures.length ? " / " + stitchGate.fallback.failures.join("; ") : ""), stitchGate),
         makeCheck(spec.attachmentMode === "none" && keepInputTopology.pass && keepTopology.pass, "attachment=" + spec.attachmentMode + " / keep " + derived.keepPxCount + " px" + (key === "horseshoe" ? " / final actual=" + keepTopology.actualArea + " expected=" + keepTopology.expectedArea + " / components=" + keepTopology.actualComponentCount8 + "/" + keepTopology.expectedComponentCount8 + " / missing=" + keepTopology.missingPxCount + " extra=" + keepTopology.extraPxCount : derived.keepPxCount > 0 ? " (要目視確認)" : ""), { attachmentMode: spec.attachmentMode, keepPxCount: derived.keepPxCount, warning: key !== "horseshoe" && derived.keepPxCount > 0, keepInputTopology: keepInputTopology, keepTopology: keepTopology }),
         makeCheck(transferBytes <= 900 * 1024, Math.round(transferBytes / 1024) + " KB / 900 KB", { baseBytes: baseBlob.size, masksBytes: masksBlob.size, totalBytes: transferBytes })
       ];
@@ -4108,7 +5029,7 @@
       }));
     }
 
-    async function buildChecksAndConfig(job, base, masks, derived, baseMeta, whiteOutput, blackOutput, correction, grainContext) {
+    async function buildChecksAndConfig(job, base, masks, derived, baseMeta, correction, grainContext) {
       const key = job.key, spec = job.spec;
       const baseBlob = await imageDataToBlob(base);
       const masksBlob = await imageDataToBlob(masks);
@@ -4119,8 +5040,9 @@
       const decodedDerived = computeDerived(decodedBase, decodedMasks, spec, decodedMeta, correction.preDerived.calibration);
       const decodedCorrection = Object.assign({}, correction, { base: decodedBase, masks: decodedMasks, baseMeta: decodedMeta, derived: decodedDerived });
       const verificationBlackTarget = variantTarget("calf:black");
-      const decodedWhiteOutput = recolor(decodedBase, decodedMasks, decodedDerived, verificationBlackTarget, "gold", "white", spec);
-      const decodedBlackOutput = recolor(decodedBase, decodedMasks, decodedDerived, verificationBlackTarget, "gold", "black", spec);
+      const decodedStitchOutputs = stitchVerificationOutputs(decodedBase, decodedMasks, decodedDerived, verificationBlackTarget, spec, decodedCorrection.stitchPathsAsset);
+      const decodedWhiteOutput = decodedStitchOutputs.white;
+      const decodedBlackOutput = decodedStitchOutputs.black;
       const sourceHash = await sha256(job.sourceBytes);
       const manualRecords = await buildManualRecords(key, job.manual, sourceHash, job.work);
       const baseHash = await sha256(decodedBase.data);
@@ -4505,8 +5427,9 @@
       correction.grainContext = grainContext;
       const derived = correction.derived;
       const verificationBlackTarget = variantTarget("calf:black");
-      const whiteOutput = recolor(correction.base, correction.masks, derived, verificationBlackTarget, "gold", "white", spec);
-      const blackOutput = recolor(correction.base, correction.masks, derived, verificationBlackTarget, "gold", "black", spec);
+      const stitchOutputs = stitchVerificationOutputs(correction.base, correction.masks, derived, verificationBlackTarget, spec, correction.stitchPathsAsset);
+      const whiteOutput = stitchOutputs.white;
+      const blackOutput = stitchOutputs.black;
       const baseBlob = await imageDataToBlob(correction.base);
       const masksBlob = await imageDataToBlob(correction.masks);
       const decodedBase = (await decodeStraightPngBlob(baseBlob, key + ".base.png regenerated", true)).imageData;
@@ -4515,8 +5438,9 @@
       const decodedMeta = finalBaseMetaFromDecoded(decodedBase, correction.baseMeta.background);
       const decodedDerived = computeDerived(decodedBase, decodedMasks, spec, decodedMeta, correction.preDerived.calibration);
       const decodedCorrection = Object.assign({}, correction, { base: decodedBase, masks: decodedMasks, baseMeta: decodedMeta, derived: decodedDerived });
-      const decodedWhiteOutput = recolor(decodedBase, decodedMasks, decodedDerived, verificationBlackTarget, "gold", "white", spec);
-      const decodedBlackOutput = recolor(decodedBase, decodedMasks, decodedDerived, verificationBlackTarget, "gold", "black", spec);
+      const decodedStitchOutputs = stitchVerificationOutputs(decodedBase, decodedMasks, decodedDerived, verificationBlackTarget, spec, decodedCorrection.stitchPathsAsset);
+      const decodedWhiteOutput = decodedStitchOutputs.white;
+      const decodedBlackOutput = decodedStitchOutputs.black;
       const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, decodedMasks, decodedDerived, decodedWhiteOutput, decodedBlackOutput, decodedCorrection, inputs.manual);
       const manifestCheck = computeManifestCheck(key, spec, await sha256(inputs.sourceBytes), grainContext);
       const regeneratedMaterialAssets = grainContext ? { [grainContext.record.materialKey]: {
@@ -4526,7 +5450,12 @@
       } } : {};
       const flatCheck = await computeFlatCheck(spec, decodedBase, decodedMasks, grainContext, Object.assign({}, flatVerification || {}, { batchPeersComplete: true, materialAssets: regeneratedMaterialAssets }));
       const checks = checks1to7.concat([manifestCheck, flatCheck]);
-      if (!checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) throw new Error(key + " 再生成した検査1〜7＋M/FにFAILがあります");
+      if (!checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) {
+        const failedChecks = checks.slice(0, PRECHECK_COUNT).map(function (check, index) {
+          return check.status === "pass" ? null : (index + 1) + ":" + check.detail;
+        }).filter(Boolean);
+        throw new Error(key + " 再生成した検査1〜7＋M/FにFAILがあります / " + failedChecks.join(" | "));
+      }
       const mismatches = [];
       if (!imageDataEqual(decodedBase, archivedOutputs.base.imageData)) mismatches.push("base decoded RGBA");
       if (!imageDataEqual(decodedMasks, archivedOutputs.masks.imageData)) mismatches.push("masks decoded RGBA");
@@ -4617,7 +5546,7 @@
       }, values || {}));
       const prep = jsonClone(result.prep);
       prep.verify = pendingVerificationRecord();
-      const replacement = Object.assign({}, result, { checks: checks, prep: prep });
+      const replacement = cloneResultEnvelope(result, { checks: checks, prep: prep });
       replacements.set(result, replacement);
       return replacement;
     }
@@ -4640,6 +5569,8 @@
       // Build the complete replacement state before publishing any part of it.
       // This keeps the previous PASS state intact if preparation unexpectedly
       // throws, and makes the final assignment synchronous and all-at-once.
+      const originalBatch = state.batch;
+      const originalResult = state.result;
       const replacementByResult = new Map();
       function failedResult(result) {
         return failedVerificationResult(result, failureDetail, {
@@ -4656,16 +5587,8 @@
           result: failedResult(previous.result || null)
         })];
       }));
-      const nextSelectedResult = failedResult(state.result);
-
       assertOperationToken(operationToken);
-      Object.assign(state, { batch: nextBatch, result: nextSelectedResult, lastArchive: report });
-      renderBatch();
-      const selected = state.batch[state.selectedKey];
-      if (selected && selected.result && state.result === selected.result) {
-        renderChecks(selected.result.checks);
-        dom.configPreview.textContent = JSON.stringify(selected.result.prep, null, 2);
-      }
+      publishVerificationState(nextBatch, report, originalBatch, originalResult);
       dom.exportGate.textContent = "VERIFY FAIL";
       dom.exportGate.className = "tag fail";
       return report;
@@ -4720,7 +5643,7 @@
             checks[VERIFY_CHECK_INDEX] = makeCheck(item.status === "pass", item.status === "pass" ? "入力・出力・独立再生成が一致" : item.reasons.join(" / "), {
               inputMatch: item.inputMatch, outputMatch: item.outputMatch, regenerationMatch: item.regenerationMatch, reasons: item.reasons
             });
-            nextResult = Object.assign({}, result, { checks: checks, prep: jsonClone(prep) });
+            nextResult = cloneResultEnvelope(result, { checks: checks, prep: jsonClone(prep) });
             replacementByResult.set(result, nextResult);
           }
         } else {
@@ -4745,31 +5668,12 @@
         next.result = nextResult;
         nextBatch[item.key] = next;
       }
-      const originalResultReplacement = replacementByResult.get(originalResult);
-      let nextSelectedResult = originalResultReplacement || originalResult;
-      const selected = nextBatch[state.selectedKey];
-      if (archiveFullyVerified && selected && selected.result && currentMatches[state.selectedKey]) {
-        nextSelectedResult = selected.result;
-      } else if (!archiveFullyVerified && originalResult && !originalResultReplacement) {
-        const item = verificationDiagnosticForKey(report.results, originalResult.key) || { reasons: [] };
-        nextSelectedResult = failedVerificationResult(originalResult, verificationFailure, {
-          firstPass: verificationDiagnosticForKey(report.firstPassResults, originalResult.key),
-          finalPass: verificationDiagnosticForKey(report.finalResults, originalResult.key),
-          finalReverification: report.finalReverification,
-          reasons: item.reasons.concat(report.errors)
-        }, replacementByResult);
-      }
       const allPass = report.status === "pass";
       const allCurrentMatched = CHARM_KEYS.every(function (key) { return currentMatches[key]; });
       const binding = { allCurrentMatched: allCurrentMatched, currentMatches: currentMatches };
       report.currentArtifacts = binding;
       assertOperationToken(operationToken);
-      Object.assign(state, { batch: nextBatch, result: nextSelectedResult, lastArchive: report });
-      renderBatch();
-      if (state.result && state.result.key === state.selectedKey) {
-        renderChecks(state.result.checks);
-        dom.configPreview.textContent = JSON.stringify(state.result.prep, null, 2);
-      }
+      publishVerificationState(nextBatch, report, originalBatch, originalResult);
       dom.exportGate.textContent = allPass && allCurrentMatched ? "1–8 PASS" : allPass ? "ARCHIVE PASS / CURRENT STALE" : "VERIFY FAIL";
       dom.exportGate.className = "tag " + (allPass && allCurrentMatched ? "pass" : allPass ? "" : "fail");
       return binding;
@@ -4778,6 +5682,7 @@
     async function exportArchive(options) {
       const operationToken = beginOperation("export-archive");
       try {
+        requireSwanStitchDecision();
         const settings = options || {};
         await finalizeBatchPeerChecks(operationToken);
         const results = {};
@@ -4827,6 +5732,7 @@
     }
 
     function exportCurrentAssets() {
+      requireSwanStitchDecision();
       const result = state.result;
       if (!allBatchPeerPass()) throw new Error("全8種のF-2 grainScaleMm peer検査が未完了です。全素材バッチを完走してから書き出してください");
       if (!result || !result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })) throw new Error("選択素材の検査1〜7＋M/Fが未通過です");
@@ -4840,6 +5746,7 @@
     }
 
     async function verifyArchive(input, options) {
+      requireSwanStitchDecision();
       const operationToken = beginOperation("verify-archive");
       try {
         const settings = options || {};
@@ -4942,7 +5849,7 @@
       const tempCtx = getContext(temp);
       const reportCases = [];
       cases.forEach(function (item, index) {
-        const output = recolor(result.base, result.masks, result.derived, item.target, item.logo, item.stitch, spec);
+        const output = recolor(result.base, result.masks, result.derived, item.target, item.logo, item.stitch, spec, result.stitchPathsAsset || []);
         const keptMismatchPx = keptPixelMismatchCount(result.base, result.masks, output);
         const col = index % columns, row = Math.floor(index / columns), x = col * cellW, y = 54 + row * cellH;
         ctx.fillStyle = "#fff"; ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
@@ -4959,17 +5866,48 @@
       return { canvas: canvas, cases: reportCases };
     }
 
+    function runtimeSpecFromPrep(prep, key) {
+      const base = CHARM_SPECS[key];
+      if (!base || !prep || !prep.inputs || !prep.derived) throw new Error(key + " の確定prepがありません");
+      if (!["detect", "none", "fallback"].includes(prep.inputs.stitchMode)) throw new Error(key + " のstitchModeが未確定です");
+      return Object.assign({}, base, {
+        threadColor: prep.inputs.threadColor,
+        stitchMode: prep.inputs.stitchMode,
+        stitchPathsWork: cloneStitchPaths(prep.inputs.stitchPathsWork || []),
+        stitchPathsAsset: cloneStitchPaths(prep.derived.stitchPathsAsset || [])
+      });
+    }
+
+    function fixedVisualCaseCountForMode(stitchMode) {
+      if (!["detect", "none", "fallback"].includes(stitchMode)) throw new Error("固定目視回帰のstitchModeが未確定です");
+      return 2 * 2 * (stitchMode === "none" ? 1 : 2);
+    }
+
+    function fixedVisualCaseBreakdown() {
+      requireSwanStitchDecision();
+      const byCharm = Object.fromEntries(CHARM_KEYS.map(function (key) {
+        const spec = effectiveCharmSpec(key, true);
+        return [key, fixedVisualCaseCountForMode(spec.stitchMode)];
+      }));
+      const total = Object.values(byCharm).reduce(function (sum, value) { return sum + value; }, 0);
+      const expectedTotal = effectiveCharmSpec("swan", true).stitchMode === "none" ? 40 : 44;
+      if (total !== expectedTotal) throw new Error("fixedVisualCaseCount 合計が契約値と一致しません: " + total + "/" + expectedTotal);
+      return { byCharm: byCharm, total: total, expectedTotal: expectedTotal };
+    }
+
     async function buildFlatRegressionSheets(options) {
       const operationToken = beginOperation("flat-regression");
       try {
+        requireSwanStitchDecision();
         const settings = options || {};
         const result = state.result;
         const key = state.selectedKey;
-        const spec = CHARM_SPECS[key];
         if (!result || result.key !== key || !result.artifacts || !result.artifacts.baseBlob || !result.artifacts.masksBlob
           || !result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; })
-          || !spec || spec.sourceMode !== "colorless") throw new Error("検査1〜7＋M/Fを全通過したflat素材で回帰シートを作成してください");
+          || !CHARM_SPECS[key] || CHARM_SPECS[key].sourceMode !== "colorless") throw new Error("検査1〜7＋M/Fを全通過したflat素材で回帰シートを作成してください");
         const prepSnapshot = jsonClone(result.prep);
+        const spec = runtimeSpecFromPrep(prepSnapshot, key);
+        const fixedCounts = fixedVisualCaseBreakdown();
         const baseSnapshot = await decodeArtifactSnapshot(result.artifacts.baseBlob);
         const masksSnapshot = await decodeArtifactSnapshot(result.artifacts.masksBlob);
         assertOperationToken(operationToken);
@@ -4980,7 +5918,8 @@
         const regressionResult = {
           base: baseSnapshot.imageData,
           masks: masksSnapshot.imageData,
-          derived: jsonClone(result.derived)
+          derived: jsonClone(result.derived),
+          stitchPathsAsset: cloneStitchPaths(prepSnapshot.derived.stitchPathsAsset || [])
         };
         const colors24 = DISPLAY_VARIANTS.filter(function (variant) { return variant.materialKey === "calf"; }).map(function (variant) {
           return { label: variant.canonicalLabel + " " + variant.approvedHex, target: variantTarget(variant.variantKey), logo: "silver", stitch: "white" };
@@ -4991,13 +5930,15 @@
         const fixed8 = [];
         [[black.canonicalLabel, variantTarget(black.variantKey)], [ivory.canonicalLabel, variantTarget(ivory.variantKey)]].forEach(function (leather) {
           [["金", "gold"], ["銀", "silver"]].forEach(function (logo) {
-            [["白糸", "white"], ["黒糸", "black"]].forEach(function (stitch) {
+            const stitchCases = spec.stitchMode === "none" ? [["ステッチ非対応", "white"]] : [["白糸", "white"], ["黒糸", "black"]];
+            stitchCases.forEach(function (stitch) {
               fixed8.push({ label: leather[0] + " / ロゴ" + logo[0] + " / " + stitch[0], target: leather[1], logo: logo[1], stitch: stitch[1] });
             });
           });
         });
+        if (fixed8.length !== fixedCounts.byCharm[key]) throw new Error(key + " fixedVisualCaseCountが内訳と一致しません");
         const colorsSheet = buildRegressionCanvas(regressionResult, spec, colors24, 6, spec.label + " / カーフ24色（色味承認前）");
-        const fixedSheet = buildRegressionCanvas(regressionResult, spec, fixed8, 4, spec.label + " / 固定8ケース");
+        const fixedSheet = buildRegressionCanvas(regressionResult, spec, fixed8, 4, spec.label + " / 固定" + fixed8.length + "ケース");
         const colorsBlob = await canvasToBlob(colorsSheet.canvas, "image/png");
         const fixedBlob = await canvasToBlob(fixedSheet.canvas, "image/png");
         const baseHash = baseSnapshot.decodedRgbaSha256;
@@ -5018,12 +5959,16 @@
             prepWithoutVerifySha256: prepIdentitySha256
           },
           colors24: colorsSheet.cases,
-          fixed8: fixedSheet.cases,
-          files: { colors24: key + "-colors24.png", fixed8: key + "-fixed8.png" }
+          fixedVisualCases: fixedSheet.cases,
+          fixedVisualCaseCount: fixedSheet.cases.length,
+          fixedVisualCaseCountByCharm: fixedCounts.byCharm,
+          fixedVisualCaseTotal: fixedCounts.total,
+          fixedVisualCaseExpectedTotal: fixedCounts.expectedTotal,
+          files: { colors24: key + "-colors24.png", fixedVisual: key + "-fixed" + fixedSheet.cases.length + ".png" }
         };
         if (settings.download) {
           downloadBlob(colorsBlob, report.files.colors24);
-          downloadBlob(fixedBlob, report.files.fixed8);
+          downloadBlob(fixedBlob, report.files.fixedVisual);
           downloadBlob(new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }), key + "-regression-report.json");
         }
         return { report: report, colorsBlob: colorsBlob, fixedBlob: fixedBlob };
@@ -5105,18 +6050,15 @@
         const correction = applyAspectCorrection(baseMeta.imageData, masks, spec, preDerived, baseMeta, calibrationInput);
         correction.grainContext = grainContext;
         const derived = correction.derived;
-        const blackTarget = variantTarget("calf:black"), ivoryTarget = variantTarget("calf:ivory");
-        const whiteOutput = recolor(correction.base, correction.masks, derived, blackTarget, "gold", "white", spec);
-        const blackOutput = recolor(correction.base, correction.masks, derived, blackTarget, "gold", "black", spec);
-        const ivoryOutput = recolor(correction.base, correction.masks, derived, ivoryTarget, "silver", "white", spec);
-        const artifacts = await buildChecksAndConfig(job, correction.base, correction.masks, derived, correction.baseMeta, whiteOutput, blackOutput, correction, grainContext);
+        const ivoryTarget = variantTarget("calf:ivory");
+        const artifacts = await buildChecksAndConfig(job, correction.base, correction.masks, derived, correction.baseMeta, correction, grainContext);
         assertOperationToken(operationToken);
         if (state.loadedKey !== key || state.selectedKey !== key || state.manualRevision !== job.manualRevision) {
           throw new Error("処理中に選択チャームまたは手動補正が変更されました");
         }
         const finalCorrection = artifacts.correction;
         const finalDerived = artifacts.derived;
-        const finalIvoryOutput = recolor(artifacts.base, artifacts.masks, finalDerived, ivoryTarget, "silver", "white", spec);
+        const finalIvoryOutput = recolor(artifacts.base, artifacts.masks, finalDerived, ivoryTarget, "silver", "white", spec, finalCorrection.stitchPathsAsset);
         const result = {
           key: key, base: artifacts.base, masks: artifacts.masks, derived: finalDerived,
           work: job.work,
@@ -5124,13 +6066,16 @@
           aspectCorrection: finalCorrection.aspectCorrection,
           stitchPathsWork: finalCorrection.stitchPathsWork,
           stitchPathsAsset: finalCorrection.stitchPathsAsset,
+          manualRecipeStats: job.manualRecipeStats,
           grainContext: grainContext,
           previews: { blackGoldWhite: artifacts.previews.white, blackGoldBlack: artifacts.previews.black, ivorySilverWhite: finalIvoryOutput },
           checks: artifacts.checks, prep: artifacts.prep, artifacts: artifacts
         };
-        state.result = result;
+        const previousBatch = Object.assign({}, state.batch);
+        const previousResult = state.result;
         const pass = result.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
         state.batch[key] = { status: pass ? "pass" : "fail", verify: "pending", foreground: finalDerived.fgBboxPx ? finalDerived.fgBboxPx.w + "×" + finalDerived.fgBboxPx.h : "—", result: result };
+        state.result = retainSinglePreviewResult(state.batch, result, previousBatch, previousResult);
         renderResult(result); renderBatch(); updateInteractivity();
         dom.exportCurrentButton.disabled = !pass || !allBatchPeerPass();
         dom.exportBatchButton.disabled = !allBatchPass1to7() || !allBatchPeerPass();
@@ -5171,6 +6116,7 @@
           preDistortion: result.aspectCorrection.preDistortion,
           postDistortion: result.derived.calibration.distortion
         },
+        manualRecipeStats: result.manualRecipeStats || null,
         transferBytes: result.artifacts.baseBlob.size + result.artifacts.masksBlob.size
       };
     }
@@ -5190,6 +6136,12 @@
         const previousValues = previous.values && typeof previous.values === "object" ? previous.values : {};
         const failures = Array.isArray(previousValues.failures) ? previousValues.failures.filter(function (failure) { return failure !== "F-2 grainScaleMm peer mismatch"; }) : [];
         if (!complete || !same) failures.push("F-2 grainScaleMm peer mismatch");
+        const mutationGate = previousValues.mutationGate;
+        const mutationFailure = "F oracle mutation gate did not detect all 5 mutations";
+        if ((!mutationGate || mutationGate.pass !== true || mutationGate.requiredCount !== 5 || mutationGate.detectedCount !== 5)
+          && !failures.includes(mutationFailure)) {
+          failures.push(mutationFailure);
+        }
         const values = Object.assign({}, previousValues, {
           grainScalePeers: peers,
           grainScalePeerCount: peers.filter(function (value) { return Number.isFinite(value) && value > 0; }).length,
@@ -5197,7 +6149,7 @@
           failures: failures
         });
         const flatCheck = makeCheck(complete && same && failures.length === 0,
-          flatCheckDetail(values.finalCoreCount, values.finalCoreNonGray, complete && same, failures), values);
+          flatCheckDetail(values.finalCoreCount, values.finalCoreNonGray, complete && same, failures, mutationGate), values);
         result.checks[PRECHECK_COUNT - 1] = flatCheck;
         result.prep.checks = publicChecksRecord(result.checks.concat([]).slice(0, PRECHECK_COUNT));
         batch.status = result.checks.slice(0, PRECHECK_COUNT).every(function (item) { return item.status === "pass"; }) ? "pass" : "fail";
@@ -5212,6 +6164,7 @@
       const report = { status: "running", toolVersion: TOOL_VERSION, results: [] };
       const output = document.getElementById("automationResult");
       try {
+        requireSwanStitchDecision();
         CHARM_KEYS.forEach(function (key) {
           const previous = state.batch[key];
           if (previous && previous.result) releaseBatchPreviewMemory(previous.result);
@@ -5267,9 +6220,30 @@
       }
     }
 
-    async function runInternalSelfTests() {
-      const operationToken = beginOperation("internal-selftest");
-      try {
+    function applySwanBatchQueryDecision(params) {
+      const mode = params.get("swanStitchMode") || params.get("swanMode");
+      if (!mode) return { provided: false, applied: false };
+      if (mode === "pending") {
+        setSwanStitchDecision(null, "swan 判定が未確定のため自動バッチを待機しています");
+        return { provided: true, applied: false, pending: true };
+      }
+      if (!["detect", "none", "fallback"].includes(mode)) throw new Error("swanStitchMode は detect / none / fallback のいずれかです");
+      const threadColor = mode === "none" ? null : (params.get("swanThreadColor") || params.get("swanThread") || "light");
+      const rawPaths = params.get("swanStitchPathsWork") || params.get("swanPaths");
+      let stitchPathsWork = [];
+      if (mode === "fallback") {
+        if (!rawPaths) throw new Error("swan fallback の自動バッチには swanStitchPathsWork JSON が必要です");
+        try { stitchPathsWork = JSON.parse(rawPaths); }
+        catch (error) { throw new Error("swanStitchPathsWork JSONが不正です: " + error.message); }
+      }
+      setSwanStitchDecision({ stitchMode: mode, threadColor: threadColor, stitchPathsWork: stitchPathsWork }, "URL指定のswan判定を適用しました。自動バッチを開始します");
+      return { provided: true, applied: true, stitchMode: mode, threadColor: threadColor, stitchPathsWork: stitchPathsWork };
+    }
+
+    async function runInternalSelfTestsBody() {
+      // 自己検査はUI全体をロックしない。production入口のロックと、manual import/editorの許可を検証するため、
+      // 各production関数が必要な範囲で個別にbeginOperationする。
+      const operationToken = undefined;
       const results = [];
       function record(name, pass, detail) { results.push({ name: name, status: pass ? "pass" : "fail", detail: detail || "" }); }
       try {
@@ -5317,8 +6291,10 @@
           const measured = CHARM_SPECS[key].sizeMmMeasured;
           return measured && typeof measured.confirmed === "boolean"
             && (measured.confirmed ? /^\d{4}-\d{2}-\d{2}$/.test(measured.receivedAt) : measured.receivedAt === null);
-        }) && CHARM_SPECS.swan.sizeMmMeasured.confirmed === false;
-        record("phase3-schema-and-version", TOOL_VERSION === "0.6.0" && SCHEMA_VERSION === 5, "toolVersion=" + TOOL_VERSION + ", schemaVersion=" + SCHEMA_VERSION);
+        }) && charmKeys.every(function (key) {
+          return CHARM_SPECS[key].sizeMmMeasured.confirmed === true && CHARM_SPECS[key].sizeMmMeasured.receivedAt;
+        });
+        record("phase3-schema-and-version", TOOL_VERSION === "0.7.0" && SCHEMA_VERSION === 5, "toolVersion=" + TOOL_VERSION + ", schemaVersion=" + SCHEMA_VERSION);
         record("phase3-counts", charmKeys.length === 8 && materialKeys.length === 2 && LEATHER_VARIANTS.length === 27 && calfVariants.length === 24 && chevreVariants.length === 3, "charms=" + charmKeys.length + ", materials=" + materialKeys.length + ", variants=" + LEATHER_VARIANTS.length + ", calf=" + calfVariants.length + ", chevre=" + chevreVariants.length);
         record("phase3-source-tone-one-to-one", sourceModeToneModePass && sourceKeys.length === charmKeys.length, "all canonical sources are colorless/flat");
         const freeze = await loadColorFreeze();
@@ -5385,8 +6361,560 @@
         record("phase3-material-profiles", materialsPass && freezeMaterialsPass, "calf/chevre profile全メタデータをfreeze照合");
         record("phase3-freeze-transfer", freezeVariantsPass && freezeMaterialsPass, "color freeze variants/materials exact join");
         record("phase3-variant-transfer", variantsPass && freezeVariantsPass, "approvedHex/textureProfileKey/appliesToCharms");
-        record("phase3-measured-inputs", measuredPass, "swan confirmed=false is explicitly represented");
+        record("phase3-measured-inputs", measuredPass, "8種 sizeMmMeasured confirmed=true（swan受領 2026-07-28）");
+        record("phase3-frenchie-crop-source", jsonEqual(CHARM_SPECS.frenchie.cropSource, FRENCHIE_CROP_SOURCE)
+          && FRENCHIE_CROP_SOURCE.x === 320 && FRENCHIE_CROP_SOURCE.y === 848 && FRENCHIE_CROP_SOURCE.w === 1105 && FRENCHIE_CROP_SOURCE.h === 1312,
+          JSON.stringify(CHARM_SPECS.frenchie.cropSource));
+        const expectedRecipe = {
+          id: "osanpo-colorless-20260728-v1", backgroundDistance: 14, autoAlphaLow: 12, autoAlphaHigh: 32, featureDistance: 4, designPaddingPx: 12,
+          mainWhiteRange: { areaMin: 120000, areaMax: 146000, widthMin: 400, widthMax: 435, heightMin: 660, heightMax: 700 },
+          hangingHoleSeed: [.495, .273], hangingHoleRoi: [.465, .245, .525, .305],
+          hangingHoleRange: { areaMin: 850, areaMax: 1150, widthMin: 30, widthMax: 40, heightMin: 30, heightMax: 42 },
+          minorClosedWhiteMaxArea: 500, logoRoi: [.53, .27, .68, .43], logoBoundaryMin: 45,
+          logoRange: { countMin: 1000, countMax: 1500, componentMin: 1, componentMax: 2 },
+          stitch: { seedBoundaryMin: 15, seedBoundaryMax: 40, finalBoundaryMin: 12, finalBoundaryMax: 43, dilatePasses: 3, exclusionDilatePasses: 2 },
+          stitchRange: { rawComponentMin: 18, rawComponentMax: 34, finalCountMin: 14000, finalCountMax: 20000, finalComponentMin: 1, finalComponentMax: 3 }
+        };
+        const recipeContractPass = jsonEqual(OSANPO_COLORLESS_MANUAL, expectedRecipe)
+          && jsonEqual(CHARM_SPECS.osanpo.manualRecipe, expectedRecipe);
+        record("phase3-osanpo-recipe-constants", recipeContractPass, "OSANPO_COLORLESS_MANUAL id/全定数を計画書契約へ照合");
+        let recipeGenerationPass = false, recipeGenerationDetail = "";
+        try {
+        // The manifest path is rooted at the project root; this tool is served from
+        // /tools, so use the same canonical source URL as production loading.
+        const response = await fetch(CHARM_SPECS.osanpo.source, { cache: "no-store" });
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          const bytes = await response.arrayBuffer();
+          const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
+          const canvas = document.createElement("canvas");
+          const scale = Math.min(1, WORK_MAX / Math.max(bitmap.width, bitmap.height));
+          const width = Math.round(bitmap.width * scale), height = Math.round(bitmap.height * scale);
+          canvas.width = width; canvas.height = height;
+          const context = canvas.getContext("2d", { willReadFrequently: true });
+          context.drawImage(bitmap, 0, 0, width, height);
+          const image = context.getImageData(0, 0, width, height);
+          if (bitmap.close) bitmap.close();
+          const savedManual = state.manual;
+          state.manual = { alpha: emptyLayer(width, height), owner: emptyLayer(width, height), keep: emptyLayer(width, height), inpaint: emptyLayer(width, height) };
+          const stats = seedOsanpoManualLayers(image, OSANPO_COLORLESS_MANUAL);
+          state.manual = savedManual;
+          recipeGenerationPass = stats.mainWhiteArea >= OSANPO_COLORLESS_MANUAL.mainWhiteRange.areaMin && stats.mainWhiteArea <= OSANPO_COLORLESS_MANUAL.mainWhiteRange.areaMax
+            && stats.hangingHoleArea >= OSANPO_COLORLESS_MANUAL.hangingHoleRange.areaMin && stats.hangingHoleArea <= OSANPO_COLORLESS_MANUAL.hangingHoleRange.areaMax
+            && stats.rawStitchComponentCount >= OSANPO_COLORLESS_MANUAL.stitchRange.rawComponentMin && stats.rawStitchComponentCount <= OSANPO_COLORLESS_MANUAL.stitchRange.rawComponentMax
+            && stats.finalStitchCount >= OSANPO_COLORLESS_MANUAL.stitchRange.finalCountMin && stats.finalStitchCount <= OSANPO_COLORLESS_MANUAL.stitchRange.finalCountMax
+            && stats.finalStitchComponentCount >= OSANPO_COLORLESS_MANUAL.stitchRange.finalComponentMin && stats.finalStitchComponentCount <= OSANPO_COLORLESS_MANUAL.stitchRange.finalComponentMax
+            && stats.logoCount >= OSANPO_COLORLESS_MANUAL.logoRange.countMin && stats.logoCount <= OSANPO_COLORLESS_MANUAL.logoRange.countMax
+            && stats.logoComponentCount >= OSANPO_COLORLESS_MANUAL.logoRange.componentMin && stats.logoComponentCount <= OSANPO_COLORLESS_MANUAL.logoRange.componentMax;
+          recipeGenerationDetail = JSON.stringify({ width: width, height: height, mainWhiteArea: stats.mainWhiteArea, hangingHoleArea: stats.hangingHoleArea, rawStitchComponentCount: stats.rawStitchComponentCount, finalStitchCount: stats.finalStitchCount, finalStitchComponentCount: stats.finalStitchComponentCount, logoCount: stats.logoCount, logoComponentCount: stats.logoComponentCount });
+        } catch (error) { recipeGenerationDetail = error.message; }
+        record("phase3-osanpo-recipe-generation-ranges", recipeGenerationPass, recipeGenerationDetail);
       } catch (error) { record("phase3-contract-suite", false, error.message); }
+
+      try {
+        const savedDecision = state.swanStitchDecision;
+        const savedBinding = state.swanStitchDecisionBinding;
+        const savedDraftDirty = state.swanStitchDraftDirty;
+        let unresolvedRejected = false, draftRejected = false, invalidFallbackRejected = false;
+        try {
+          state.swanStitchDecision = null;
+          state.swanStitchDecisionBinding = null;
+          state.swanStitchDraftDirty = false;
+          try { requireSwanStitchDecision(); } catch (error) { unresolvedRejected = /未確定/.test(error.message); }
+          const detect = normalizeSwanStitchDecision({ stitchMode: "detect", threadColor: "light", stitchPathsWork: [] }, { w: 10, h: 10 });
+          const none = normalizeSwanStitchDecision({ stitchMode: "none", threadColor: null, stitchPathsWork: [] }, { w: 10, h: 10 });
+          const fallback = normalizeSwanStitchDecision({
+            stitchMode: "fallback",
+            threadColor: "dark",
+            stitchPathsWork: [{ points: [[1, 1], [8, 8]], widthMm: 1, dashMm: 2, gapMm: 1 }]
+          }, { w: 10, h: 10 });
+          try { normalizeSwanStitchDecision({ stitchMode: "fallback", threadColor: "light", stitchPathsWork: [] }, { w: 10, h: 10 }); }
+          catch (error) { invalidFallbackRejected = /1本以上/.test(error.message); }
+          state.swanStitchDecision = detect;
+          state.swanStitchDraftDirty = true;
+          try { requireSwanStitchDecision(); } catch (error) { draftRejected = /未適用/.test(error.message); }
+          state.swanStitchDraftDirty = false;
+          const effectiveDetect = effectiveCharmSpec("swan", true);
+          state.swanStitchDecision = none;
+          const effectiveNone = effectiveCharmSpec("swan", true);
+          state.swanStitchDecision = fallback;
+          const effectiveFallback = effectiveCharmSpec("swan", true);
+          state.swanStitchDecision = none;
+          const noneCounts = fixedVisualCaseBreakdown();
+          state.swanStitchDecision = detect;
+          const stitchCounts = fixedVisualCaseBreakdown();
+          state.swanStitchDecision = fallback;
+          const fallbackCounts = fixedVisualCaseBreakdown();
+          record("swan-stitch-decision-gate",
+            CHARM_SPECS.swan.stitchMode === null && CHARM_SPECS.swan.threadColor === null
+              && unresolvedRejected && draftRejected && invalidFallbackRejected
+              && effectiveDetect.stitchMode === "detect" && effectiveDetect.threadColor === "light" && effectiveDetect.stitchPathsWork.length === 0
+              && effectiveNone.stitchMode === "none" && effectiveNone.threadColor === null && effectiveNone.stitchPathsWork.length === 0
+              && effectiveFallback.stitchMode === "fallback" && effectiveFallback.threadColor === "dark" && effectiveFallback.stitchPathsWork.length === 1
+              && noneCounts.total === 40 && noneCounts.byCharm.swan === 4
+              && stitchCounts.total === 44 && stitchCounts.byCharm.swan === 8
+              && fallbackCounts.total === 44 && fallbackCounts.byCharm.swan === 8,
+            "未確定／未適用draftは処理拒否、detect/none/fallback完全列挙、fixedVisualCaseCount=40/44（fallback含む）");
+        } finally {
+          state.swanStitchDecision = savedDecision;
+          state.swanStitchDecisionBinding = savedBinding;
+          state.swanStitchDraftDirty = savedDraftDirty;
+        }
+      } catch (error) { record("swan-stitch-decision-gate", false, error.message); }
+
+      try {
+        const savedDecision = state.swanStitchDecision;
+        const savedBinding = state.swanStitchDecisionBinding;
+        const savedDirty = state.swanStitchDraftDirty;
+        const savedMode = dom.swanStitchMode.value;
+        const savedThread = dom.swanThreadColor.value;
+        const savedPaths = dom.swanStitchPaths.value;
+        const savedActivePath = state.swanStitchEditorActivePath;
+        let pendingApiRejected = false, draftApiRejected = false, atomicSetterRejected = false, atomicSetterPreserved = false;
+        try {
+          state.swanStitchDecision = null;
+          state.swanStitchDecisionBinding = null;
+          state.swanStitchDraftDirty = false;
+          try { withSelfTestPublicProbe(function () { return window.charmPrepAPI.getCurrentResult(); }); } catch (error) { pendingApiRejected = /未確定/.test(error.message); }
+          state.swanStitchDecision = normalizeSwanStitchDecision({ stitchMode: "fallback", threadColor: "light", stitchPathsWork: [{ points: [[1, 1], [4, 4]], widthMm: .8, dashMm: 1.8, gapMm: 1.2 }] }, { w: 10, h: 10 });
+          state.swanStitchDraftDirty = true;
+          try { withSelfTestPublicProbe(function () { return window.charmPrepAPI.getCurrentResult(); }); } catch (error) { draftApiRejected = /未適用/.test(error.message); }
+          dom.swanStitchMode.value = "fallback";
+          dom.swanThreadColor.value = "dark";
+          const draftPaths = [{ points: [[2, 3], [7, 8]], widthMm: 1, dashMm: 2, gapMm: 1 }];
+          writeSwanStitchPathsDraft(draftPaths, { dirty: false });
+          const publicDraft = window.charmPrepAPI.getSwanStitchDraft();
+          const publicState = window.charmPrepAPI.getState();
+          const beforeInvalid = {
+            mode: dom.swanStitchMode.value,
+            thread: dom.swanThreadColor.value,
+            paths: dom.swanStitchPaths.value,
+            dirty: state.swanStitchDraftDirty
+          };
+          try {
+            withSelfTestPublicProbe(function () { return window.charmPrepAPI.setSwanStitchDraft({
+              stitchMode: "fallback",
+              threadColor: "light",
+              stitchPathsWork: [{ points: [[2, 3]], widthMm: 1, dashMm: 2, gapMm: 1 }]
+            }); });
+          } catch (error) { atomicSetterRejected = /points|2点以上/.test(error.message); }
+          atomicSetterPreserved = beforeInvalid.mode === dom.swanStitchMode.value
+            && beforeInvalid.thread === dom.swanThreadColor.value
+            && beforeInvalid.paths === dom.swanStitchPaths.value
+            && beforeInvalid.dirty === state.swanStitchDraftDirty;
+          record("swan-stitch-editor-api-sync",
+            pendingApiRejected && draftApiRejected
+              && publicDraft.stitchMode === "fallback" && publicDraft.threadColor === "dark"
+              && jsonEqual(publicDraft.stitchPathsWork, draftPaths) && publicDraft.dirty === true
+              && publicState.swanStitchDraftDirty === true
+              && atomicSetterRejected && atomicSetterPreserved
+              && typeof window.charmPrepAPI.setSwanStitchDraft === "function"
+              && typeof window.charmPrepAPI.setSwanStitchDecision === "function",
+            "pending/draft API拒否、JSON/editor/getState/getDraft同期、無効setterは原子性維持");
+        } finally {
+          state.swanStitchDecision = savedDecision;
+          state.swanStitchDecisionBinding = savedBinding;
+          state.swanStitchDraftDirty = savedDirty;
+          state.swanStitchEditorActivePath = savedActivePath;
+          dom.swanStitchMode.value = savedMode;
+          dom.swanThreadColor.value = savedThread;
+          dom.swanStitchPaths.value = savedPaths;
+          renderSource();
+        }
+      } catch (error) { record("swan-stitch-editor-api-sync", false, error.message); }
+
+      try {
+        const saved = {
+          selectedKey: state.selectedKey,
+          loadedKey: state.loadedKey,
+          sourceBytes: state.sourceBytes,
+          sourceImageData: state.sourceImageData,
+          work: state.work,
+          manual: state.manual,
+          history: state.history,
+          result: state.result,
+          batch: state.batch,
+          lastArchive: state.lastArchive,
+          rings: state.rings,
+          transformDirty: state.transformDirty,
+          decision: state.swanStitchDecision,
+          decisionBinding: state.swanStitchDecisionBinding,
+          draftDirty: state.swanStitchDraftDirty,
+          activePath: state.swanStitchEditorActivePath,
+          mode: dom.swanStitchMode.value,
+          thread: dom.swanThreadColor.value,
+          paths: dom.swanStitchPaths.value,
+          charmValue: dom.charmSelect.value,
+          transformUi: snapshotTransformUi()
+        };
+        try {
+        const productionButtons = [
+          dom.processButton, dom.exportLayerButton, dom.exportCurrentButton, dom.exportRegressionButton,
+          dom.exportBatchButton, dom.verifyArchiveButton, dom.generateRingButton, dom.downloadRingButton
+        ];
+        const pending = emptyLayer(4, 4);
+        state.selectedKey = "swan";
+        state.loadedKey = "swan";
+        state.sourceBytes = null;
+        state.sourceImageData = pending;
+        state.work = { w: 4, h: 4 };
+        state.manual = { alpha: emptyLayer(4, 4), owner: emptyLayer(4, 4), keep: emptyLayer(4, 4), inpaint: emptyLayer(4, 4) };
+        state.history = [];
+        state.result = null;
+        state.batch = Object.fromEntries(CHARM_KEYS.map(function (key) { return [key, { status: "pending", verify: "pending" }]; }));
+        state.lastArchive = null;
+        state.rings = null;
+        state.transformDirty = false;
+        state.swanStitchDecision = null;
+        state.swanStitchDraftDirty = false;
+        dom.charmSelect.value = "swan";
+        dom.swanStitchMode.value = "pending";
+        dom.swanThreadColor.value = "light";
+        dom.swanStitchPaths.value = "[]";
+        updateInteractivity();
+        const pendingUiLocked = productionButtons.every(function (button) { return button.disabled; });
+        const rejectPending = async function (call) {
+          try { await Promise.resolve().then(call); return false; }
+          catch (error) { return /未確定|未適用|未確定です/.test(error.message); }
+        };
+        const pendingEntrances = [
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.processCurrent(); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.runChecks(); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.getCurrentResult(); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.runBatch(); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.exportArchive({ download: false }); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.verifyArchive(new Blob(["{}"])) ; }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.generateRingAssets({ download: false }); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.buildFlatRegressionSheets({ download: false }); }); }),
+          rejectPending(function () { return withSelfTestPublicProbe(function () { return window.charmPrepAPI.recolor(); }); })
+        ];
+        const pendingEntrancesRejected = (await Promise.all(pendingEntrances)).every(Boolean);
+        const fallbackDraft = [{ points: [[1, 1], [2, 2]], widthMm: 1, dashMm: 2, gapMm: 1 }];
+        dom.swanStitchMode.value = "fallback";
+        dom.swanStitchPaths.value = JSON.stringify(fallbackDraft, null, 2);
+        updateInteractivity();
+        const editorAllowed = !dom.importLayerButton.disabled
+          && !dom.swanNewStitchPathButton.disabled
+          && !dom.swanUndoStitchPointButton.disabled
+          && !dom.swanClearStitchPathsButton.disabled;
+        record("swan-production-ui-lock-and-editor-allowance",
+          pendingUiLocked && pendingEntrancesRejected && editorAllowed,
+          "pending時production入口9種をロック、fallback manual import/editorは許可");
+        } finally {
+          state.selectedKey = saved.selectedKey;
+          state.loadedKey = saved.loadedKey;
+          state.sourceBytes = saved.sourceBytes;
+          state.sourceImageData = saved.sourceImageData;
+          state.work = saved.work;
+          state.manual = saved.manual;
+          state.history = saved.history;
+          state.result = saved.result;
+          state.batch = saved.batch;
+          state.lastArchive = saved.lastArchive;
+          state.rings = saved.rings;
+          state.transformDirty = saved.transformDirty;
+          state.swanStitchDecision = saved.decision;
+          state.swanStitchDecisionBinding = saved.decisionBinding;
+          state.swanStitchDraftDirty = saved.draftDirty;
+          state.swanStitchEditorActivePath = saved.activePath;
+          dom.charmSelect.value = saved.charmValue;
+          dom.swanStitchMode.value = saved.mode;
+          dom.swanThreadColor.value = saved.thread;
+          dom.swanStitchPaths.value = saved.paths;
+          restoreTransformUi(saved.transformUi);
+          if (state.sourceImageData) renderSource();
+          else getContext(dom.sourceCanvas).clearRect(0, 0, dom.sourceCanvas.width, dom.sourceCanvas.height);
+          if (resultHasRenderablePreview(state.result)) renderResult(state.result);
+          else resetDerivedViews();
+          if (!state.result) dom.configPreview.textContent = "{}";
+          syncSwanStitchControls();
+          updateInteractivity();
+        }
+      } catch (error) { record("swan-production-ui-lock-and-editor-allowance", false, error.message); }
+
+      try {
+        const width = 24, height = 16;
+        const base = emptyLayer(width, height), leatherMasks = emptyLayer(width, height);
+        for (let offset = 0; offset < base.data.length; offset += 4) {
+          base.data[offset] = base.data[offset + 1] = base.data[offset + 2] = 128;
+          base.data[offset + 3] = 255;
+          leatherMasks.data[offset] = 255;
+          leatherMasks.data[offset + 3] = 255;
+        }
+        const derivedNone = { baseLum: .5, pxPerMm: 2, stitchPxCount: 0 };
+        const target = { r: 65, g: 75, b: 85 };
+        const emptyInpaint = { inpaint: emptyLayer(width, height) };
+        const noneSpec = { toneMode: "flat", stitchMode: "none", threadColor: null };
+        const noneCorrection = { stitchPathsAsset: [] };
+        const noneOutputs = stitchVerificationOutputs(base, leatherMasks, derivedNone, target, noneSpec, []);
+        const noneGate = evaluateStitchContract(noneSpec, leatherMasks, derivedNone, noneOutputs.white, noneOutputs.black, noneCorrection, emptyInpaint);
+
+        const detectMasks = cloneImageData(leatherMasks);
+        let detectCount = 0;
+        for (let y = 6; y <= 8; y += 1) for (let x = 10; x <= 12; x += 1) {
+          const offset = rgbaIndex(x, y, width);
+          detectMasks.data[offset] = detectMasks.data[offset + 1] = 0;
+          detectMasks.data[offset + 2] = 255;
+          detectCount += 1;
+        }
+        const detectDerived = { baseLum: .5, pxPerMm: 2, stitchPxCount: detectCount };
+        const detectSpec = { toneMode: "flat", stitchMode: "detect", threadColor: "light" };
+        const detectOutputs = stitchVerificationOutputs(base, detectMasks, detectDerived, target, detectSpec, []);
+        const detectGate = evaluateStitchContract(detectSpec, detectMasks, detectDerived, detectOutputs.white, detectOutputs.black, { stitchPathsAsset: [] }, emptyInpaint);
+        const detectNegative = evaluateStitchContract(detectSpec, leatherMasks, derivedNone, noneOutputs.white, noneOutputs.black, { stitchPathsAsset: [] }, emptyInpaint);
+
+        const fallbackPaths = [{ points: [[3, 8], [20, 8]], widthMm: 1, dashMm: 2, gapMm: 1 }];
+        const fallbackSpec = { toneMode: "flat", stitchMode: "fallback", threadColor: "dark" };
+        const fallbackManual = { inpaint: emptyLayer(width, height) };
+        fallbackManual.inpaint.data[rgbaIndex(4, 8, width) + 3] = 255;
+        const fallbackOutputs = stitchVerificationOutputs(base, leatherMasks, derivedNone, target, fallbackSpec, fallbackPaths);
+        const fallbackGate = evaluateStitchContract(fallbackSpec, leatherMasks, derivedNone, fallbackOutputs.white, fallbackOutputs.black, { stitchPathsAsset: fallbackPaths }, fallbackManual);
+        const fallbackMissingInpaint = evaluateStitchContract(fallbackSpec, leatherMasks, derivedNone, fallbackOutputs.white, fallbackOutputs.black, { stitchPathsAsset: fallbackPaths }, emptyInpaint);
+        let fallbackUndrawnRejected = false;
+        try { stitchVerificationOutputs(base, leatherMasks, derivedNone, target, fallbackSpec, []); }
+        catch (error) { fallbackUndrawnRejected = /fallback stitchPathsAsset/.test(error.message); }
+        const regeneratedOutputs = stitchVerificationOutputs(cloneImageData(base), cloneImageData(leatherMasks), jsonClone(derivedNone), target, fallbackSpec, cloneStitchPaths(fallbackPaths));
+        const regeneratedGate = evaluateStitchContract(fallbackSpec, leatherMasks, derivedNone, regeneratedOutputs.white, regeneratedOutputs.black, { stitchPathsAsset: fallbackPaths }, fallbackManual);
+
+        const noneMasksNegative = cloneImageData(leatherMasks);
+        noneMasksNegative.data[2] = 255;
+        noneMasksNegative.data[0] = 0;
+        const noneNegativeOutputs = stitchVerificationOutputs(base, noneMasksNegative, { baseLum: .5, pxPerMm: 2, stitchPxCount: 1 }, target, noneSpec, []);
+        const noneNegative = evaluateStitchContract(noneSpec, noneMasksNegative, { baseLum: .5, pxPerMm: 2, stitchPxCount: 1 }, noneNegativeOutputs.white, noneNegativeOutputs.black, noneCorrection, emptyInpaint);
+        const savedDecision = state.swanStitchDecision, savedBinding = state.swanStitchDecisionBinding, savedDirty = state.swanStitchDraftDirty;
+        let publicFallbackRejected = false;
+        try {
+          state.swanStitchDecision = normalizeSwanStitchDecision({ stitchMode: "fallback", threadColor: "dark", stitchPathsWork: fallbackPaths }, { w: width, h: height });
+          state.swanStitchDecisionBinding = null;
+          state.swanStitchDraftDirty = false;
+          try { withSelfTestPublicProbe(function () { return window.charmPrepAPI.recolor(base, leatherMasks, derivedNone, target, "gold", "dark", fallbackSpec, []); }); }
+          catch (error) { publicFallbackRejected = /公開recolorのfallback/.test(error.message); }
+        } finally {
+          state.swanStitchDecision = savedDecision;
+          state.swanStitchDecisionBinding = savedBinding;
+          state.swanStitchDraftDirty = savedDirty;
+        }
+        let actualProductionPass = false, actualProductionDetail = "not-run";
+        const savedProduction = {
+          selectedKey: state.selectedKey,
+          loadedKey: state.loadedKey,
+          sourceBytes: state.sourceBytes,
+          sourceImageData: state.sourceImageData,
+          work: state.work,
+          manual: state.manual,
+          history: state.history,
+          result: state.result,
+          batch: state.batch,
+          cropInputs: jsonClone(state.cropInputs),
+          lastArchive: state.lastArchive,
+          rings: state.rings,
+          transformDirty: state.transformDirty,
+          manualRevision: state.manualRevision,
+          decision: state.swanStitchDecision,
+          decisionBinding: state.swanStitchDecisionBinding,
+          draftDirty: state.swanStitchDraftDirty,
+          activePath: state.swanStitchEditorActivePath,
+          charmValue: dom.charmSelect.value,
+          mode: dom.swanStitchMode.value,
+          thread: dom.swanThreadColor.value,
+          paths: dom.swanStitchPaths.value,
+          calibrationMode: dom.calibrationMode.value,
+          widthP1: dom.widthP1.value,
+          widthP2: dom.widthP2.value,
+          heightP1: dom.heightP1.value,
+          heightP2: dom.heightP2.value,
+          workspaceTitle: dom.workspaceTitle.textContent,
+          sourceMeta: dom.sourceMeta.textContent,
+          workDims: dom.workDims.textContent,
+          manualBadge: dom.manualBadge.textContent,
+          transformUi: snapshotTransformUi()
+        };
+        state.selfTestInternalPhase = true;
+        try {
+          state.batch = Object.fromEntries(CHARM_KEYS.map(function (key) { return [key, { status: "pending", verify: "pending" }]; }));
+          state.result = null;
+          state.lastArchive = null;
+          await loadSource("horse");
+          setSwanStitchDecision({ stitchMode: "none", threadColor: null, stitchPathsWork: [] });
+          const productionSourceBytes = state.sourceBytes.slice(0);
+          const productionManual = cloneManualLayers(state.manual);
+          const productionResult = await processCurrent();
+          const grainFile = productionResult.prep.inputs.grain && productionResult.prep.inputs.grain.calf && productionResult.prep.inputs.grain.calf.file;
+          const grainResponse = await fetch("../" + grainFile, { cache: "no-store" });
+          if (!grainResponse.ok) throw new Error("swan grain HTTP " + grainResponse.status);
+          const grainBytes = await grainResponse.arrayBuffer();
+          const peerScale = productionResult.prep.inputs.grain.calf.grainScaleMm;
+          const productionSpec = effectiveCharmSpec("horse", true);
+          const finalizedFlat = await computeFlatCheck(productionSpec, productionResult.base, productionResult.masks, productionResult.grainContext, {
+            grainScalePeers: Array(CHARM_KEYS.length).fill(peerScale),
+            batchPeersComplete: true,
+            materialAssets: productionResult.prep.derived.materialAssets
+          });
+          productionResult.checks[PRECHECK_COUNT - 1] = finalizedFlat;
+          productionResult.prep.checks = publicChecksRecord(productionResult.checks.slice(0, PRECHECK_COUNT));
+          const archivedOutputs = {
+            base: { imageData: cloneImageData(productionResult.base) },
+            masks: { imageData: cloneImageData(productionResult.masks) }
+          };
+          const regenerated = await regenerateFromPrep(
+            null,
+            productionResult.prep,
+            "horse",
+            productionSpec,
+            { sourceBytes: productionSourceBytes, grainBytes: grainBytes, manual: productionManual },
+            archivedOutputs,
+            { grainScalePeers: Array(CHARM_KEYS.length).fill(peerScale), batchPeersComplete: true, materialAssets: productionResult.prep.derived.materialAssets }
+          );
+          const productionChecksPass = productionResult.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
+          const regeneratedChecksPass = regenerated.checks.slice(0, PRECHECK_COUNT).every(function (check) { return check.status === "pass"; });
+          actualProductionPass = productionChecksPass && regeneratedChecksPass
+            && imageDataEqual(regenerated.base, productionResult.base)
+            && imageDataEqual(regenerated.masks, productionResult.masks);
+          actualProductionDetail = "horse processCurrent/buildChecksAndConfig+peerFinalize=" + (productionChecksPass ? "pass" : "fail")
+            + " / PNG+regenerate=" + (regeneratedChecksPass ? "pass" : "fail")
+            + " / RGBA=" + (actualProductionPass ? "equal" : "mismatch");
+        } catch (error) {
+          actualProductionDetail = error.message;
+        } finally {
+          state.selfTestInternalPhase = false;
+          if (state.result && state.result !== savedProduction.result) releaseBatchPreviewMemory(state.result);
+          state.selectedKey = savedProduction.selectedKey;
+          state.loadedKey = savedProduction.loadedKey;
+          state.sourceBytes = savedProduction.sourceBytes;
+          state.sourceImageData = savedProduction.sourceImageData;
+          state.work = savedProduction.work;
+          state.manual = savedProduction.manual;
+          state.history = savedProduction.history;
+          state.result = savedProduction.result;
+          state.batch = savedProduction.batch;
+          state.cropInputs = savedProduction.cropInputs;
+          state.lastArchive = savedProduction.lastArchive;
+          state.rings = savedProduction.rings;
+          state.transformDirty = savedProduction.transformDirty;
+          state.manualRevision = savedProduction.manualRevision;
+          state.swanStitchDecision = savedProduction.decision;
+          state.swanStitchDecisionBinding = savedProduction.decisionBinding;
+          state.swanStitchDraftDirty = savedProduction.draftDirty;
+          state.swanStitchEditorActivePath = savedProduction.activePath;
+          dom.charmSelect.value = savedProduction.charmValue;
+          dom.swanStitchMode.value = savedProduction.mode;
+          dom.swanThreadColor.value = savedProduction.thread;
+          dom.swanStitchPaths.value = savedProduction.paths;
+          dom.calibrationMode.value = savedProduction.calibrationMode;
+          dom.widthP1.value = savedProduction.widthP1;
+          dom.widthP2.value = savedProduction.widthP2;
+          dom.heightP1.value = savedProduction.heightP1;
+          dom.heightP2.value = savedProduction.heightP2;
+          dom.workspaceTitle.textContent = savedProduction.workspaceTitle;
+          dom.sourceMeta.textContent = savedProduction.sourceMeta;
+          dom.workDims.textContent = savedProduction.workDims;
+          dom.manualBadge.textContent = savedProduction.manualBadge;
+          restoreTransformUi(savedProduction.transformUi);
+          if (state.sourceImageData) {
+            renderSource();
+          } else {
+            const sourceCtx = getContext(dom.sourceCanvas);
+            sourceCtx.clearRect(0, 0, dom.sourceCanvas.width, dom.sourceCanvas.height);
+          }
+          if (resultHasRenderablePreview(state.result)) renderResult(state.result);
+          else resetDerivedViews();
+          if (!state.result) dom.configPreview.textContent = "{}";
+          updateInteractivity();
+        }
+        record("swan-stitch-modes-production-regeneration",
+          noneGate.pass && detectGate.pass && fallbackGate.pass && regeneratedGate.pass
+            && !detectNegative.pass && !noneNegative.pass && !fallbackMissingInpaint.pass && fallbackUndrawnRejected && publicFallbackRejected
+            && fallbackGate.diffPxCount === fallbackGate.fallback.clippedDiffPx
+            && imageDataEqual(fallbackOutputs.white, regeneratedOutputs.white)
+            && imageDataEqual(fallbackOutputs.black, regeneratedOutputs.black)
+            && actualProductionPass,
+          "共有recolor＋検査5で3モード正例、負例、fallback実描画、swan実処理PNG再生成一致 / " + actualProductionDetail);
+      } catch (error) { record("swan-stitch-modes-production-regeneration", false, error.message); }
+
+      try {
+        const width = 25, height = 25, alpha = new Uint8ClampedArray(width * height);
+        const lightBase = emptyLayer(width, height), darkBase = emptyLayer(width, height);
+        for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+          const offset = rgbaIndex(x, y, width);
+          const owned = x >= 2 && x <= 22 && y >= 2 && y <= 22;
+          alpha[y * width + x] = owned ? 255 : 0;
+          lightBase.data[offset] = lightBase.data[offset + 1] = lightBase.data[offset + 2] = 100;
+          darkBase.data[offset] = darkBase.data[offset + 1] = darkBase.data[offset + 2] = 200;
+          lightBase.data[offset + 3] = darkBase.data[offset + 3] = 255;
+        }
+        for (let y = 12; y <= 13; y += 1) for (let x = 12; x <= 13; x += 1) {
+          const offset = rgbaIndex(x, y, width);
+          lightBase.data[offset] = lightBase.data[offset + 1] = lightBase.data[offset + 2] = 245;
+          darkBase.data[offset] = darkBase.data[offset + 1] = darkBase.data[offset + 2] = 15;
+        }
+        const lightSpec = { stitchMode: "detect", threadColor: "light" };
+        const darkSpec = { stitchMode: "detect", threadColor: "dark" };
+        const lightDetected = detectStitch(lightBase, alpha, lightSpec, .08);
+        const darkDetected = detectStitch(darkBase, alpha, darkSpec, .08);
+        const lightWrongPolarity = detectStitch(lightBase, alpha, darkSpec, .08);
+        const darkWrongPolarity = detectStitch(darkBase, alpha, lightSpec, .08);
+        const lightRegenerated = detectStitch(cloneImageData(lightBase), new Uint8ClampedArray(alpha), lightSpec, .08);
+        const darkRegenerated = detectStitch(cloneImageData(darkBase), new Uint8ClampedArray(alpha), darkSpec, .08);
+        const count = function (mask) { return mask.reduce(function (sum, value) { return sum + (value ? 1 : 0); }, 0); };
+        record("stitch-detect-thread-polarity",
+          count(lightDetected) > 0 && count(darkDetected) > 0 && count(lightWrongPolarity) === 0 && count(darkWrongPolarity) === 0
+            && jsonEqual(Array.from(lightDetected), Array.from(lightRegenerated))
+            && jsonEqual(Array.from(darkDetected), Array.from(darkRegenerated)),
+          "light=高輝度側、dark=低輝度側を排他的に通常／再生成で検出");
+      } catch (error) { record("stitch-detect-thread-polarity", false, error.message); }
+
+      try {
+        const image = emptyLayer(2, 2);
+        const baseBlob = new Blob(["base"]), masksBlob = new Blob(["masks"]);
+        const manualRecords = { alpha: { blob: new Blob(["manual"]) } };
+        function fakeResult(key) {
+          return {
+          key: key,
+          base: image,
+          masks: image,
+          preDerived: { large: image },
+          grainContext: { large: image },
+          previews: { blackGoldWhite: image },
+          artifacts: {
+            base: image,
+            masks: image,
+            previews: { white: image, black: image },
+            correction: { base: image, masks: image, grainContext: { large: image } },
+            baseBlob: baseBlob,
+            masksBlob: masksBlob,
+            manualRecords: manualRecords
+          }
+        };
+        }
+        const direct = fakeResult("swan");
+        releaseBatchPreviewMemory(direct);
+        const original = fakeResult("swan");
+        const replacement = cloneResultEnvelope(original, { checks: [], prep: {} });
+        releaseBatchPreviewMemory(original);
+        const hiddenA = fakeResult("horse"), hiddenB = fakeResult("cat");
+        const hiddenBatch = { horse: { result: hiddenA }, cat: { result: hiddenB } };
+        const hiddenDisplay = retainSinglePreviewResult(hiddenBatch, null, {}, null);
+        const visibleA = fakeResult("horse"), visibleB = fakeResult("cat");
+        const visibleBatch = { horse: { result: visibleA }, cat: { result: visibleB } };
+        const visibleDisplay = retainSinglePreviewResult(visibleBatch, visibleB, {}, null);
+        const invalidationResult = fakeResult("swan");
+        const invalidationBatch = { swan: { status: "pass", verify: "pass", result: invalidationResult } };
+        const afterInvalidation = invalidateSwanDependentResults(invalidationBatch, invalidationResult);
+        record("batch-preview-memory-release",
+          direct.base === null && direct.masks === null && direct.preDerived === null
+            && direct.grainContext === null && direct.previews === null
+            && direct.artifacts.base === null && direct.artifacts.masks === null
+            && direct.artifacts.previews === null && direct.artifacts.correction === null
+            && direct.artifacts.baseBlob === baseBlob && direct.artifacts.masksBlob === masksBlob
+            && direct.artifacts.manualRecords === manualRecords
+            && resultHasRenderablePreview(replacement)
+            && hiddenDisplay === null && hiddenA.base === null && hiddenB.base === null
+            && hiddenA.artifacts.baseBlob === baseBlob && hiddenB.artifacts.manualRecords === manualRecords
+            && visibleDisplay === visibleB && visibleA.base === null && resultHasRenderablePreview(visibleB)
+            && afterInvalidation === null && invalidationBatch.swan.status === "pending"
+            && invalidationResult.base === null && invalidationResult.artifacts.baseBlob === baseBlob,
+          "検査8再束縛を含め高々1件のImageDataを保持し、archive用Blob/manualRecordsと複製結果を保持");
+      } catch (error) { record("batch-preview-memory-release", false, error.message); }
+
       try {
         const rgba = new Uint8ClampedArray([
           201, 17, 99, 0, 14, 230, 71, 1, 255, 2, 199, 2,
@@ -5529,78 +7057,13 @@
       } catch (error) { record("oracle-2x2-constant-gray", false, error.message); }
 
       try {
-        const width = 4, height = 3, radius = 2, amp = .25, rgba = new Uint8ClampedArray(width * height * 4);
-        for (let index = 0; index < width * height; index += 1) { const offset = index * 4; rgba[offset] = (index * 37 + 11) & 255; rgba[offset + 1] = (index * 91 + 7) & 255; rgba[offset + 2] = (index * 53 + 19) & 255; rgba[offset + 3] = 255; }
-        const grainImage = new ImageData(rgba, width, height), grainBlob = await imageDataToBlob(grainImage), rawBytes = await grainBlob.arrayBuffer();
-        const resource = { file: "selftest.png", sha256: await sha256(rawBytes), width: width, height: height, rawBytes: rawBytes, sourceImageData: grainImage };
-        const defaultRecord = { grainRadiusPx: radius, grainAmp: amp, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
-        const oracleResource = await getFlatOracleResource(resource, defaultRecord, operationToken);
-        const productionG0 = new Float64Array(width * height);
-        for (let index = 0; index < productionG0.length; index += 1) { const offset = index * 4; productionG0[index] = luminance(rgba[offset], rgba[offset + 1], rgba[offset + 2]); }
-        const correct = await exactMirrorBoxRatioMap(productionG0, width, height, radius, amp, operationToken);
-        const before = cloneImageData(grainImage), masks = emptyLayer(width, height);
-        for (let offset = 0; offset < masks.data.length; offset += 4) { masks.data[offset] = 255; masks.data[offset + 3] = 255; }
-        async function auditMap(map, record, selectedMasks) {
-          const baked = bakeFlatGrainMap(before, selectedMasks || masks, { width: width, height: height, map: map }, record);
-          return { baked: baked, audit: await auditFlatBakeOracle(oracleResource, before, baked.afterBake, selectedMasks || masks, record) };
-        }
-        const normal = await auditMap(correct, defaultRecord);
-        record("oracle-production-bake", normal.audit.expectedMismatchPxCount === 0 && normal.audit.nonLeatherChangedPxCount === 0,
-          JSON.stringify(normal.audit));
-        function mutatedMap(kind) {
-          const g0 = new Float64Array(width * height);
-          for (let index = 0; index < g0.length; index += 1) { const o = index * 4; const value = (.2126 * rgba[o] + .7152 * rgba[o + 1] + .0722 * rgba[o + 2]) / 255; g0[index] = kind === "float32" ? Math.fround(value) : value; }
-          function indexFor(value, size) {
-            if (kind === "mirror") return ((value % size) + size) % size;
-            const period = 2 * size, t = ((value % period) + period) % period; return t < size ? t : period - 1 - t;
-          }
-          const output = new Float64Array(g0.length), divisor = (2 * radius + 1) ** 2;
-          for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
-            let sum = 0;
-            if (kind === "loop-order") for (let dx = -radius; dx <= radius; dx += 1) for (let dy = -radius; dy <= radius; dy += 1) sum += g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)];
-            else for (let dy = -radius; dy <= radius; dy += 1) for (let dx = -radius; dx <= radius; dx += 1) sum = kind === "float32" ? Math.fround(sum + g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)]) : sum + g0[indexFor(y + dy, height) * width + indexFor(x + dx, width)];
-            const ratio = g0[y * width + x] / (sum / divisor); output[y * width + x] = Math.max(1 - amp, Math.min(1 + amp, ratio));
-          }
-          return output;
-        }
-        async function detectIntegratedMutation(kind, mutation) {
-          let candidate = await auditMap(mutation, defaultRecord);
-          if (candidate.audit.expectedMismatchPxCount > 0) return { audit: candidate.audit, tuned: false };
-          for (let index = 0; index < mutation.length; index += 1) {
-            if (Object.is(mutation[index], correct[index])) continue;
-            const offset = index * 4;
-            const sourceLum = luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]);
-            const midpoint = (mutation[index] + correct[index]) / 2;
-            if (!(sourceLum > 0) || !(midpoint > 0)) continue;
-            for (let boundary = 1.5; boundary < defaultRecord.grainBase * midpoint; boundary += 1) {
-              const scale = boundary / midpoint;
-              if (!(scale > 0) || scale > defaultRecord.grainBase) continue;
-              const tunedFlatWhite = sourceLum * defaultRecord.grainBase / scale;
-              if (!(tunedFlatWhite > 0) || tunedFlatWhite > 1) continue;
-              const tunedRecord = Object.assign({}, defaultRecord, { flatWhite: tunedFlatWhite });
-              const normalTuned = await auditMap(correct, tunedRecord), mutationTuned = await auditMap(mutation, tunedRecord);
-              if (normalTuned.audit.expectedMismatchPxCount === 0 && mutationTuned.audit.expectedMismatchPxCount > 0) {
-                return { audit: mutationTuned.audit, tuned: true, grainIndex: index, flatWhite: tunedRecord.flatWhite };
-              }
-            }
-          }
-          return { audit: candidate.audit, tuned: false };
-        }
-        for (const kind of ["float32", "mirror", "loop-order"]) {
-          const detected = await detectIntegratedMutation(kind, mutatedMap(kind));
-          record("oracle-mutation-" + kind, detected.audit.expectedMismatchPxCount > 0, JSON.stringify(detected));
-        }
-        const fixedOne = new Float64Array(correct.length); fixedOne.fill(1);
-        const fixedDetected = await detectIntegratedMutation("grain-one", fixedOne);
-        record("oracle-mutation-grain-one", fixedDetected.audit.expectedMismatchPxCount > 0, JSON.stringify(fixedDetected));
-        const nonLeatherMasks = cloneImageData(masks), nonLeatherOffset = (width * height - 1) * 4;
-        nonLeatherMasks.data[nonLeatherOffset] = 0;
-        const nonLeatherBaseline = await auditMap(correct, defaultRecord, nonLeatherMasks);
-        const nonLeatherAfter = cloneImageData(nonLeatherBaseline.baked.afterBake);
-        nonLeatherAfter.data[nonLeatherOffset] = (nonLeatherAfter.data[nonLeatherOffset] + 1) & 255;
-        const nonLeatherAudit = await auditFlatBakeOracle(oracleResource, before, nonLeatherAfter, nonLeatherMasks, defaultRecord);
-        record("oracle-mutation-nonleather", nonLeatherBaseline.audit.expectedMismatchPxCount === 0 && nonLeatherBaseline.audit.nonLeatherChangedPxCount === 0
-          && nonLeatherAudit.nonLeatherChangedPxCount > 0, JSON.stringify(nonLeatherAudit));
+        const mutationSuite = await runFlatOracleMutationSuite(operationToken);
+        record("oracle-production-bake", mutationSuite.normal.pass, JSON.stringify(mutationSuite.normal.audit));
+        ["float32", "mirror", "loop-order", "grain-one", "nonleather"].forEach(function (kind) {
+          const result = mutationSuite.mutations[kind];
+          const reportName = kind === "nonleather" ? "nonleather" : kind;
+          record("oracle-mutation-" + reportName, !!result && result.detected === true, JSON.stringify(result));
+        });
       } catch (error) { record("oracle-mutation-suite", false, error.message); }
 
       try {
@@ -5630,8 +7093,22 @@
       const report = { status: results.every(function (item) { return item.status === "pass"; }) ? "pass" : "fail", toolVersion: TOOL_VERSION, results: results };
       console.table(results);
       return report;
+    }
+
+    async function runInternalSelfTests() {
+      if (state.selfTestActive) throw new Error("自己検査がすでに実行中です");
+      if (state.operation) throw new Error("別の処理が実行中のため自己検査を開始できません");
+      state.selfTestActive = true;
+      state.selfTestInternalPhase = false;
+      state.selfTestProbeDepth = 0;
+      updateInteractivity();
+      try {
+        return await runInternalSelfTestsBody();
       } finally {
-        endOperation(operationToken);
+        state.selfTestInternalPhase = false;
+        state.selfTestProbeDepth = 0;
+        state.selfTestActive = false;
+        updateInteractivity();
       }
     }
 
@@ -5647,7 +7124,47 @@
         const crop = state.cropInputs[state.selectedKey] || CHARM_SPECS[state.selectedKey].cropSource;
         if (crop) seedTransformControls(crop);
         else [dom.cropX, dom.cropY, dom.cropW, dom.cropH].forEach(function (input) { input.value = ""; });
+        if (state.loadedKey !== state.selectedKey) {
+          releaseBatchPreviewMemory(state.result);
+          state.result = null;
+          getContext(dom.sourceCanvas).clearRect(0, 0, dom.sourceCanvas.width, dom.sourceCanvas.height);
+          resetDerivedViews();
+          dom.configPreview.textContent = "{}";
+          dom.sourceMeta.textContent = CHARM_SPECS[state.selectedKey].source + " を読み込んでください。";
+        } else {
+          renderSource();
+          if (resultHasRenderablePreview(state.result)) renderResult(state.result);
+        }
         updateInteractivity();
+      });
+      dom.swanStitchMode.addEventListener("change", function () {
+        if (dom.swanStitchMode.value !== "fallback") state.swanStitchEditorActivePath = -1;
+        markSwanStitchDraftDirty("swan stitchMode に未適用の変更があります");
+        renderSource();
+      });
+      dom.swanThreadColor.addEventListener("change", function () { markSwanStitchDraftDirty("swan threadColor に未適用の変更があります"); });
+      dom.swanStitchPaths.addEventListener("input", function () {
+        state.swanStitchEditorActivePath = -1;
+        markSwanStitchDraftDirty("swan stitchPathsWork に未適用の変更があります");
+        renderSource();
+      });
+      [dom.swanStitchWidthMm, dom.swanStitchDashMm, dom.swanStitchGapMm].forEach(function (input) {
+        input.addEventListener("change", function () {
+          try { updateActiveSwanStitchPathMetrics(); }
+          catch (error) { setStatus(error.message, "error"); }
+        });
+      });
+      dom.swanCanvasEditMode.addEventListener("change", function () { renderSource(); });
+      dom.swanNewStitchPathButton.addEventListener("click", function () {
+        try { beginSwanStitchPath(); } catch (error) { setStatus(error.message, "error"); }
+      });
+      dom.swanUndoStitchPointButton.addEventListener("click", function () {
+        try { undoSwanStitchPoint(); } catch (error) { setStatus(error.message, "error"); }
+      });
+      dom.swanClearStitchPathsButton.addEventListener("click", clearSwanStitchPathsDraft);
+      dom.applySwanStitchButton.addEventListener("click", function () {
+        try { setSwanStitchDecision(readSwanStitchDecisionControls()); }
+        catch (error) { setStatus("swan ステッチ判定エラー: " + error.message, "error"); }
       });
       [dom.cropX, dom.cropY, dom.cropW, dom.cropH].forEach(function (input) { input.addEventListener("change", updateCropInput); });
       dom.manualLayer.addEventListener("change", updateBrushModes);
@@ -5664,7 +7181,14 @@
       dom.exportLayerButton.addEventListener("click", function () { exportManualLayer().catch(function (error) { setStatus(error.message, "error"); }); });
       dom.importLayerButton.addEventListener("click", function () { dom.layerFileInput.click(); });
       dom.layerFileInput.addEventListener("change", function () { importManualLayer(dom.layerFileInput.files[0]).catch(function (error) { setStatus(error.message, "error"); }); dom.layerFileInput.value = ""; });
-      dom.copyConfigButton.addEventListener("click", async function () { if (!state.result) return; await navigator.clipboard.writeText(JSON.stringify(state.result.prep, null, 2)); setStatus("prep.jsonをコピーしました", "ok"); });
+      dom.copyConfigButton.addEventListener("click", async function () {
+        try {
+          requireSwanStitchDecision();
+          if (!state.result) return;
+          await navigator.clipboard.writeText(JSON.stringify(state.result.prep, null, 2));
+          setStatus("prep.jsonをコピーしました", "ok");
+        } catch (error) { setStatus(error.message, "error"); }
+      });
       dom.exportCurrentButton.addEventListener("click", function () {
         try { exportCurrentAssets(); setStatus(state.selectedKey + " の派生アセットを書き出しました", "ok"); }
         catch (error) { setStatus("書き出し失敗: " + error.message, "error"); }
@@ -5672,7 +7196,7 @@
       dom.exportRegressionButton.addEventListener("click", function () {
         setStatus("flat回帰シートを生成中", "busy");
         buildFlatRegressionSheets({ download: true }).then(function (output) {
-          setStatus(output.report.status === "pass" ? "カーフ24色＋固定8ケースを書き出しました（色味承認は保留）" : "回帰シートの保持画素検査が不合格です", output.report.status === "pass" ? "ok" : "error");
+          setStatus(output.report.status === "pass" ? "カーフ24色＋固定" + output.report.fixedVisualCaseCount + "ケースを書き出しました（色味承認は保留）" : "回帰シートの保持画素検査が不合格です", output.report.status === "pass" ? "ok" : "error");
         }).catch(function (error) { setStatus("回帰シート生成失敗: " + error.message, "error"); console.error(error); });
       });
       dom.exportBatchButton.addEventListener("click", function () {
@@ -5714,11 +7238,26 @@
       automationResult.hidden = !new URLSearchParams(location.search).has("batch");
       automationResult.textContent = JSON.stringify({ status: "idle" });
       document.body.appendChild(automationResult);
-      if (new URLSearchParams(location.search).get("batch") === "1") {
-        runBatch().catch(function (error) {
+      const query = new URLSearchParams(location.search);
+      if (query.get("batch") === "1") {
+        try {
+          const swanBatchDecision = applySwanBatchQueryDecision(query);
+          if (!swanBatchDecision.provided || !swanBatchDecision.applied) {
+            const waiting = { status: "waiting", reason: "swan stitchMode未確定。swanStitchMode=detect|none|fallback を明示して再実行してください" };
+            automationResult.textContent = JSON.stringify(waiting);
+            automationResult.dataset.complete = "true";
+            setStatus(waiting.reason, "idle");
+          } else {
+            runBatch().catch(function (error) {
+              automationResult.textContent = JSON.stringify({ status: "error", error: error.message });
+              automationResult.dataset.complete = "true";
+            });
+          }
+        } catch (error) {
           automationResult.textContent = JSON.stringify({ status: "error", error: error.message });
           automationResult.dataset.complete = "true";
-        });
+          setStatus("自動バッチ入力エラー: " + error.message, "error");
+        }
       }
       if (new URLSearchParams(location.search).get("selftest") === "1") {
         const selfTestResult = document.createElement("pre"); selfTestResult.id = "selfTestResult"; selfTestResult.textContent = JSON.stringify({ status: "running" }); document.body.appendChild(selfTestResult);
@@ -5740,7 +7279,9 @@
         operation: state.operation ? Object.freeze({ kind: state.operation.kind }) : null,
         resultKey: state.result ? state.result.key : null,
         batch: Object.freeze(batch),
-        lastArchiveStatus: state.lastArchive ? state.lastArchive.status : null
+        lastArchiveStatus: state.lastArchive ? state.lastArchive.status : null,
+        swanStitchDecision: state.swanStitchDecision ? detachedPublicValue(state.swanStitchDecision) : null,
+        swanStitchDraftDirty: state.swanStitchDraftDirty
       });
     }
 
@@ -5749,20 +7290,72 @@
       specs: CHARM_SPECS,
       layout: detachedPublicValue(LAYOUT),
       getState: publicStateSnapshot,
-      loadCharm: function (key) { return loadSource(key); },
-      processCurrent: async function () { return detachedPublicValue(await processCurrent()); },
+      loadCharm: function (key) { assertProductionAvailable(); return loadSource(key); },
+      processCurrent: async function () { assertProductionAvailable(); requireSwanStitchDecision(); return detachedPublicValue(await processCurrent()); },
       runChecks: async function () {
+        assertProductionAvailable();
+        requireSwanStitchDecision();
         const result = state.result && state.result.key === state.selectedKey ? state.result : await processCurrent();
         return detachedPublicValue(result.checks);
       },
-      getCurrentResult: function () { return state.result ? detachedPublicValue(state.result) : null; },
-      recolor: recolor,
-      runBatch: async function () { return detachedPublicValue(await runBatch()); },
-      exportArchive: exportArchive,
-      verifyArchive: async function (input, options) { return detachedPublicValue(await verifyArchive(input, options)); },
-      generateRingAssets: async function (options) { return detachedPublicValue(await generateRingAssets(options)); },
-      buildFlatRegressionSheets: async function (options) { return detachedPublicValue(await buildFlatRegressionSheets(options)); },
+      getCurrentResult: function () { assertProductionAvailable(); requireSwanStitchDecision(); return state.result ? detachedPublicValue(state.result) : null; },
+      recolor: function () {
+        assertProductionAvailable();
+        const effective = requireSwanStitchDecision();
+        const args = Array.from(arguments);
+        const requestedSpec = args[6];
+        const requestedPaths = args[7];
+        if (requestedSpec && requestedSpec.stitchMode === "fallback") {
+          const resultPaths = state.result && state.result.key === "swan" ? state.result.stitchPathsAsset : null;
+          const allowed = jsonEqual(requestedPaths || [], effective.stitchPathsWork)
+            || (Array.isArray(resultPaths) && jsonEqual(requestedPaths || [], resultPaths));
+          if (effective.stitchMode !== "fallback" || requestedSpec.threadColor !== effective.threadColor || !allowed) {
+            throw new Error("公開recolorのfallback stitchPathsが確定済みswan判定と一致しません");
+          }
+        }
+        return recolor.apply(null, args);
+      },
+      runBatch: async function () { assertProductionAvailable(); requireSwanStitchDecision(); return detachedPublicValue(await runBatch()); },
+      exportArchive: async function (options) { assertProductionAvailable(); return detachedPublicValue(await exportArchive(options)); },
+      verifyArchive: async function (input, options) { assertProductionAvailable(); return detachedPublicValue(await verifyArchive(input, options)); },
+      generateRingAssets: async function (options) { assertProductionAvailable(); return detachedPublicValue(await generateRingAssets(options)); },
+      buildFlatRegressionSheets: async function (options) { assertProductionAvailable(); return detachedPublicValue(await buildFlatRegressionSheets(options)); },
+      getFixedVisualCaseCounts: function () { return detachedPublicValue(fixedVisualCaseBreakdown()); },
       runInternalSelfTests: async function () { return detachedPublicValue(await runInternalSelfTests()); },
+      getSwanStitchDecision: function () { return state.swanStitchDecision ? detachedPublicValue(state.swanStitchDecision) : null; },
+      setSwanStitchDecision: function (input) { return detachedPublicValue(setSwanStitchDecision(input)); },
+      getSwanStitchDraft: function () {
+        return detachedPublicValue({
+          stitchMode: dom.swanStitchMode.value,
+          threadColor: dom.swanStitchMode.value === "none" ? null : dom.swanThreadColor.value,
+          stitchPathsWork: dom.swanStitchMode.value === "fallback" ? parseSwanStitchPathsDraft() : [],
+          dirty: state.swanStitchDraftDirty
+        });
+      },
+      setSwanStitchDraft: function (input) {
+        assertProductionAvailable();
+        if (state.operation) throw new Error("処理中はswanのステッチドラフトを変更できません");
+        if (!input || !["pending", "detect", "none", "fallback"].includes(input.stitchMode)) throw new Error("swan stitchModeドラフトが不正です");
+        const mode = input.stitchMode;
+        const workSize = state.loadedKey === "swan" && state.work ? { w: state.work.w, h: state.work.h } : null;
+        const normalized = mode === "pending" ? null : normalizeSwanStitchDecision({
+          stitchMode: mode,
+          threadColor: mode === "none" ? null : input.threadColor,
+          stitchPathsWork: mode === "fallback" ? input.stitchPathsWork || [] : []
+        }, workSize);
+        const nextPaths = normalized ? cloneStitchPaths(normalized.stitchPathsWork) : [];
+        const nextPathsJson = JSON.stringify(nextPaths, null, 2);
+        const nextThread = normalized && normalized.threadColor ? normalized.threadColor : (input.threadColor === "dark" ? "dark" : "light");
+        // ここまでに正規化・シリアライズを完了し、失敗時はDOM/stateを一切変更しない。
+        dom.swanStitchMode.value = mode;
+        dom.swanThreadColor.value = nextThread;
+        dom.swanStitchPaths.value = nextPathsJson;
+        state.swanStitchEditorActivePath = mode === "fallback" ? Math.max(0, nextPaths.length - 1) : -1;
+        syncActiveSwanStitchPathMetricsToInputs(nextPaths);
+        markSwanStitchDraftDirty("swan ステッチドラフトを更新しました");
+        renderSource();
+        return window.charmPrepAPI.getSwanStitchDraft();
+      },
       setGrainScaleMm: function (value) {
         if (state.operation) throw new Error("処理中はgrainScaleMmを変更できません");
         if (!Number.isFinite(value) || value <= 0) throw new Error("grainScaleMmは正の有限値が必要です");
