@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "phase": 5,
+  "planRevision": 16,
+  "reviewPackageVersion": "shape-qa-preview-v1",
+  "selectedPhase4EvidenceCommit": "c8eb8416dd08b0a9fde6c0275825c2e74fb1e2e9",
+  "assetCommit": "e71a1d80d0bbfa0a05995d923f09eb288469cf30",
+  "createdAt": "2026-07-30T06:20:14Z",
+  "approvalStatus": "approved",
+  "phase6Ready": true,
+  "approvedAt": "2026-07-30T06:45:00Z",
+  "approvalRecord": {
+    "approvedBy": "user",
+    "scope": ["shape", "aspect-ratio", "logo-position", "orientation", "retained-decoration"],
+    "colorApproval": "pending-phase7",
+    "evidence": "ユーザーが全8種の共通物理スケール一覧を確認し、ロゴ位置・形状を了承したうえで次フェーズへの移行を指示。horseshoe右外周の連続性も確認済み。"
+  },
+  "approvalScope": [
+    "outer-shape",
+    "aspect-ratio",
+    "tilt-and-orientation",
+    "grain-to-edge",
+    "outer-edge-and-hole-edge",
+    "logo-position-size-angle",
+    "flat-foil-and-no-halo",
+    "unchanged-retained-decoration"
+  ],
+  "colorApproval": {
+    "status": "pending-phase7",
+    "note": "calf:ivory and calf:black are comparison faces for shape/intent QA only; color, texture and edge-tone acceptance is deferred to Phase 7."
+  },
+  "comparisonFaces": {
+    "pipelineSource": "source-photos/*-colorless.png",
+    "approvalReference": "reference-visuals/charms/*-approved.png",
+    "calf:ivory": "#ece7dd",
+    "calf:black": "#41403d"
+  },
+  "generation": {
+    "method": "shape-qa-preview-v1",
+    "aspectPreserving": true,
+    "runtimeColorContract": "not-final; Phase 6/7 runtime uses the locked Lab flatLeatherTone contract",
+    "notes": [
+      "The four-up previews are generated from the frozen source/reference and Phase 4 base/masks without geometric rescaling of the comparison subject.",
+      "Contour overlays are diagnostic only and do not replace visual approval.",
+      "Any visible ivory outer line, halo or texture mismatch remains pending until the user reviews the four-up material."
+    ]
+  },
+  "ratioOverview": {
+    "path": "reports/charm-combo/rev16/shape-comparisons/all-charms-ratio-overview.png",
+    "sha256": "070c12d140d9eba1a85e4b7c96bccef2d65b352f006497921bbee0cc376c6869",
+    "width": 1920,
+    "height": 2500,
+    "columns": ["pipelineSource", "approvalReference", "assetSilhouette"],
+    "uniformScale": true,
+    "purpose": "全8種の比率・形状を1枚で確認するための一覧。色の承認資料ではない。"
+  },
+  "physicalScaleOverview": {
+    "path": "reports/charm-combo/rev16/shape-comparisons/all-charms-physical-scale.png",
+    "sha256": "929a09ecb435cc15ca1f38699e039033d34b98dff19ce43dc1af1915ae296199",
+    "width": 1440,
+    "height": 1905,
+    "commonPxPerMm": 3.6,
+    "layout": "2 columns × 4 rows",
+    "sourceOfSize": "assets/charms/*/prep.json inputs.sizeMm and derived.pxPerMm",
+    "uniformScale": true,
+    "purpose": "左右チャームを同一stage上で見たときの相対サイズを確認するための一覧。"
+  },
+  "charms": [
+    {
+      "key": "horse",
+      "sourceSha256": "ec6ef0cc6a2da23c172b0f3d04a06c4c2e91958babe980ee1908683d7955e6f0",
+      "referenceSha256": "ec6ef0cc6a2da23c172b0f3d04a06c4c2e91958babe980ee1908683d7955e6f0",
+      "assetSha256": {
+        "base": "2fd5ff98ea0ba449b591a561c6efc3421697b5ae32ca5726838afb6d9f1abb8a",
+        "masks": "09fbd90b3d5fa85346ad1583565095d06b87e6c26acf8773b81fe7e91eb86e7f"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/horse-4up.png", "sha256": "96ab6e36e0b6d4e26be617b56a548730b621e2c2b3b57a0085b29def3a735d2b", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/horse-contour-overlay.png", "sha256": "d88038cd81cd26a475f61a1a82c4ce493dd19736329cd1ba32a4429da23457ac", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved",
+      "note": "比率変更なし。色は後工程。"
+    },
+    {
+      "key": "horseshoe",
+      "sourceSha256": "111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c",
+      "referenceSha256": "111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c",
+      "assetSha256": {
+        "base": "9e8b3b1aeb6d8257bc2d8824c1820c608384d15c990bb42b3c1b1e45515033d0",
+        "masks": "06879903fd61db795d44ce3945b6e7d78001efc925a001a058d919d13d78e266"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/horseshoe-4up.png", "sha256": "7abfbf04c056f5abbf3b7b3b87fc85f9727757e0c67b379f1b9f3f84c95a5372", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/horseshoe-contour-overlay.png", "sha256": "e9f341b61e0a3d6abe45bc3e7fec48261351a66bec7dc70d315bc8cd710345c2", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved",
+      "note": "外形・穴・アンパサンド内部・ロゴ傾きを確認対象。ivory 外周線は色/縁の後段確認事項として保留。"
+    },
+    {
+      "key": "frenchie",
+      "sourceSha256": "05c08873322c11f6ed48ef2b6e272f2582bd6f597fd2ced874ef15d84b9d6edf",
+      "referenceSha256": "05c08873322c11f6ed48ef2b6e272f2582bd6f597fd2ced874ef15d84b9d6edf",
+      "assetSha256": {
+        "base": "1d271e083be36a1d9916a788364815acca604f9bc9b194658f0f9e09107de630",
+        "masks": "057c7ed7658d11cac6687b5e562b4dfd725e364c68ccc5a99dca8d8c4a56ad20"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/frenchie-4up.png", "sha256": "f8a0298c8c8995755556b89129e5ef9841a52f3f6fa0485c8e8bde234f76055c", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/frenchie-contour-overlay.png", "sha256": "e33cb805120b07cb0aa18d1543cd796f12cf7319a729bed9d026dd52836cbff6", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved"
+    },
+    {
+      "key": "dachshund",
+      "sourceSha256": "e0e228f792b69eae074695ef020c9af1c2ad34306cf05fb735e7b131d17487da",
+      "referenceSha256": "e0e228f792b69eae074695ef020c9af1c2ad34306cf05fb735e7b131d17487da",
+      "assetSha256": {
+        "base": "c39d8c6de1ea5832e789ba9182987cf4cb711896fda2a295020afc62f65f4131",
+        "masks": "be4c59939add976d9fbae41ca2b1521d923a1330555247837e407a1832d91d72"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/dachshund-4up.png", "sha256": "d531e12cf4592d2d2c1a1deb19980eca1e97ead9cd8b23e3b023021836a3ecc6", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/dachshund-contour-overlay.png", "sha256": "e896ed3745d0eff63f5c1297d2df730ad579f63465267e09f8ba330f026413ce", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved",
+      "note": "最新承認見本の顔形状と平坦な箔押しロゴを確認対象。"
+    },
+    {
+      "key": "toypoodle",
+      "sourceSha256": "b4251b764c0ca3f35af6d6f0904b52c909811bc44637dc64b12d8ccdf64bfcba",
+      "referenceSha256": "b4251b764c0ca3f35af6d6f0904b52c909811bc44637dc64b12d8ccdf64bfcba",
+      "assetSha256": {
+        "base": "9c8d8756f5d6e845c5982ed4095cca3198be3d2036495a3d897e3525df56c97f",
+        "masks": "ba694cdcec79ba081cde65ec2c570d89915d97c377341fda5e45e6b8cf61ec1f"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/toypoodle-4up.png", "sha256": "8ed58073388328c1f6c85a825757d36e1324152870f41439c016d9aa6d7ba1ab", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/toypoodle-contour-overlay.png", "sha256": "8e33d583e9e7d63c2c7c0e7e5655ec054f42a3da099ec469b8a5ec77888d00a6", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved"
+    },
+    {
+      "key": "osanpo",
+      "sourceSha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e",
+      "referenceSha256": "f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e",
+      "assetSha256": {
+        "base": "518d6ac1eccc35af2aa0284d14688becd74c8ea66c6ab022de42c3b40f1ff1e6",
+        "masks": "7cb8ddb6b291a6b4f7463bbf1b24a1ddf3cafdfae748bbca97db7954ac25d8e1"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/osanpo-4up.png", "sha256": "24fe054614a2a9e81c6482520eea85af8d84e02770d71453b64e8f579d3dbb04", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/osanpo-contour-overlay.png", "sha256": "ffafab12d7d7489474ff0f4fd8ae1d3d3781a9797935b8cb576b628edce5d73a", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved"
+    },
+    {
+      "key": "cat",
+      "sourceSha256": "563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7",
+      "referenceSha256": "563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7",
+      "assetSha256": {
+        "base": "abbde2a2aed061835387765ae9de627c0848d76efd230b8943a35f2ea2530378",
+        "masks": "a23be1b897087917ff9e79196bdcbe9391ca3241bdb539108ee77a73783ea081"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/cat-4up.png", "sha256": "0dddf2ff767591dd0b8ffc81550f8e5c4827439e985a72b536bbc9c168edef03", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/cat-contour-overlay.png", "sha256": "89c955e4006ada80dbd65017aa7989a5c6a44ae2f875c8dbe5ebdb0bf88c880c", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved",
+      "note": "catフチ画像の地面側の前足を含む輪郭を確認対象。"
+    },
+    {
+      "key": "swan",
+      "sourceSha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435",
+      "referenceSha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435",
+      "assetSha256": {
+        "base": "abf8eef521fa0d46c6e6bb9e75afbcf2991df337ebb720181d16f97e0ea37ee8",
+        "masks": "7928f9b527b75070c00d5495ad7cc5fd051c7e1ffac07e98f3bdaafbf88511a4"
+      },
+      "comparison": {
+        "fourUp": {"path": "reports/charm-combo/rev16/shape-comparisons/swan-4up.png", "sha256": "e63e93004d345a2f522ff65aa1022d536e5647757d76a1ebc32037af93a1647b", "width": 1200, "height": 1200},
+        "contourOverlay": {"path": "reports/charm-combo/rev16/shape-comparisons/swan-contour-overlay.png", "sha256": "65b852c01086dc1b88d162beb37b1a5c424305d16b114c486e030dad37f01f91", "width": 1200, "height": 600}
+      },
+      "reviewStatus": "approved",
+      "note": "ロゴの黒haloなし・平面箔・元の位置/大きさ/傾きを最終確認対象。"
+    }
+  ],
+  "priorApprovalEvidence": {
+    "nonSwan": "AE-20260718-01",
+    "swan": "AE-20260718-09",
+    "note": "過去の会話上の承認IDは補助的な参照として保持し、今回のユーザー確認を最新の正式承認とする。"
+  }
+}
