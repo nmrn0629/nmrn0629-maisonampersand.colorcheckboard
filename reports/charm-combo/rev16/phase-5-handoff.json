@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "phase": 5,
+  "planRevision": 16,
+  "selectedLockCommit": "5cc72dd760257e52e46a636dac5d5064790e83a2",
+  "manifestPayloadSha256": "f984ddb89fb5c0f7b8466edae47858bd64d528f6c2c9a44bb5ff33bc38f69e82",
+  "selectedPhase4EvidenceCommit": "c8eb8416dd08b0a9fde6c0275825c2e74fb1e2e9",
+  "phase4HandoffPayloadSha256": "14256eeeaebcfc21d73ddb8d25bfb715c040804e043fc8a17656b15a85c7f384",
+  "assetCommit": "e71a1d80d0bbfa0a05995d923f09eb288469cf30",
+  "phaseInputCommits": [
+    "c8eb8416dd08b0a9fde6c0275825c2e74fb1e2e9"
+  ],
+  "phaseOutputCommit": "8444c18cd497f83c3471b4cea2e40c7e7dc73645",
+  "shapeApprovalCommit": "8444c18cd497f83c3471b4cea2e40c7e7dc73645",
+  "shapeApproval": {
+    "path": "reports/charm-combo/rev16/shape-approval.json",
+    "byteLength": 10986,
+    "sha256": "e5a119ae54c1df25242ba855a8561224087dea304b2b78692b124871ede2ff27",
+    "status": "approved",
+    "approvedAt": "2026-07-30T06:45:00Z",
+    "approvedScope": ["shape", "aspect-ratio", "logo-position", "orientation", "retained-decoration"],
+    "colorApproval": "pending-phase7"
+  },
+  "approvalMaterials": {
+    "fourUpCount": 8,
+    "contourOverlayCount": 8,
+    "ratioOverview": {
+      "path": "reports/charm-combo/rev16/shape-comparisons/all-charms-ratio-overview.png",
+      "sha256": "070c12d140d9eba1a85e4b7c96bccef2d65b352f006497921bbee0cc376c6869",
+      "byteLength": 394150,
+      "uniformScale": true
+    },
+    "physicalScaleOverview": {
+      "path": "reports/charm-combo/rev16/shape-comparisons/all-charms-physical-scale.png",
+      "sha256": "929a09ecb435cc15ca1f38699e039033d34b98dff19ce43dc1af1915ae296199",
+      "byteLength": 327145,
+      "commonPxPerMm": 3.6,
+      "uniformScale": true
+    },
+    "artifacts": [
+      {"path":"reports/charm-combo/rev16/shape-comparisons/all-charms-physical-scale.png","byteLength":327145,"sha256":"929a09ecb435cc15ca1f38699e039033d34b98dff19ce43dc1af1915ae296199"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/all-charms-ratio-overview.png","byteLength":394150,"sha256":"070c12d140d9eba1a85e4b7c96bccef2d65b352f006497921bbee0cc376c6869"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/cat-4up.png","byteLength":86616,"sha256":"0dddf2ff767591dd0b8ffc81550f8e5c4827439e985a72b536bbc9c168edef03"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/cat-contour-overlay.png","byteLength":57823,"sha256":"89c955e4006ada80dbd65017aa7989a5c6a44ae2f875c8dbe5ebdb0bf88c880c"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/dachshund-4up.png","byteLength":114842,"sha256":"d531e12cf4592d2d2c1a1deb19980eca1e97ead9cd8b23e3b023021836a3ecc6"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/dachshund-contour-overlay.png","byteLength":74120,"sha256":"e896ed3745d0eff63f5c1297d2df730ad579f63465267e09f8ba330f026413ce"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/frenchie-4up.png","byteLength":121116,"sha256":"f8a0298c8c8995755556b89129e5ef9841a52f3f6fa0485c8e8bde234f76055c"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/frenchie-contour-overlay.png","byteLength":73146,"sha256":"e33cb805120b07cb0aa18d1543cd796f12cf7319a729bed9d026dd52836cbff6"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/horse-4up.png","byteLength":101800,"sha256":"96ab6e36e0b6d4e26be617b56a548730b621e2c2b3b57a0085b29def3a735d2b"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/horse-contour-overlay.png","byteLength":69686,"sha256":"d88038cd81cd26a475f61a1a82c4ce493dd19736329cd1ba32a4429da23457ac"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/horseshoe-4up.png","byteLength":438431,"sha256":"7abfbf04c056f5abbf3b7b3b87fc85f9727757e0c67b379f1b9f3f84c95a5372"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/horseshoe-contour-overlay.png","byteLength":195379,"sha256":"e9f341b61e0a3d6abe45bc3e7fec48261351a66bec7dc70d315bc8cd710345c2"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/osanpo-4up.png","byteLength":198019,"sha256":"24fe054614a2a9e81c6482520eea85af8d84e02770d71453b64e8f579d3dbb04"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/osanpo-contour-overlay.png","byteLength":64955,"sha256":"ffafab12d7d7489474ff0f4fd8ae1d3d3781a9797935b8cb576b628edce5d73a"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/swan-4up.png","byteLength":110630,"sha256":"e63e93004d345a2f522ff65aa1022d536e5647757d76a1ebc32037af93a1647b"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/swan-contour-overlay.png","byteLength":75607,"sha256":"65b852c01086dc1b88d162beb37b1a5c424305d16b114c486e030dad37f01f91"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/toypoodle-4up.png","byteLength":104742,"sha256":"8ed58073388328c1f6c85a825757d36e1324152870f41439c016d9aa6d7ba1ab"},
+      {"path":"reports/charm-combo/rev16/shape-comparisons/toypoodle-contour-overlay.png","byteLength":68763,"sha256":"8e33d583e9e7d63c2c7c0e7e5655ec054f42a3da099ec469b8a5ec77888d00a6"}
+    ]
+  },
+  "protectedFiles": [
+    {
+      "path": "index.html",
+      "sha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b",
+      "gitDiffExitCode": 0
+    }
+  ],
+  "dedicatedWorktree": {
+    "path": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard/.worktrees/rev16-phase5",
+    "branch": "feature/charm-combo-codex-rev16-phase5",
+    "startHead": "c8eb8416dd08b0a9fde6c0275825c2e74fb1e2e9",
+    "shapeApprovalHead": "8444c18cd497f83c3471b4cea2e40c7e7dc73645",
+    "cleanAtStart": true
+  },
+  "phase6CarryForward": {
+    "customerPage": "charms.html must expand from representative horseshoe to 8 charms plus none; two selected charms share one stage scale.",
+    "physicalScale": "Use one common stage px/mm and sizeMm-derived placement; never fit each charm independently to its cell.",
+    "outerEdge": "Horseshoe outer leather edge must recolor with the selected leather color; if the edge is not owned by the mask, correct it through prep-tool mask regeneration and rerun inspections.",
+    "stitch": "Render stitch ownership as segmented stitch pixels/paths, not as a newly drawn continuous white line; verify horseshoe and osanpo detect behavior.",
+    "color": "Color and material acceptance remains Phase 7; no color approval is implied by this shape approval."
+  },
+  "checks": {
+    "phase4EvidenceRevalidated": "pass",
+    "shapeApprovalStatus": "approved",
+    "allEightShapeReviews": "pass",
+    "physicalScaleOverview": "pass",
+    "comparisonSha256": "pass",
+    "protectedIndexHtml": "pass",
+    "codexCliReview": "not-run-environment-failure"
+  },
+  "codexCliReview": {
+    "status": "not-run-environment-failure",
+    "attempts": 2,
+    "reason": "codex exec read-only could not initialize state DB and then failed API/WebSocket/HTTPS name resolution; independent material, anti-pattern and quality checks passed."
+  },
+  "unresolved": [],
+  "nextPhaseReady": true,
+  "canStartPhase6": true,
+  "nextPhaseGate": {
+    "required": true,
+    "checkpoint": "Phase 6 start gate",
+    "action": "Phase 6 must externally select this phase-5 evidence commit, verify its sole parent is shapeApprovalCommit, revalidate shape-approval.json and all comparison SHA, then implement representative two-charm customer rendering before expanding to all charms."
+  },
+  "handoffPayloadSha256": "8c0c99c10129bc22a703d9bbb6a4e42c3e17ce6ff6ce60ecfc29d708b575c3bb"
+}
