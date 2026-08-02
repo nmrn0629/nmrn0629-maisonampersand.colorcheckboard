@@ -1,14 +1,14 @@
 <!-- SUPERSEDED-METADATA-BEGIN
 status: SUPERSEDED — DO NOT EXECUTE
 supersededAt: 2026-07-18
-successorPlan: plans/charm-combo-display-plan.md revision 16
+successorPlan: plans/charm-combo-display-plan.md revision 17
 successorInstructions: plans/impl-instructions-charm-combo-display-v2.md
 lockManifest: plans/charm-combo-revision-lock.json
 SUPERSEDED-METADATA-END -->
 
 # チャーム組み合わせ表示 実装指示書（Opus 4.8 / Codex 向け）
 
-> **本指示書は失効済み（status: SUPERSEDED — DO NOT EXECUTE）**。改訂14以降の実装は successorInstructions（plans/impl-instructions-charm-combo-display-v2.md・現行は改訂16対応）を使用すること。以下の本文（改訂8時点・7種/168組/64配置/転記9項目）は監査証跡としてのみ保存し、**いかなる数量・手順も実行契約として解釈しない**（同期計画 §2-1）。
+> **本指示書は失効済み（status: SUPERSEDED — DO NOT EXECUTE）**。改訂14以降の実装は successorInstructions（plans/impl-instructions-charm-combo-display-v2.md・現行は改訂17対応）を使用すること。以下の本文（改訂8時点・7種/168組/64配置/転記9項目）は監査証跡としてのみ保存し、**いかなる数量・手順も実行契約として解釈しない**（同期計画 §2-1）。
 
 ## 0. 依頼概要
 
