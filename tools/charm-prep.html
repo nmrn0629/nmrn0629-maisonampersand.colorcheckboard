@@ -322,8 +322,8 @@
   <script>
     "use strict";
 
-    const TOOL_VERSION = "0.7.0";
-    const SCHEMA_VERSION = 5;
+    const TOOL_VERSION = "0.8.0";
+    const SCHEMA_VERSION = 6;
     const WORK_MAX = 1200;
     const ARCHIVE_FORMAT = "maison-charm-prep-archive";
     const ARCHIVE_VERSION = 1;
@@ -426,8 +426,61 @@
       // §5-2 requires a common visually confirmed value. This seed remains
       // explicit in prep.json and inspection F; do not silently change it.
       grainScaleMm: .105,
-      tileMode: "mirror"
+      tileMode: "mirror",
+      grainSourceInset: 2,
+      shadeMin: .78
     });
+
+    // Revision 17: all colorless sources without a dedicated manual recipe
+    // use the same closed-white foreground extraction. Per-charm ranges and
+    // seeds below are contractual values from plan §0-E-1.
+    const COLORLESS_CLOSED_WHITE = Object.freeze({
+      id: "colorless-closedwhite-20260730-v1",
+      backgroundDistance: 14,
+      autoAlphaLow: 12,
+      autoAlphaHigh: 32,
+      designPaddingPx: 12,
+      sealPasses: 2,
+      mainComponentAreaFraction: .05
+    });
+    const COLORLESS_CLOSED_WHITE_SPECS = Object.freeze({
+      horse: Object.freeze({
+        mainWhiteRange: Object.freeze({ areaMin: 180694, areaMax: 229975, widthMin: 863, widthMax: 871, heightMin: 633, heightMax: 641, componentMin: 1, componentMax: 1 }),
+        hangingHoleSeed: Object.freeze([.4858, .4720]), hangingHoleRoi: Object.freeze([.4681, .4550, .5043, .4900]),
+        hangingHoleRange: Object.freeze({ areaMin: 225, areaMax: 286, widthMin: 15, widthMax: 21, heightMin: 15, heightMax: 21 }), minorClosedWhiteMaxArea: 827
+      }),
+      frenchie: Object.freeze({
+        mainWhiteRange: Object.freeze({ areaMin: 439820, areaMax: 559771, widthMin: 913, widthMax: 921, heightMin: 1102, heightMax: 1110, componentMin: 1, componentMax: 1 }),
+        hangingHoleSeed: Object.freeze([.4439, .1253]), hangingHoleRoi: Object.freeze([.4085, .0950, .4807, .1567]),
+        hangingHoleRange: Object.freeze({ areaMin: 1660, areaMax: 2113, widthMin: 46, widthMax: 52, heightMin: 47, heightMax: 53 }), minorClosedWhiteMaxArea: 917
+      }),
+      dachshund: Object.freeze({
+        mainWhiteRange: Object.freeze({ areaMin: 233914, areaMax: 297709, widthMin: 959, widthMax: 967, heightMin: 673, heightMax: 681, componentMin: 1, componentMax: 1 }),
+        hangingHoleSeed: Object.freeze([.4682, .5144]), hangingHoleRoi: Object.freeze([.4450, .4917, .4917, .5383]),
+        hangingHoleRange: Object.freeze({ areaMin: 705, areaMax: 898, widthMin: 29, widthMax: 35, heightMin: 29, heightMax: 35 }), minorClosedWhiteMaxArea: 500
+      }),
+      toypoodle: Object.freeze({
+        mainWhiteRange: Object.freeze({ areaMin: 258169, areaMax: 328578, widthMin: 865, widthMax: 873, heightMin: 695, heightMax: 703, componentMin: 1, componentMax: 1 }),
+        hangingHoleSeed: Object.freeze([.5131, .4917]), hangingHoleRoi: Object.freeze([.4908, .4692, .5358, .5150]),
+        hangingHoleRange: Object.freeze({ areaMin: 652, areaMax: 831, widthMin: 27, widthMax: 33, heightMin: 28, heightMax: 34 }), minorClosedWhiteMaxArea: 500
+      }),
+      cat: Object.freeze({
+        mainWhiteRange: Object.freeze({ areaMin: 236195, areaMax: 300612, widthMin: 759, widthMax: 767, heightMin: 712, heightMax: 720, componentMin: 1, componentMax: 1 }),
+        hangingHoleSeed: Object.freeze([.4498, .2917]), hangingHoleRoi: Object.freeze([.4275, .2700, .4725, .3142]),
+        hangingHoleRange: Object.freeze({ areaMin: 601, areaMax: 766, widthMin: 27, widthMax: 33, heightMin: 26, heightMax: 32 }), minorClosedWhiteMaxArea: 611
+      }),
+      swan: Object.freeze({
+        mainWhiteRange: Object.freeze({ areaMin: 236663, areaMax: 301208, widthMin: 582, widthMax: 590, heightMin: 729, heightMax: 737, componentMin: 3, componentMax: 3 }),
+        hangingHoleSeed: Object.freeze([.3710, .3489]), hangingHoleRoi: Object.freeze([.3450, .3317, .3990, .3675]),
+        hangingHoleRange: Object.freeze({ areaMin: 244, areaMax: 311, widthMin: 16, widthMax: 22, heightMin: 16, heightMax: 22 }), minorClosedWhiteMaxArea: 500
+      })
+    });
+
+    function closedWhiteRecipeFor(key) {
+      const spec = COLORLESS_CLOSED_WHITE_SPECS[key];
+      if (!spec) throw new Error("COLORLESS_CLOSED_WHITE の未定義チャームです: " + key);
+      return Object.assign({}, COLORLESS_CLOSED_WHITE, spec);
+    }
 
     // Versioned preparation recipe for the accepted 2026-07-15 colorless
     // horseshoe source. Coordinates are search seeds only: the keep/logo
@@ -452,13 +505,17 @@
       hangingHoleRange: Object.freeze({ areaMin: 650, areaMax: 1000, widthMin: 30, widthMax: 40, heightMin: 25, heightMax: 36 }),
       designWhiteRange: Object.freeze({ areaMin: 220000, areaMax: 260000, widthMin: 750, widthMax: 790, heightMin: 830, heightMax: 870 }),
       designPaddingPx: 12,
-      stitch: Object.freeze({ seedBoundaryMin: 16, seedBoundaryMax: 60, finalBoundaryMin: 13, finalBoundaryMax: 63, dilatePasses: 3, exclusionDilatePasses: 2 })
+      stitch: Object.freeze({ seedBoundaryMin: 16, seedBoundaryMax: 60, finalBoundaryMin: 13, finalBoundaryMax: 63, dilatePasses: 3, exclusionDilatePasses: 2 }),
+      outlineCaptureRadius: 12,
+      outlineLumMax: .75,
+      outlineProbeRadius: 8,
+      logoRange: Object.freeze({ countMin: 3378, countMax: 5066, componentMin: 2, componentMax: 4 })
     });
 
     // Plan revision 16 deterministic manual recipe for the colorless osanpo
     // source. All constants are contractual; changes require a plan revision.
     const OSANPO_COLORLESS_MANUAL = Object.freeze({
-      id: "osanpo-colorless-20260728-v1",
+      id: "osanpo-colorless-20260730-v2",
       backgroundDistance: 14,
       autoAlphaLow: 12,
       autoAlphaHigh: 32,
@@ -472,20 +529,26 @@
       logoRoi: Object.freeze([.53, .27, .68, .43]),
       logoBoundaryMin: 45,
       logoRange: Object.freeze({ countMin: 1000, countMax: 1500, componentMin: 1, componentMax: 2 }),
-      stitch: Object.freeze({ seedBoundaryMin: 15, seedBoundaryMax: 40, finalBoundaryMin: 12, finalBoundaryMax: 43, dilatePasses: 3, exclusionDilatePasses: 2 }),
-      stitchRange: Object.freeze({ rawComponentMin: 18, rawComponentMax: 34, finalCountMin: 14000, finalCountMax: 20000, finalComponentMin: 1, finalComponentMax: 3 })
+      stitch: Object.freeze({ seedBoundaryMin: 15, seedBoundaryMax: 40, finalBoundaryMin: 12, finalBoundaryMax: 43, dilatePasses: 0, exclusionDilatePasses: 2, logoProtectDilatePasses: 2 }),
+      stitchRange: Object.freeze({ rawComponentMin: 22, rawComponentMax: 34, finalCountMin: 8200, finalCountMax: 11500, finalComponentMin: 20, finalComponentMax: 34 })
     });
+
+    const BEAK_OUTLINE_REMOVAL = Object.freeze({
+      beakSatMin: 40, beakValueMin: 60, beakRoiPaddingPx: 12, beakOutlineRadius: 12, beakBridgeRadius: 3,
+      beakExpectedDiffRange: Object.freeze({ countMin: 1069, countMax: 1307 })
+    });
+    const SWAN_KEEP_EXPECTED = Object.freeze({ beakPxCount: 3629, stonePxCount: 1515, totalPxCount: 5144 });
 
     const BBOX_REASON = "正立素材の革本体外接矩形を実測W/Hへ対応付けるため";
     const CHARM_SPECS = Object.freeze({
-      horse: { label: "horse", source: "../source-photos/horse-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 95, h: 70 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.54,.49,.68,.63], grain: GRAIN_DEFAULTS },
-      horseshoe: { label: "horseshoe", source: "../source-photos/horseshoe-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 46, h: 54 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: HORSESHOE_COLORLESS_MANUAL.logoRoi, manualRecipe: HORSESHOE_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
-      frenchie: { label: "frenchie", source: "../source-photos/frenchie-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 60, h: 75 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.50,.55,.76,.82], cropSource: FRENCHIE_CROP_SOURCE, grain: GRAIN_DEFAULTS },
-      dachshund: { label: "dachshund", source: "../source-photos/dachshund-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.64,.56,.78,.72], grain: GRAIN_DEFAULTS },
-      toypoodle: { label: "toy poodle", source: "../source-photos/toy-poodle-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 80, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.61,.58,.75,.73], grain: GRAIN_DEFAULTS },
-      osanpo: { label: "osanpo", source: "../source-photos/osanpo-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", reason: "canonicalSource上の主軸・短軸を再計測（2026-07-22）。2304px原寸の計測線をWORK_MAX=1200の作業座標へ25/48倍変換し、幅線は長軸92mm、高さ線は短軸40mmに対応", widthLine: [[693.2291666667,254.6875],[495.3125,902.6041666667]], heightLine: [[662.5,871.875],[375,783.8541666667]] }, logoRoi: [.53,.27,.68,.43], manualRecipe: OSANPO_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
-      cat: { label: "cat", source: "../source-photos/cat-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 68, h: 65 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.43,.66,.58,.82], grain: GRAIN_DEFAULTS },
-      swan: { label: "swan", source: "../source-photos/swan-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 90 }, sizeMmMeasured: SWAN_SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: null, stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.48,.70,.76,.90], grain: GRAIN_DEFAULTS }
+      horse: { label: "horse", source: "../source-photos/horse-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 95, h: 70 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.54,.49,.68,.63], logoThreshold: 18, logoRange: Object.freeze({ countMin: 1979, countMax: 2969, componentMin: 2, componentMax: 6 }), manualRecipe: closedWhiteRecipeFor("horse"), grain: GRAIN_DEFAULTS },
+      horseshoe: { label: "horseshoe", source: "../source-photos/horseshoe-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 46, h: 54 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: HORSESHOE_COLORLESS_MANUAL.logoRoi, logoThreshold: null, logoRange: HORSESHOE_COLORLESS_MANUAL.logoRange, manualRecipe: HORSESHOE_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
+      frenchie: { label: "frenchie", source: "../source-photos/frenchie-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 60, h: 75 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.50,.55,.76,.82], logoThreshold: 18, logoRange: Object.freeze({ countMin: 5514, countMax: 8270, componentMin: 2, componentMax: 5 }), cropSource: FRENCHIE_CROP_SOURCE, manualRecipe: closedWhiteRecipeFor("frenchie"), grain: GRAIN_DEFAULTS },
+      dachshund: { label: "dachshund", source: "../source-photos/dachshund-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.64,.56,.78,.72], logoThreshold: 18, logoRange: Object.freeze({ countMin: 2435, countMax: 3653, componentMin: 4, componentMax: 8 }), manualRecipe: closedWhiteRecipeFor("dachshund"), grain: GRAIN_DEFAULTS },
+      toypoodle: { label: "toy poodle", source: "../source-photos/toy-poodle-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 80, h: 60 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.61,.58,.75,.73], logoThreshold: 18, logoRange: Object.freeze({ countMin: 1902, countMax: 2854, componentMin: 2, componentMax: 5 }), manualRecipe: closedWhiteRecipeFor("toypoodle"), grain: GRAIN_DEFAULTS },
+      osanpo: { label: "osanpo", source: "../source-photos/osanpo-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", reason: "canonicalSource上の主軸・短軸を再計測（2026-07-22）。2304px原寸の計測線をWORK_MAX=1200の作業座標へ25/48倍変換し、幅線は長軸92mm、高さ線は短軸40mmに対応", widthLine: [[693.2291666667,254.6875],[495.3125,902.6041666667]], heightLine: [[662.5,871.875],[375,783.8541666667]] }, logoRoi: [.53,.27,.68,.43], logoThreshold: null, logoRange: OSANPO_COLORLESS_MANUAL.logoRange, manualRecipe: OSANPO_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
+      cat: { label: "cat", source: "../source-photos/cat-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 68, h: 65 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.4875,.7092,.5900,.7958], logoThreshold: 18, logoRange: Object.freeze({ countMin: 1669, countMax: 2503, componentMin: 2, componentMax: 4 }), manualRecipe: closedWhiteRecipeFor("cat"), grain: GRAIN_DEFAULTS },
+      swan: { label: "swan", source: "../source-photos/swan-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 90 }, sizeMmMeasured: SWAN_SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: null, stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.4630,.7412,.5590,.8083], logoThreshold: 10, logoRange: Object.freeze({ countMin: 718, countMax: 1078, componentMin: 3, componentMax: 8 }), stoneRoi: [.5245,.7600,.6155,.8158], stoneLumMax: .965, beakRemoval: BEAK_OUTLINE_REMOVAL, manualRecipe: closedWhiteRecipeFor("swan"), grain: GRAIN_DEFAULTS }
     });
 
     function deepFreeze(value) {
@@ -532,6 +595,10 @@
       lastPoint: null,
       manualRevision: 0,
       manualRecipeStats: null,
+      // Ephemeral swan audit captured during deterministic manual generation.
+      // The masks are kept out of prep.json; they are consumed by the
+      // generation/selftest gates and cloned into a process snapshot only.
+      swanBeakAudit: null,
       grainResource: null,
       productionGrainGeneration: 0,
       productionGrainWorker: null,
@@ -860,6 +927,78 @@
       return { w: w, h: h, scaleX: w / crop.w, scaleY: h / crop.h, rotation: 0, crop: crop, logoRoi: logoRoi };
     }
 
+    // Canonical colorless sources use the browser Canvas work raster.  Swan
+    // additionally uses a deterministic separable bilinear work raster whose
+    // 16-bit fixed-point coefficients match the Pillow reference measurement
+    // (1221/6 -> 898/5) without depending on browser resampling differences.
+    function bilinearAxisWeights(sourceSize, targetSize) {
+      const scale = sourceSize / targetSize, radius = Math.max(1, scale), rows = [];
+      for (let dst = 0; dst < targetSize; dst += 1) {
+        const center = (dst + 0.5) * scale, low = Math.floor(center - radius), high = Math.floor(center + radius), merged = new Map();
+        for (let src = low; src <= high; src += 1) {
+          const weight = Math.max(0, 1 - Math.abs((src + 0.5 - center) / radius));
+          if (weight <= 0) continue;
+          const clamped = Math.max(0, Math.min(sourceSize - 1, src));
+          merged.set(clamped, (merged.get(clamped) || 0) + weight);
+        }
+        let total = 0; merged.forEach(function (weight) { total += weight; });
+        const entries = Array.from(merged, function (entry) { return { index: entry[0], weight: entry[1] / total }; });
+        const coefficientScale = 65536;
+        const coefficients = entries.map(function (entry) { return Math.floor(entry.weight * coefficientScale + .5); });
+        coefficients[coefficients.length - 1] += coefficientScale - coefficients.reduce(function (sum, value) { return sum + value; }, 0);
+        rows.push(entries.map(function (entry, index) { return { index: entry.index, weight: coefficients[index] / coefficientScale }; }));
+      }
+      return rows;
+    }
+
+    function resizeColorlessSourceBilinear(source, targetWidth, targetHeight) {
+      if (source.width === targetWidth && source.height === targetHeight) return cloneImageData(source);
+      const horizontal = bilinearAxisWeights(source.width, targetWidth), vertical = bilinearAxisWeights(source.height, targetHeight);
+      const intermediate = new Uint8ClampedArray(source.height * targetWidth * 4);
+      for (let y = 0; y < source.height; y += 1) for (let x = 0; x < targetWidth; x += 1) {
+        const weights = horizontal[x], out = (y * targetWidth + x) * 4;
+        for (let channel = 0; channel < 4; channel += 1) {
+          let value = 0;
+          weights.forEach(function (entry) { value += source.data[(y * source.width + entry.index) * 4 + channel] * entry.weight; });
+          intermediate[out + channel] = clamp(Math.round(value));
+        }
+      }
+      const output = new ImageData(new Uint8ClampedArray(targetWidth * targetHeight * 4), targetWidth, targetHeight);
+      for (let y = 0; y < targetHeight; y += 1) for (let x = 0; x < targetWidth; x += 1) {
+        const weights = vertical[y], out = (y * targetWidth + x) * 4;
+        for (let channel = 0; channel < 4; channel += 1) {
+          let value = 0;
+          weights.forEach(function (entry) { value += intermediate[(entry.index * targetWidth + x) * 4 + channel] * entry.weight; });
+          output.data[out + channel] = clamp(Math.round(value));
+        }
+      }
+      return output;
+    }
+
+    function renderWorkImageData(bitmap, crop, work, spec) {
+      const canvas = document.createElement("canvas");
+      if (spec.sourceMode !== "colorless") {
+        setCanvasSize(canvas, work.w, work.h);
+        const context = getContext(canvas); context.imageSmoothingEnabled = true;
+        context.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, work.w, work.h);
+        return context.getImageData(0, 0, work.w, work.h);
+      }
+      if (spec.label === "swan") return renderColorlessReferenceImageData(bitmap, crop, work);
+      setCanvasSize(canvas, work.w, work.h);
+      const context = getContext(canvas); context.imageSmoothingEnabled = true;
+      context.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, work.w, work.h);
+      return context.getImageData(0, 0, work.w, work.h);
+    }
+
+    function renderColorlessReferenceImageData(bitmap, crop, work) {
+      const cropWidth = Math.max(1, Math.round(crop.w)), cropHeight = Math.max(1, Math.round(crop.h));
+      const canvas = document.createElement("canvas");
+      setCanvasSize(canvas, cropWidth, cropHeight);
+      const context = getContext(canvas); context.imageSmoothingEnabled = false;
+      context.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, cropWidth, cropHeight);
+      return resizeColorlessSourceBilinear(context.getImageData(0, 0, cropWidth, cropHeight), work.w, work.h);
+    }
+
     function mimeForSource(path) {
       return /\.png$/i.test(path) ? "image/png" : "image/jpeg";
     }
@@ -874,6 +1013,14 @@
 
     function markManualEdited() {
       state.manualRevision += 1;
+    }
+
+    function invalidateSwanBeakAuditOnManualEdit() {
+      // Deterministic seed generation sets the audit before the initial
+      // markManualEdited call.  Any subsequent interactive/manual import
+      // invalidates that snapshot so production cannot reuse stale alpha
+      // evidence after a user edit.
+      if (!state.selfTestInternalPhase && state.selectedKey === "swan") state.swanBeakAudit = null;
     }
 
     function imageDataToCanvas(imageData, canvas) {
@@ -963,11 +1110,7 @@
         state.cropInputs[key] = { x: cropInput.x, y: cropInput.y, w: cropInput.w, h: cropInput.h };
         seedTransformControls(state.cropInputs[key]);
         const work = computeWork(bitmapWidth, bitmapHeight, spec, state.cropInputs[key]);
-        const sourceCanvas = document.createElement("canvas");
-        setCanvasSize(sourceCanvas, work.w, work.h);
-        const sourceCtx = getContext(sourceCanvas);
-        sourceCtx.drawImage(bitmap, work.crop.x, work.crop.y, work.crop.w, work.crop.h, 0, 0, work.w, work.h);
-        const sourceImageData = sourceCtx.getImageData(0, 0, work.w, work.h);
+        const sourceImageData = renderWorkImageData(bitmap, work.crop, work, spec);
         if (bitmap.close) bitmap.close();
         bitmap = null;
 
@@ -981,6 +1124,7 @@
         state.transformDirty = false;
         state.manual = { alpha: emptyLayer(work.w, work.h), owner: emptyLayer(work.w, work.h), keep: emptyLayer(work.w, work.h), inpaint: emptyLayer(work.w, work.h) };
         state.manualRecipeStats = null;
+        state.swanBeakAudit = null;
         seedDeterministicManualLayers(spec, sourceImageData);
         markManualEdited();
         state.history = [];
@@ -1830,9 +1974,32 @@
       }
     }
 
+    function cropImageDataInset(image, inset) {
+      if (!image || !Number.isInteger(inset) || inset < 0 || inset * 2 >= image.width || inset * 2 >= image.height) {
+        throw new Error("grainSourceInsetが画像寸法に対して不正です");
+      }
+      const width = image.width - inset * 2, height = image.height - inset * 2;
+      const data = new Uint8ClampedArray(width * height * 4);
+      for (let y = 0; y < height; y += 1) {
+        const srcOffset = ((y + inset) * image.width + inset) * 4;
+        data.set(image.data.subarray(srcOffset, srcOffset + width * 4), y * width * 4);
+      }
+      // The grain ROI contract hashes canonical RGB with an explicit A=255;
+      // source alpha (if any) is never part of the material texture.
+      for (let index = 3; index < data.length; index += 4) data[index] = 255;
+      return new ImageData(data, width, height);
+    }
+
     async function buildGrainResource(image, grainConfig, identity, operationToken) {
       if (operationToken !== undefined) assertOperationToken(operationToken);
-      const width = image.width, height = image.height;
+      const sourceWidth = image.width, sourceHeight = image.height;
+      const expectedProfile = identity.materialKey && MATERIAL_PROFILES[identity.materialKey];
+      if (expectedProfile && (sourceWidth !== expectedProfile.canonicalOutput.width || sourceHeight !== expectedProfile.canonicalOutput.height)) {
+        throw new Error("grain canonical output寸法がfreezeと一致しません");
+      }
+      const grainSourceInset = Number.isInteger(grainConfig.grainSourceInset) ? grainConfig.grainSourceInset : GRAIN_DEFAULTS.grainSourceInset;
+      const effectiveImage = cropImageDataInset(image, grainSourceInset);
+      const width = effectiveImage.width, height = effectiveImage.height;
       const radius = grainConfig.grainRadiusPx;
       if (radius !== GRAIN_DEFAULTS.grainRadiusPx) {
         throw new Error("grainRadiusPxはtoolVersion " + TOOL_VERSION + " の正規値 " + GRAIN_DEFAULTS.grainRadiusPx + " のみ対応です");
@@ -1840,7 +2007,7 @@
       const g0 = new Float64Array(width * height);
       for (let index = 0; index < g0.length; index += 1) {
         const offset = index * 4;
-        g0[index] = luminance(image.data[offset], image.data[offset + 1], image.data[offset + 2]);
+        g0[index] = luminance(effectiveImage.data[offset], effectiveImage.data[offset + 1], effectiveImage.data[offset + 2]);
       }
       const map = await exactMirrorBoxRatioMap(g0, width, height, radius, grainConfig.grainAmp, operationToken);
       if (operationToken !== undefined) assertOperationToken(operationToken);
@@ -1848,8 +2015,10 @@
       if (operationToken !== undefined) assertOperationToken(operationToken);
       return {
         materialKey: identity.materialKey || "calf", file: identity.file, sha256: identity.sha256, width: width, height: height,
+        sourceWidth: sourceWidth, sourceHeight: sourceHeight, grainSourceInset: grainSourceInset,
+        effectiveWidth: width, effectiveHeight: height, effectiveRoiSha256: await sha256(effectiveImage.data),
         radius: radius, amp: grainConfig.grainAmp, map: map,
-        sourceImageData: cloneImageData(image),
+        sourceImageData: effectiveImage,
         rawBytes: identity.rawBytes ? identity.rawBytes.slice(0) : null
       };
     }
@@ -1872,8 +2041,9 @@
         && state.grainResource.sha256 === resource.fileSha256
         && state.grainResource.radius === grainConfig.grainRadiusPx
         && state.grainResource.amp === grainConfig.grainAmp
-        && state.grainResource.width === resource.imageData.width
-        && state.grainResource.height === resource.imageData.height) return state.grainResource;
+        && state.grainResource.sourceWidth === resource.imageData.width
+        && state.grainResource.sourceHeight === resource.imageData.height
+        && state.grainResource.grainSourceInset === grainConfig.grainSourceInset) return state.grainResource;
       state.grainResource = await buildGrainResource(resource.imageData, grainConfig, { materialKey: manifest.materialKey, file: manifest.file, sha256: resource.fileSha256, rawBytes: resource.bytes }, operationToken);
       if (operationToken !== undefined) assertOperationToken(operationToken);
       return state.grainResource;
@@ -2642,6 +2812,7 @@
         const t = step / steps;
         paintDisk(layer, Math.round(from.x + (to.x - from.x) * t), Math.round(from.y + (to.y - from.y) * t), radius, dom.brushMode.value);
       }
+      invalidateSwanBeakAuditOnManualEdit();
       markManualEdited();
       dom.manualBadge.textContent = "編集済み";
       renderSource();
@@ -2731,6 +2902,7 @@
         if (!validation.pass) throw new Error(validation.reason);
         pushHistory(layerName);
         state.manual[layerName] = imageData;
+        invalidateSwanBeakAuditOnManualEdit();
         markManualEdited();
         dom.manualLayer.value = layerName;
         dom.manualBadge.textContent = "読込済み";
@@ -2746,6 +2918,7 @@
       const layerName = dom.manualLayer.value;
       pushHistory(layerName);
       state.manual[layerName] = emptyLayer(state.work.w, state.work.h);
+      invalidateSwanBeakAuditOnManualEdit();
       markManualEdited();
       dom.manualBadge.textContent = "消去済み";
       invalidateResult("手動補正を消去しました。再実行してください");
@@ -2756,6 +2929,7 @@
       const last = state.history.pop();
       if (!last) return;
       state.manual[last.layer] = last.data;
+      invalidateSwanBeakAuditOnManualEdit();
       markManualEdited();
       dom.manualLayer.value = last.layer;
       updateBrushModes();
@@ -2766,6 +2940,7 @@
 
     function seedDeterministicManualLayers(spec, source) {
       state.manualRecipeStats = null;
+      state.swanBeakAudit = null;
       if (!state.manual || !spec.manualRecipe) return;
       if (spec.sourceMode !== "colorless" || spec.toneMode !== "flat") throw new Error(spec.label + " manualRecipeはcolorless/flat専用です");
       if (spec.manualRecipe.id === HORSESHOE_COLORLESS_MANUAL.id) {
@@ -2773,11 +2948,234 @@
         seedHorseshoeOwnerAndKeep(source, spec.manualRecipe);
       } else if (spec.manualRecipe.id === OSANPO_COLORLESS_MANUAL.id) {
         state.manualRecipeStats = seedOsanpoManualLayers(source, spec.manualRecipe);
+      } else if (spec.manualRecipe.id === COLORLESS_CLOSED_WHITE.id) {
+        state.manualRecipeStats = seedColorlessClosedWhiteManualLayers(source, spec);
       } else {
         throw new Error(spec.label + " 未知のmanualRecipeです");
       }
       dom.manualBadge.textContent = "新素材manual生成済み";
     }
+
+    function regenerateSwanBeakAudit(source, spec) {
+      if (!source || !spec || spec.label !== "swan") return null;
+      const savedManual = state.manual;
+      const savedStats = state.manualRecipeStats;
+      const savedAudit = state.swanBeakAudit;
+      try {
+        state.manual = { alpha: emptyLayer(source.width, source.height), owner: emptyLayer(source.width, source.height), keep: emptyLayer(source.width, source.height), inpaint: emptyLayer(source.width, source.height) };
+        state.manualRecipeStats = null;
+        state.swanBeakAudit = null;
+        seedColorlessClosedWhiteManualLayers(source, spec);
+        return cloneSwanBeakAudit(state.swanBeakAudit);
+      } finally {
+        state.manual = savedManual;
+        state.manualRecipeStats = savedStats;
+        state.swanBeakAudit = savedAudit;
+      }
+    }
+
+    function dilate8Mask(mask, width, height, passes) {
+      let current = mask;
+      for (let pass = 0; pass < passes; pass += 1) {
+        const next = new Uint8Array(current);
+        for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+          const index = y * width + x;
+          if (current[index]) continue;
+          for (let oy = -1; oy <= 1 && !next[index]; oy += 1) for (let ox = -1; ox <= 1; ox += 1) {
+            if (!ox && !oy) continue;
+            const xx = x + ox, yy = y + oy;
+            if (xx >= 0 && yy >= 0 && xx < width && yy < height && current[yy * width + xx]) { next[index] = 1; break; }
+          }
+        }
+        current = next;
+      }
+      return current;
+    }
+
+    function components8(mask, width, height) {
+      const visited = new Uint8Array(mask.length), queue = new Int32Array(mask.length), output = [];
+      for (let start = 0; start < mask.length; start += 1) {
+        if (!mask[start] || visited[start]) continue;
+        let head = 0, tail = 0, minX = width, minY = height, maxX = -1, maxY = -1;
+        const pixels = [];
+        queue[tail++] = start; visited[start] = 1;
+        while (head < tail) {
+          const index = queue[head++], x = index % width, y = (index - x) / width;
+          pixels.push(index); minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+          for (let oy = -1; oy <= 1; oy += 1) for (let ox = -1; ox <= 1; ox += 1) {
+            if (!ox && !oy) continue;
+            const xx = x + ox, yy = y + oy;
+            if (xx < 0 || yy < 0 || xx >= width || yy >= height) continue;
+            const next = yy * width + xx;
+            if (mask[next] && !visited[next]) { visited[next] = 1; queue[tail++] = next; }
+          }
+        }
+        output.push({ pixels: pixels, area: pixels.length, bbox: { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 }, firstIndex: start });
+      }
+      return output;
+    }
+
+    function closedWhiteClassification(source, recipe) {
+      const width = source.width, height = source.height, count = width * height;
+      const background = sampleBackground(source), passable = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 4;
+        if (Math.hypot(source.data[offset] - background.r, source.data[offset + 1] - background.g, source.data[offset + 2] - background.b) <= recipe.backgroundDistance) passable[index] = 1;
+      }
+      const barrier = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) barrier[index] = passable[index] ? 0 : 1;
+      const sealedBarrier = dilate8Mask(barrier, width, height, recipe.sealPasses);
+      const flow = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (passable[index] && !sealedBarrier[index]) flow[index] = 1;
+      const reachable = new Uint8Array(count), queue = new Int32Array(count);
+      let head = 0, tail = 0;
+      function enqueue(index) { if (index < 0 || index >= count || !flow[index] || reachable[index]) return; reachable[index] = 1; queue[tail++] = index; }
+      for (let x = 0; x < width; x += 1) { enqueue(x); enqueue((height - 1) * width + x); }
+      for (let y = 1; y + 1 < height; y += 1) { enqueue(y * width); enqueue(y * width + width - 1); }
+      while (head < tail) {
+        const index = queue[head++], x = index % width, y = (index - x) / width;
+        if (x > 0) enqueue(index - 1); if (x + 1 < width) enqueue(index + 1); if (y > 0) enqueue(index - width); if (y + 1 < height) enqueue(index + width);
+      }
+      const restored = dilate8Mask(reachable, width, height, recipe.sealPasses);
+      const closed = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (passable[index] && !restored[index]) closed[index] = 1;
+      const components = components8(closed, width, height);
+      if (!components.length) throw new Error("COLORLESS_CLOSED_WHITE の閉白成分がありません");
+      const holeRoi = roiBounds(recipe.hangingHoleRoi, width, height);
+      const seedX = Math.floor(recipe.hangingHoleSeed[0] * width), seedY = Math.floor(recipe.hangingHoleSeed[1] * height);
+      if (seedX < 0 || seedY < 0 || seedX >= width || seedY >= height) throw new Error("吊り穴 seed が作業座標外です");
+      let hole = null;
+      components.forEach(function (component) {
+        const inside = component.bbox.x >= holeRoi.x0 && component.bbox.y >= holeRoi.y0 && component.bbox.x + component.bbox.w <= holeRoi.x1 && component.bbox.y + component.bbox.h <= holeRoi.y1;
+        if (!inside) return;
+        let distance = Infinity;
+        component.pixels.forEach(function (index) { const x = index % width, y = (index - x) / width; distance = Math.min(distance, (x - seedX) * (x - seedX) + (y - seedY) * (y - seedY)); });
+        component.minDistance = distance;
+        if (!hole || distance < hole.minDistance || (distance === hole.minDistance && component.firstIndex < hole.firstIndex)) hole = component;
+      });
+      if (!hole) throw new Error("COLORLESS_CLOSED_WHITE の吊り穴候補がROI内にありません");
+      const sorted = components.slice().sort(function (a, b) { return b.area - a.area || a.firstIndex - b.firstIndex; });
+      const largestArea = sorted[0].area;
+      const main = components.filter(function (component) { return component !== hole && component.area >= largestArea * recipe.mainComponentAreaFraction; });
+      const minor = components.filter(function (component) { return component !== hole && main.indexOf(component) < 0; });
+      const range = recipe.mainWhiteRange, mainArea = main.reduce(function (sum, component) { return sum + component.area; }, 0), largestMain = main.slice().sort(function (a, b) { return b.area - a.area || a.firstIndex - b.firstIndex; })[0];
+      const holeRange = recipe.hangingHoleRange;
+      if (!largestMain || main.length < range.componentMin || main.length > range.componentMax || mainArea < range.areaMin || mainArea > range.areaMax
+        || largestMain.bbox.w < range.widthMin || largestMain.bbox.w > range.widthMax || largestMain.bbox.h < range.heightMin || largestMain.bbox.h > range.heightMax
+        || hole.area < holeRange.areaMin || hole.area > holeRange.areaMax || hole.bbox.w < holeRange.widthMin || hole.bbox.w > holeRange.widthMax || hole.bbox.h < holeRange.heightMin || hole.bbox.h > holeRange.heightMax
+        || minor.some(function (component) { return component.area > recipe.minorClosedWhiteMaxArea; })) {
+        throw new Error("COLORLESS_CLOSED_WHITE の成分レンジ外: main=" + mainArea + "/" + main.length + " hole=" + hole.area + " minorMax=" + (minor.length ? Math.max.apply(null, minor.map(function (item) { return item.area; })) : 0));
+      }
+      return { background: background, rawAutoAlpha: passable, closed: closed, components: components, hole: hole, main: main, minor: minor, largestMain: largestMain };
+    }
+
+    function setManualPixel(layer, index, r, g, b, alpha) {
+      const offset = index * 4; layer.data[offset] = r; layer.data[offset + 1] = g; layer.data[offset + 2] = b; layer.data[offset + 3] = alpha;
+    }
+
+    function maskFromPixels(pixels, count) { const mask = new Uint8Array(count); (pixels || []).forEach(function (index) { mask[index] = 1; }); return mask; }
+
+    function largestPredicateComponent(source, roi, predicate) {
+      const width = source.width, height = source.height, mask = new Uint8Array(width * height), bounds = roi || { x0: 0, y0: 0, x1: width, y1: height };
+      for (let y = bounds.y0; y < bounds.y1; y += 1) for (let x = bounds.x0; x < bounds.x1; x += 1) if (predicate(x, y, y * width + x)) mask[y * width + x] = 1;
+      return components8(mask, width, height).sort(function (a, b) { return b.area - a.area || a.firstIndex - b.firstIndex; })[0] || null;
+    }
+
+    function nearMask(index, mask, width, height, radius, inclusive) {
+      const x = index % width, y = (index - x) / width, r2 = radius * radius;
+      const x0 = Math.max(0, Math.floor(x - radius)), x1 = Math.min(width - 1, Math.ceil(x + radius));
+      const y0 = Math.max(0, Math.floor(y - radius)), y1 = Math.min(height - 1, Math.ceil(y + radius));
+      for (let yy = y0; yy <= y1; yy += 1) for (let xx = x0; xx <= x1; xx += 1) if (mask[yy * width + xx] && ((xx - x) * (xx - x) + (yy - y) * (yy - y) <= r2 + (inclusive ? 1e-9 : 0))) return true;
+      return false;
+    }
+
+    function seedColorlessClosedWhiteManualLayers(source, spec) {
+      const recipe = spec.manualRecipe, width = source.width, height = source.height, count = width * height;
+      const classification = closedWhiteClassification(source, recipe), alpha = state.manual.alpha, owner = state.manual.owner, keep = state.manual.keep;
+      const holeMask = maskFromPixels(classification.hole.pixels, count), mainMask = new Uint8Array(count), minorMask = new Uint8Array(count);
+      classification.main.forEach(function (component) { component.pixels.forEach(function (index) { mainMask[index] = 1; }); });
+      classification.minor.forEach(function (component) { component.pixels.forEach(function (index) { minorMask[index] = 1; }); });
+      const holeFeather = componentFeatherBands(classification.hole.pixels, width, height);
+      const design = { x0: Math.max(0, classification.largestMain.bbox.x - recipe.designPaddingPx), y0: Math.max(0, classification.largestMain.bbox.y - recipe.designPaddingPx), x1: Math.min(width, classification.largestMain.bbox.x + classification.largestMain.bbox.w + recipe.designPaddingPx), y1: Math.min(height, classification.largestMain.bbox.y + classification.largestMain.bbox.h + recipe.designPaddingPx) };
+      for (let index = 0; index < count; index += 1) {
+        if (holeMask[index]) continue;
+        const x = index % width, y = (index - x) / width, offset = index * 4;
+        const closed = classification.closed[index], insideDesign = x >= design.x0 && x < design.x1 && y >= design.y0 && y < design.y1, band = holeFeather.bands[index];
+        const distance = Math.hypot(source.data[offset] - classification.background.r, source.data[offset + 1] - classification.background.g, source.data[offset + 2] - classification.background.b);
+        const raw = Math.round(smoothstep(recipe.autoAlphaLow, recipe.autoAlphaHigh, distance) * 255);
+        const value = band === 1 ? clamp(raw, 32, 127) : band === 2 ? clamp(raw, 128, 223) : (closed || mainMask[index] || minorMask[index]) ? 255 : insideDesign ? raw : 0;
+        if (value > 0) setManualPixel(alpha, index, value, 0, 0, 255);
+      }
+      // The default owner emitted by buildMasks is leather (R).  Keep swan's
+      // manual layer sparse: only explicit logo ownership (G) and keep
+      // decoration belong here.  A full R layer would mask the automatic B
+      // stitch detection when swan is later resolved to stitchMode=detect.
+      // The other closed-white charms remain fully manual-owned for their
+      // fixed stitchMode=none contract.
+      if (spec.label !== "swan") for (let index = 0; index < count; index += 1) setManualPixel(owner, index, 255, 0, 0, 255);
+      // Keep the exact alpha state immediately before the swan-only beak
+      // outline removal.  This is an ephemeral audit input for the five
+      // BEAK_EXPECTED_DIFF predicates; it is intentionally not serialized.
+      const alphaWithoutBeak = spec.label === "swan" ? alphaToArray(alpha) : null;
+      let beakMask = new Uint8Array(count), stoneMask = new Uint8Array(count), diffMask = new Uint8Array(count);
+      if (spec.label === "swan") {
+        const beak = largestPredicateComponent(source, null, function (x, y, index) { const o = index * 4, r = source.data[o], g = source.data[o + 1], b = source.data[o + 2]; return Math.max(r, g, b) - Math.min(r, g, b) > spec.beakRemoval.beakSatMin && Math.max(r, g, b) > spec.beakRemoval.beakValueMin; });
+        if (!beak) throw new Error("swan beak候補がありません");
+        beakMask = maskFromPixels(beak.pixels, count);
+        const beakRoi = { x0: Math.max(0, beak.bbox.x - spec.beakRemoval.beakRoiPaddingPx), y0: Math.max(0, beak.bbox.y - spec.beakRemoval.beakRoiPaddingPx), x1: Math.min(width, beak.bbox.x + beak.bbox.w + spec.beakRemoval.beakRoiPaddingPx), y1: Math.min(height, beak.bbox.y + beak.bbox.h + spec.beakRemoval.beakRoiPaddingPx) };
+        for (let y = beakRoi.y0; y < beakRoi.y1; y += 1) for (let x = beakRoi.x0; x < beakRoi.x1; x += 1) {
+          const index = y * width + x;
+          if (!alpha.data[index * 4 + 3] || beakMask[index] || mainMask[index] || minorMask[index]) continue;
+          if (nearMask(index, beakMask, width, height, spec.beakRemoval.beakOutlineRadius, true) && !nearMask(index, mainMask, width, height, spec.beakRemoval.beakBridgeRadius, false)) {
+            setManualPixel(alpha, index, 0, 0, 0, 0); diffMask[index] = 1;
+          }
+        }
+        const stoneRoi = roiBounds(spec.stoneRoi, width, height);
+        const stone = largestPredicateComponent(source, stoneRoi, function (x, y, index) { const o = index * 4; return luminance(source.data[o], source.data[o + 1], source.data[o + 2]) < spec.stoneLumMax; });
+        if (!stone) throw new Error("swan stone候補がありません");
+        stoneMask = maskFromPixels(stone.pixels, count);
+        beakMask.forEach(function (value, index) { if (value) setManualPixel(keep, index, 0, 0, 0, 255); });
+        stoneMask.forEach(function (value, index) { if (value) setManualPixel(keep, index, 0, 0, 0, 255); });
+      }
+      const keepMask = new Uint8Array(count); for (let index = 0; index < count; index += 1) if (beakMask[index] || stoneMask[index]) keepMask[index] = 1;
+      const baseForLogo = new ImageData(new Uint8ClampedArray(source.data), width, height); for (let index = 0; index < count; index += 1) baseForLogo.data[index * 4 + 3] = alpha.data[index * 4];
+      const threshold = spec.logoThreshold;
+      const logoMask = threshold === null ? new Uint8Array(count) : detectLogo(baseForLogo, alphaToArray(alpha), spec.logoRoi, threshold, keepMask);
+      if (threshold !== null) for (let index = 0; index < count; index += 1) if (logoMask[index]) setManualPixel(owner, index, 0, 255, 0, 255);
+      const alphaWithBeak = spec.label === "swan" ? alphaToArray(alpha) : null;
+      if (spec.label === "swan") {
+        state.swanBeakAudit = {
+          alphaWithout: alphaWithoutBeak,
+          alphaWith: alphaWithBeak,
+          expectedDiff: diffMask.slice(0),
+          beakPxCount: maskCount(beakMask),
+          stonePxCount: maskCount(stoneMask),
+          width: width,
+          height: height
+        };
+      }
+      const stats = {
+        recipeId: recipe.id,
+        mainWhiteArea: classification.main.reduce(function (sum, c) { return sum + c.area; }, 0),
+        mainComponentCount: classification.main.length,
+        mainComponentAreas: classification.main.map(function (c) { return c.area; }),
+        mainWhiteBbox: classification.largestMain.bbox,
+        hangingHoleArea: classification.hole.area,
+        hangingHoleBbox: classification.hole.bbox,
+        hangingHoleSeedDistance: classification.hole.minDistance,
+        minorCount: classification.minor.length,
+        minorMaxArea: classification.minor.length ? Math.max.apply(null, classification.minor.map(function (c) { return c.area; })) : 0,
+        logoCount: threshold === null ? 0 : logoMask.reduce(function (sum, value) { return sum + value; }, 0),
+        logoComponentCount: threshold === null ? 0 : countMaskComponents8(logoMask, width, height),
+        keepPxCountWork: keepMask.reduce(function (sum, value) { return sum + value; }, 0),
+        beakPxCount: maskCount(beakMask),
+        stonePxCount: maskCount(stoneMask),
+        beakExpectedDiffCount: diffMask.reduce(function (sum, value) { return sum + value; }, 0)
+      };
+      return stats;
+    }
+
+    function alphaToArray(imageData) { const alpha = new Uint8ClampedArray(imageData.width * imageData.height); for (let index = 0; index < alpha.length; index += 1) alpha[index] = imageData.data[index * 4 + 3]; return alpha; }
 
     function countMaskComponents8(mask, width, height) {
       const visited = new Uint8Array(mask.length);
@@ -2900,20 +3298,41 @@
       }
       const matte = buildMatte(source, state.manual.alpha, recipe.autoAlphaLow, recipe.autoAlphaHigh);
       const boundaryDistance = distanceFromTransparent(matte.alpha, width, height, 70);
-      const exclusion = new Uint8Array(count);
       const logoRoi = roiBounds(recipe.logoRoi, width, height), holeRoi = roiBounds(recipe.hangingHoleRoi, width, height);
-      for (let y = logoRoi.y0; y < logoRoi.y1; y += 1) for (let x = logoRoi.x0; x < logoRoi.x1; x += 1) exclusion[y * width + x] = 1;
-      for (let y = holeRoi.y0; y < holeRoi.y1; y += 1) for (let x = holeRoi.x0; x < holeRoi.x1; x += 1) exclusion[y * width + x] = 1;
-      const exclusionDilated = dilateMask(exclusion, width, height, recipe.stitch.exclusionDilatePasses);
-      const rawStitch = new Uint8Array(count);
+      // v2 protects only the detected logo pixels, not the whole logo ROI;
+      // this leaves nearby dashed stitch pixels available for B ownership.
+      const logoMask = new Uint8Array(count), logoBoundary = recipe.logoBoundaryMin;
+      for (let index = 0; index < count; index += 1) {
+        const x = index % width, y = (index - x) / width;
+        const inLogoRoi = x >= logoRoi.x0 && x < logoRoi.x1 && y >= logoRoi.y0 && y < logoRoi.y1;
+        if (inLogoRoi && sourceDistance(source, background, x, y) > recipe.featureDistance && boundaryDistance[index] >= logoBoundary) logoMask[index] = 1;
+      }
+      const logoProtected = dilateMask(logoMask, width, height, recipe.stitch.logoProtectDilatePasses);
+      const holeRect = new Uint8Array(count);
+      for (let y = holeRoi.y0; y < holeRoi.y1; y += 1) for (let x = holeRoi.x0; x < holeRoi.x1; x += 1) holeRect[y * width + x] = 1;
+      const holeProtected = dilateMask(holeRect, width, height, recipe.stitch.exclusionDilatePasses);
+      const exclusionDilated = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (logoProtected[index] || holeProtected[index]) exclusionDilated[index] = 1;
+      const rawCandidate = new Uint8Array(count);
       for (let index = 0; index < count; index += 1) {
         const x = index % width, y = (index - x) / width;
         if (matte.alpha[index] === 0 || boundaryDistance[index] < recipe.stitch.seedBoundaryMin || boundaryDistance[index] > recipe.stitch.seedBoundaryMax || exclusionDilated[index]) continue;
-        if (sourceDistance(source, background, x, y) > recipe.featureDistance) rawStitch[index] = 1;
+        if (sourceDistance(source, background, x, y) > recipe.featureDistance) rawCandidate[index] = 1;
+      }
+      // With v2's dilatePasses=0, rawStitch is defined as the exact B-owned
+      // set after component filtering and the final boundary/exclusion
+      // predicate.  This makes the raw/final identity a literal pixel-set
+      // equality rather than an incidental count equality.
+      const filteredRaw = filterComponents(rawCandidate, width, height, 2, count);
+      const rawStitch = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) {
+        const distance = boundaryDistance[index];
+        if (filteredRaw[index] && !exclusionDilated[index]
+          && distance >= recipe.stitch.finalBoundaryMin && distance <= recipe.stitch.finalBoundaryMax) rawStitch[index] = 1;
       }
       const rawComponentCount = countMaskComponents8(rawStitch, width, height);
       if (rawComponentCount < recipe.stitchRange.rawComponentMin || rawComponentCount > recipe.stitchRange.rawComponentMax) throw new Error("osanpo rawStitch成分数が素材固定レンジ外です: " + rawComponentCount);
-      let finalMask = dilateMask(filterComponents(rawStitch, width, height, 2, count), width, height, recipe.stitch.dilatePasses);
+      let finalMask = dilateMask(rawStitch, width, height, recipe.stitch.dilatePasses);
       let finalCount = 0;
       for (let index = 0; index < count; index += 1) {
         const offset = index * 4;
@@ -2924,21 +3343,33 @@
       const finalComponentMask = new Uint8Array(count);
       for (let index = 0; index < count; index += 1) if (owner.data[index * 4 + 2] === 255) finalComponentMask[index] = 1;
       const finalComponentCount = countMaskComponents8(finalComponentMask, width, height);
-      const logoMask = new Uint8Array(count);
-      const logoBoundary = recipe.logoBoundaryMin;
       let logoCount = 0;
       for (let index = 0; index < count; index += 1) {
-        const x = index % width, y = (index - x) / width;
-        const inLogoRoi = x >= logoRoi.x0 && x < logoRoi.x1 && y >= logoRoi.y0 && y < logoRoi.y1;
-        if (inLogoRoi && sourceDistance(source, background, x, y) > recipe.featureDistance && boundaryDistance[index] >= logoBoundary) { logoMask[index] = 1; const offset = index * 4; owner.data[offset] = 0; owner.data[offset + 1] = 255; owner.data[offset + 2] = 0; logoCount += 1; }
+        if (logoMask[index]) { const offset = index * 4; owner.data[offset] = 0; owner.data[offset + 1] = 255; owner.data[offset + 2] = 0; logoCount += 1; }
       }
       const logoComponentCount = countMaskComponents8(logoMask, width, height);
       const logoRange = recipe.logoRange;
       if (logoCount < logoRange.countMin || logoCount > logoRange.countMax || logoComponentCount < logoRange.componentMin || logoComponentCount > logoRange.componentMax) throw new Error("osanpo logoが素材固定レンジ外です: count=" + logoCount + " / components=" + logoComponentCount);
       let overlap = 0;
       for (let index = 0; index < count; index += 1) if (finalMask[index] && logoMask[index]) overlap += 1;
-      if (finalCount < recipe.stitchRange.finalCountMin || finalCount > recipe.stitchRange.finalCountMax || finalComponentCount < recipe.stitchRange.finalComponentMin || finalComponentCount > recipe.stitchRange.finalComponentMax || overlap !== 0) throw new Error("osanpo final stitchが素材固定レンジ外です: count=" + finalCount + " / components=" + finalComponentCount + " / overlap=" + overlap);
-      return Object.assign({}, alphaStats, { rawStitchComponentCount: rawComponentCount, finalStitchCount: finalCount, finalStitchComponentCount: finalComponentCount, logoCount: logoCount, logoComponentCount: logoComponentCount, overlap: overlap });
+      let identityMismatch = 0;
+      for (let index = 0; index < count; index += 1) if (finalMask[index] !== rawStitch[index]) identityMismatch += 1;
+      if (finalCount < recipe.stitchRange.finalCountMin || finalCount > recipe.stitchRange.finalCountMax
+        || finalComponentCount < recipe.stitchRange.finalComponentMin || finalComponentCount > recipe.stitchRange.finalComponentMax
+        || overlap !== 0 || identityMismatch !== 0) {
+        throw new Error("osanpo final stitchが素材固定レンジ/集合恒等式外です: count=" + finalCount + " / components=" + finalComponentCount + " / overlap=" + overlap + " / identityMismatch=" + identityMismatch);
+      }
+      return Object.assign({}, alphaStats, {
+        recipeId: recipe.id,
+        rawStitchPxCount: rawStitch.reduce(function (sum, value) { return sum + value; }, 0),
+        rawStitchComponentCount: rawComponentCount,
+        finalStitchCount: finalCount,
+        finalStitchComponentCount: finalComponentCount,
+        rawFinalIdentityMismatch: identityMismatch,
+        logoCount: logoCount,
+        logoComponentCount: logoComponentCount,
+        overlap: overlap
+      });
     }
 
     function seedOsanpoManualLayers(source, recipe) {
@@ -3029,6 +3460,24 @@
       return { bands: bands, innerCount: innerCount, outerCount: outerCount };
     }
 
+    function fillHoles4Mask(mask, width, height) {
+      const count = width * height, outside = new Uint8Array(count), queue = new Int32Array(count);
+      let head = 0, tail = 0;
+      function enqueue(index) {
+        if (index < 0 || index >= count || mask[index] || outside[index]) return;
+        outside[index] = 1; queue[tail++] = index;
+      }
+      for (let x = 0; x < width; x += 1) { enqueue(x); enqueue((height - 1) * width + x); }
+      for (let y = 1; y + 1 < height; y += 1) { enqueue(y * width); enqueue(y * width + width - 1); }
+      while (head < tail) {
+        const index = queue[head++], x = index % width, y = (index - x) / width;
+        if (x > 0) enqueue(index - 1); if (x + 1 < width) enqueue(index + 1); if (y > 0) enqueue(index - width); if (y + 1 < height) enqueue(index + width);
+      }
+      const filled = new Uint8Array(mask);
+      for (let index = 0; index < count; index += 1) if (!mask[index] && !outside[index]) filled[index] = 1;
+      return filled;
+    }
+
     function seedHorseshoeAlpha(source, recipe) {
       const width = source.width, height = source.height, count = width * height;
       const background = sampleBackground(source);
@@ -3085,6 +3534,32 @@
         layer.data[offset] = value;
         layer.data[offset + 3] = 255;
       }
+      // Revision 17: bring the horseshoe outline into the alpha silhouette
+      // before owner generation. The candidate radius is deliberately kept
+      // separate from the probe radius used by the residual-rate audit.
+      const before = alphaToArray(layer), neighborhood = dilate8Mask(before, width, height, recipe.outlineCaptureRadius), candidate = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) {
+        if (before[index] || !neighborhood[index]) continue;
+        const offset = index * 4;
+        const lum = luminance(source.data[offset], source.data[offset + 1], source.data[offset + 2]);
+        if (lum < recipe.outlineLumMax) candidate[index] = 1;
+      }
+      const union = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (before[index] || candidate[index]) union[index] = 1;
+      const comps = components8(union, width, height).sort(function (a, b) { return b.area - a.area || a.firstIndex - b.firstIndex; });
+      if (!comps.length) throw new Error("horseshoe outlineCapture後の前景がありません");
+      const largest = maskFromPixels(comps[0].pixels, count);
+      const filled = fillHoles4Mask(largest, width, height);
+      const originalFilled = fillHoles4Mask(before, width, height);
+      for (let index = 0; index < count; index += 1) {
+        if (!filled[index]) continue;
+        // Restore every hole that existed before outline capture (the
+        // horseshoe opening and hanging hole); all other filled pixels are
+        // newly captured outline/closed silhouette and become leather.
+        if (!before[index] && originalFilled[index]) continue;
+        if (!before[index]) setManualPixel(layer, index, 255, 0, 0, 255);
+      }
+      for (let index = 0; index < count; index += 1) if (before[index] && !filled[index]) layer.data[index * 4 + 3] = 0;
     }
 
     function sourceDistance(source, background, x, y) {
@@ -3329,7 +3804,12 @@
       }
       const logoCount = logo.pixels.length;
       if (stitchCount < 72000 || stitchCount > 75000) throw new Error("horseshoe manual stitch面積が契約外です: " + stitchCount);
-      if (logoCount < 3805 || logoCount > 4700) throw new Error("horseshoe manual logo面積が契約外です: " + logoCount);
+      if (logoCount < recipe.logoRange.countMin || logoCount > recipe.logoRange.countMax
+        || logo.pixels.length < recipe.logoRange.countMin || logo.pixels.length > recipe.logoRange.countMax
+        || countMaskComponents8(logoMask, width, height) < recipe.logoRange.componentMin
+        || countMaskComponents8(logoMask, width, height) > recipe.logoRange.componentMax) {
+        throw new Error("horseshoe manual logo面積/成分数が契約外です: " + logoCount + " / " + countMaskComponents8(logoMask, width, height));
+      }
       if (forbiddenOverlap !== 0) throw new Error("horseshoe manual所有の禁領域重複があります: " + forbiddenOverlap);
     }
 
@@ -3585,14 +4065,14 @@
       return output;
     }
 
-    function detectLogo(base, alpha, logoRoiWork, threshold) {
+    function detectLogo(base, alpha, logoRoiWork, threshold, keepMask) {
       const width = base.width, height = base.height;
       if (!Array.isArray(logoRoiWork) || logoRoiWork.length !== 4 || !logoRoiWork.every(Number.isFinite)) throw new Error("logoRoiWork が不正です");
       const roi = roiBounds(logoRoiWork, width, height);
       const rs = [], gs = [], bs = [];
       for (let y = roi.y0; y < roi.y1; y += 2) for (let x = roi.x0; x < roi.x1; x += 2) {
         const index = y * width + x;
-        if (alpha[index] < 200) continue;
+        if (alpha[index] < 200 || keepMask && keepMask[index]) continue;
         const offset = index * 4;
         rs.push(base.data[offset]); gs.push(base.data[offset + 1]); bs.push(base.data[offset + 2]);
       }
@@ -3601,7 +4081,7 @@
       const raw = new Uint8Array(width * height);
       for (let y = roi.y0; y < roi.y1; y += 1) for (let x = roi.x0; x < roi.x1; x += 1) {
         const index = y * width + x;
-        if (alpha[index] === 0) continue;
+        if (alpha[index] === 0 || keepMask && keepMask[index]) continue;
         const offset = index * 4;
         const r = base.data[offset], g = base.data[offset + 1], b = base.data[offset + 2];
         const colorDistance = Math.hypot(r - center.r, g - center.g, b - center.b) / 4.416;
@@ -3669,7 +4149,7 @@
       throw new Error("detect の threadColor は light または dark 必須です");
     }
 
-    function detectStitch(base, alpha, spec, contrast) {
+    function detectStitch(base, alpha, spec, contrast, keepMask) {
       if (spec.stitchMode !== "detect") return new Uint8Array(base.width * base.height);
       if (spec.threadColor !== "light" && spec.threadColor !== "dark") throw new Error("detect の threadColor が不正です");
       const width = base.width, height = base.height;
@@ -3679,7 +4159,7 @@
       const localRadius = Math.max(4, Math.round(Math.min(width, height) * .008));
       for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
         const index = y * width + x;
-        if (alpha[index] < 200 || boundaryDistance[index] < 3 || boundaryDistance[index] > 60) continue;
+        if (alpha[index] < 200 || boundaryDistance[index] < 3 || boundaryDistance[index] > 60 || keepMask && keepMask[index]) continue;
         const offset = index * 4;
         const lum = luminance(base.data[offset], base.data[offset + 1], base.data[offset + 2]);
         const local = boxAverage(integral, x, y, localRadius, width, height);
@@ -3689,8 +4169,15 @@
     }
 
     function buildMasks(base, alpha, spec, manualOwner, manualKeep, logoRoiWork, logoThreshold, stitchContrast) {
-      const logo = detectLogo(base, alpha, logoRoiWork, logoThreshold);
-      const stitch = detectStitch(base, alpha, spec, stitchContrast);
+      const keepMask = new Uint8Array(alpha.length);
+      for (let index = 0; index < alpha.length; index += 1) if (manualKeep.data[index * 4 + 3] === 255) keepMask[index] = 1;
+      // Closed-white recipes already generated the contractual logo G layer
+      // from the canonical source.  Do not add a second, defringed auto-logo
+      // mask on top of it; swan still needs the independent auto-stitch B
+      // branch below when Phase 4 resolves stitchMode=detect.
+      const manualLogoRecipe = spec.manualRecipe && spec.manualRecipe.id === COLORLESS_CLOSED_WHITE.id;
+      const logo = logoThreshold === null || manualLogoRecipe ? new Uint8Array(alpha.length) : detectLogo(base, alpha, logoRoiWork, logoThreshold, keepMask);
+      const stitch = detectStitch(base, alpha, spec, stitchContrast, keepMask);
       const data = new Uint8ClampedArray(base.width * base.height * 4);
       for (let index = 0; index < alpha.length; index += 1) {
         const offset = index * 4;
@@ -3787,17 +4274,18 @@
         "    const digest = await crypto.subtle.digest('SHA-256', input.rawBytes);",
         "    const actualSha = Array.from(new Uint8Array(digest)).map(function (v) { return v.toString(16).padStart(2, '0'); }).join('');",
         "    if (actualSha !== input.sha256) throw new Error('F oracle raw grain SHA-256 mismatch');",
-        "    const width = input.width, height = input.height, radius = input.radius, amp = input.amp;",
+        "    const width = input.width, height = input.height, radius = input.radius, amp = input.amp, inset = input.grainSourceInset || 0;",
+        "    const sourceWidth = input.sourceWidth || width, sourceHeight = input.sourceHeight || height;",
         "    if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') throw new Error('F oracle raw-byte decode requires createImageBitmap/OffscreenCanvas');",
         "    const bitmap = await createImageBitmap(new Blob([input.rawBytes], { type: input.mime }));",
-        "    if (bitmap.width !== width || bitmap.height !== height) { if (bitmap.close) bitmap.close(); throw new Error('F oracle raw grain dimensions mismatch'); }",
-        "    const canvas = new OffscreenCanvas(width, height), context = canvas.getContext('2d', { willReadFrequently: true });",
+        "    if (bitmap.width !== sourceWidth || bitmap.height !== sourceHeight) { if (bitmap.close) bitmap.close(); throw new Error('F oracle raw grain dimensions mismatch'); }",
+        "    const canvas = new OffscreenCanvas(sourceWidth, sourceHeight), context = canvas.getContext('2d', { willReadFrequently: true });",
         "    context.drawImage(bitmap, 0, 0); if (bitmap.close) bitmap.close();",
-        "    const rgba = context.getImageData(0, 0, width, height).data;",
-        "    if (rgba.length !== width * height * 4) throw new Error('F oracle RGBA size mismatch');",
+        "    const rgba = context.getImageData(0, 0, sourceWidth, sourceHeight).data;",
+        "    if (rgba.length !== sourceWidth * sourceHeight * 4) throw new Error('F oracle RGBA size mismatch');",
         "    function independentMirror(index, size) { const period = 2 * size; const t = ((index % period) + period) % period; return t < size ? t : period - 1 - t; }",
         "    const g0 = new Float64Array(width * height);",
-        "    for (let index = 0; index < g0.length; index += 1) { const o = index * 4; g0[index] = (0.2126 * rgba[o] + 0.7152 * rgba[o + 1] + 0.0722 * rgba[o + 2]) / 255; }",
+        "    for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) { const o = ((y + inset) * sourceWidth + x + inset) * 4; const index = y * width + x; g0[index] = (0.2126 * rgba[o] + 0.7152 * rgba[o + 1] + 0.0722 * rgba[o + 2]) / 255; }",
         "    const span = 2 * radius + 1, divisor = span * span, map = new Float64Array(width * height);",
         "    for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {",
         "      let sum = 0;",
@@ -3822,13 +4310,15 @@
       const bitmap = await createImageBitmap(new Blob([resource.rawBytes], { type: mimeForSource(resource.file || INPUT_MANIFEST.grains.calf.file) }));
       try {
         assertFresh();
-        if (bitmap.width !== resource.width || bitmap.height !== resource.height) throw new Error("F oracle raw grain dimensions mismatch");
+        const sourceWidth = resource.sourceWidth || resource.width, sourceHeight = resource.sourceHeight || resource.height;
+        const inset = Number.isInteger(resource.grainSourceInset) ? resource.grainSourceInset : 0;
+        if (bitmap.width !== sourceWidth || bitmap.height !== sourceHeight) throw new Error("F oracle raw grain dimensions mismatch");
         const canvas = document.createElement("canvas");
-        setCanvasSize(canvas, resource.width, resource.height);
+        setCanvasSize(canvas, sourceWidth, sourceHeight);
         const context = getContext(canvas);
         context.drawImage(bitmap, 0, 0);
-        const rgba = context.getImageData(0, 0, resource.width, resource.height).data;
-        if (rgba.length !== resource.width * resource.height * 4) throw new Error("F oracle RGBA size mismatch");
+        const rgba = context.getImageData(0, 0, sourceWidth, sourceHeight).data;
+        if (rgba.length !== sourceWidth * sourceHeight * 4) throw new Error("F oracle RGBA size mismatch");
         const width = resource.width, height = resource.height, radius = record.grainRadiusPx, amp = record.grainAmp;
         if (!Number.isInteger(radius) || radius <= 0 || !Number.isFinite(amp) || amp <= 0 || amp > 1) throw new Error("F oracle設定が不正です");
         function independentMirror(index, size) {
@@ -3836,8 +4326,8 @@
           return t < size ? t : period - 1 - t;
         }
         const g0 = new Float64Array(width * height);
-        for (let index = 0; index < g0.length; index += 1) {
-          const offset = index * 4;
+        for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+          const offset = ((y + inset) * sourceWidth + x + inset) * 4, index = y * width + x;
           g0[index] = (0.2126 * rgba[offset] + 0.7152 * rgba[offset + 1] + 0.0722 * rgba[offset + 2]) / 255;
         }
         const span = 2 * radius + 1, divisor = span * span, map = new Float64Array(width * height);
@@ -3867,7 +4357,7 @@
 
     async function getFlatOracleResource(resource, record, operationToken) {
       if (!resource || !(resource.rawBytes instanceof ArrayBuffer) || !resource.sourceImageData) throw new Error("F oracle raw grain resource missing");
-      const key = [resource.sha256, resource.width, resource.height, record.grainRadiusPx, record.grainAmp].join("|");
+      const key = [resource.sha256, resource.sourceWidth || resource.width, resource.sourceHeight || resource.height, resource.grainSourceInset || 0, resource.width, resource.height, record.grainRadiusPx, record.grainAmp].join("|");
       const cached = state.oracleGrainCache.get(key);
       if (cached) {
         if (operationToken !== undefined) assertOperationToken(operationToken);
@@ -3905,6 +4395,8 @@
           worker.onerror = function (event) { reject(new Error(event.message || "F oracle Workerが失敗しました")); };
           worker.postMessage({
             generation: generation, sha256: resource.sha256, width: resource.width, height: resource.height,
+            sourceWidth: resource.sourceWidth || resource.width, sourceHeight: resource.sourceHeight || resource.height,
+            grainSourceInset: resource.grainSourceInset || 0,
             radius: record.grainRadiusPx, amp: record.grainAmp, mime: mimeForSource(resource.file || INPUT_MANIFEST.grains.calf.file),
             rawBytes: resource.rawBytes.slice(0)
           });
@@ -3966,7 +4458,9 @@
           if (!visited[grainIndex]) { visited[grainIndex] = 1; uniqueGrainPxCount += 1; }
           const sourceLum = (0.2126 * before.data[offset] + 0.7152 * before.data[offset + 1] + 0.0722 * before.data[offset + 2]) / 255;
           const shade = Math.max(0, Math.min(1, sourceLum / record.flatWhite));
-          const expected = Math.round(Math.max(0, Math.min(255, record.grainBase * shade * oracleResource.map[grainIndex])));
+          const strictLeather = masks.data[offset + 3] >= 128 && masks.data[offset] === 255 && masks.data[offset + 1] === 0 && masks.data[offset + 2] === 0;
+          const shadeEff = strictLeather ? Math.max(shade, record.shadeMin) : shade;
+          const expected = Math.round(Math.max(0, Math.min(255, record.grainBase * shadeEff * oracleResource.map[grainIndex])));
           if (afterBake.data[offset] !== expected || afterBake.data[offset + 1] !== expected || afterBake.data[offset + 2] !== expected) expectedMismatchPxCount += 1;
         }
       }
@@ -4013,6 +4507,11 @@
         pxPerMmWorkW: record.pxPerMmWorkW,
         pxPerMmWorkH: record.pxPerMmWorkH,
         flatWhite: record.flatWhite,
+        grainSourceInset: record.grainSourceInset,
+        effectiveWidth: record.effectiveWidth,
+        effectiveHeight: record.effectiveHeight,
+        effectiveRoiSha256: record.effectiveRoiSha256,
+        shadeMin: record.shadeMin,
         tileMode: record.tileMode
       };
     }
@@ -4023,6 +4522,7 @@
         || resource.width <= 0 || resource.height <= 0 || !resource.map || resource.map.length !== resource.width * resource.height
         || !record || !Number.isFinite(record.grainBase) || !Number.isFinite(record.grainScaleX)
         || !Number.isFinite(record.grainScaleY) || !Number.isFinite(record.flatWhite)
+        || !Number.isFinite(record.shadeMin) || record.shadeMin < 0 || record.shadeMin > 1
         || record.grainScaleX <= 0 || record.grainScaleY <= 0 || record.flatWhite <= 0) throw new Error("グレイン焼き込み入力が不正です");
       const afterBake = cloneImageData(before);
       for (let y = 0; y < before.height; y += 1) {
@@ -4031,9 +4531,11 @@
           const leather = masks.data[offset + 3] >= 128 && masks.data[offset] >= 128;
           if (!leather) continue;
           const shade = clamp(luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]) / record.flatWhite, 0, 1);
+          const strictLeather = masks.data[offset + 3] >= 128 && masks.data[offset] === 255 && masks.data[offset + 1] === 0 && masks.data[offset + 2] === 0;
+          const shadeEff = strictLeather ? Math.max(shade, record.shadeMin) : shade;
           const u = Math.floor((x + .5) / record.grainScaleX), v = Math.floor((y + .5) / record.grainScaleY);
           const grain = resource.map[mirrorIndex(v, resource.height) * resource.width + mirrorIndex(u, resource.width)];
-          const gray = Math.round(clamp(record.grainBase * shade * grain, 0, 255));
+          const gray = Math.round(clamp(record.grainBase * shadeEff * grain, 0, 255));
           afterBake.data[offset] = afterBake.data[offset + 1] = afterBake.data[offset + 2] = gray;
         }
       }
@@ -4053,6 +4555,8 @@
         || !Number.isFinite(config.grainAmp) || config.grainAmp <= 0 || config.grainAmp > 1
         || !Number.isInteger(config.grainRadiusPx) || config.grainRadiusPx <= 0
         || !Number.isFinite(config.grainScaleMm) || config.grainScaleMm <= 0
+        || !Number.isInteger(config.grainSourceInset) || config.grainSourceInset < 0
+        || !Number.isFinite(config.shadeMin) || config.shadeMin < 0 || config.shadeMin > 1
         || config.grainBase * (1 + config.grainAmp) > 255 || config.tileMode !== "mirror") throw new Error("グレイン設定が検査F-2契約に一致しません");
       const before = cloneImageData(base);
       const workMasks = cloneImageData(masks);
@@ -4066,8 +4570,10 @@
       setStatus(spec.label + " グレイン比率マップを生成中", "busy");
       const resource = explicitResource || await loadGrainResource(config, operationToken, materialKey);
       if (operationToken !== undefined) assertOperationToken(operationToken);
-      if (resource.materialKey !== materialKey || resource.sha256 !== manifest.sha256 || resource.radius !== config.grainRadiusPx || resource.amp !== config.grainAmp) throw new Error("グレインリソースが設定と一致しません");
-      const bakeRecord = { grainBase: config.grainBase, grainScaleX: grainScaleX, grainScaleY: grainScaleY, flatWhite: flatWhite };
+      if (resource.materialKey !== materialKey || resource.sha256 !== manifest.sha256 || resource.radius !== config.grainRadiusPx || resource.amp !== config.grainAmp
+        || resource.grainSourceInset !== config.grainSourceInset || resource.effectiveWidth !== resource.width || resource.effectiveHeight !== resource.height
+        || !/^[0-9a-f]{64}$/.test(resource.effectiveRoiSha256 || "")) throw new Error("グレインリソースが設定と一致しません");
+      const bakeRecord = { grainBase: config.grainBase, grainScaleX: grainScaleX, grainScaleY: grainScaleY, flatWhite: flatWhite, shadeMin: config.shadeMin };
       const baked = bakeFlatGrainMap(before, masks, resource, bakeRecord);
       const afterBake = baked.afterBake;
       base.data.set(afterBake.data);
@@ -4096,6 +4602,11 @@
           pxPerMmWorkW: pxPerMmWorkW,
           pxPerMmWorkH: pxPerMmWorkH,
           flatWhite: flatWhite,
+          grainSourceInset: resource.grainSourceInset,
+          effectiveWidth: resource.effectiveWidth,
+          effectiveHeight: resource.effectiveHeight,
+          effectiveRoiSha256: resource.effectiveRoiSha256,
+          shadeMin: config.shadeMin,
           tileMode: config.tileMode
         }
       };
@@ -4115,6 +4626,19 @@
       return Object.fromEntries(["alpha", "owner", "keep", "inpaint"].map(function (name) {
         return [name, cloneImageData(manual[name])];
       }));
+    }
+
+    function cloneSwanBeakAudit(audit) {
+      if (!audit) return null;
+      return {
+        alphaWithout: audit.alphaWithout.slice(0),
+        alphaWith: audit.alphaWith.slice(0),
+        expectedDiff: audit.expectedDiff.slice(0),
+        beakPxCount: audit.beakPxCount,
+        stonePxCount: audit.stonePxCount,
+        width: audit.width,
+        height: audit.height
+      };
     }
 
     function makeProcessJob(operationToken) {
@@ -4139,12 +4663,16 @@
         sourceImageData: cloneImageData(state.sourceImageData),
         manual: cloneManualLayers(state.manual),
         manualRecipeStats: state.manualRecipeStats ? jsonClone(state.manualRecipeStats) : null,
+        swanBeakAudit: key === "swan" ? cloneSwanBeakAudit(state.swanBeakAudit) : null,
         work: jsonClone(state.work),
         calibrationInput: jsonClone(currentCalibrationInput()),
         thresholds: Object.freeze({
           bgLow: Number(dom.bgLow.value),
           bgHigh: Number(dom.bgHigh.value),
-          logoThreshold: Number(dom.logoThreshold.value),
+          // Manual recipes (horseshoe / osanpo) own their logo mask directly;
+          // their threshold is contractually null and must never inherit the
+          // editable UI candidate threshold.
+          logoThreshold: spec.logoThreshold === null ? null : Number(spec.logoThreshold),
           stitchContrast: Number(dom.stitchContrast.value) / 100
         }),
         grainScaleMm: Number(dom.grainScaleMm.value),
@@ -4155,7 +4683,8 @@
     function computeDerived(base, masks, spec, baseMeta, calibrationInput) {
       const width = base.width, height = base.height;
       const coreLums = [];
-      let keepPxCount = 0, stitchPxCount = 0, logoPxCount = 0, identityViolations = 0;
+      let keepPxCount = 0, stitchPxCount = 0, logoPxCount = 0, identityViolations = 0, mixedOwnershipPxCount = 0;
+      const logoMask = new Uint8Array(width * height);
       for (let index = 0; index < width * height; index += 1) {
         const offset = index * 4;
         const baseAlpha = base.data[offset + 3], maskAlpha = masks.data[offset + 3];
@@ -4164,7 +4693,8 @@
         if (baseAlpha > 0 && maskAlpha < 128) keepPxCount += 1;
         if (baseAlpha === 0 && (maskAlpha !== 255 || r || g || b)) identityViolations += 1;
         if (maskAlpha >= 128 && b > 0) stitchPxCount += 1;
-        if (maskAlpha >= 128 && g > 0) logoPxCount += 1;
+        if (maskAlpha >= 128 && g > 0) { logoPxCount += 1; logoMask[index] = 1; }
+        if (maskAlpha >= 128 && r >= 128 && (g > 0 || b > 0)) mixedOwnershipPxCount += 1;
         if (baseAlpha === 255 && maskAlpha >= 128 && r === 255) coreLums.push(luminance(base.data[offset], base.data[offset + 1], base.data[offset + 2]));
       }
       coreLums.sort(function (a, b) { return a - b; });
@@ -4182,10 +4712,220 @@
       const distortion = Math.abs(pxPerMmW - pxPerMmH) / pxPerMmW;
       return {
         bboxPx: bboxPx, fgBboxPx: fgBboxPx, baseLum: baseLum, corePxCount: coreLums.length,
-        keepPxCount: keepPxCount, stitchPxCount: stitchPxCount, logoPxCount: logoPxCount, identityViolations: identityViolations,
+        keepPxCount: keepPxCount, stitchPxCount: stitchPxCount, logoPxCount: logoPxCount,
+        logoComponentCount: countMaskComponents8(logoMask, width, height), mixedOwnershipPxCount: mixedOwnershipPxCount,
+        identityViolations: identityViolations,
         edgePxCount: baseMeta.edgeCount, edgeBadPxCount: baseMeta.edgeBad,
         calibration: { mode: mode, widthLine: mode === "manual-line" ? widthLine : null, heightLine: mode === "manual-line" ? heightLine : null, widthMeasurePx: widthMeasure, heightMeasurePx: heightMeasure, pxPerMmW: pxPerMmW, pxPerMmH: pxPerMmH, distortion: distortion },
         pxPerMm: pxPerMmW
+      };
+    }
+
+    function dilate4Mask(mask, width, height, passes) {
+      let current = mask;
+      for (let pass = 0; pass < passes; pass += 1) {
+        const next = new Uint8Array(current);
+        for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+          const index = y * width + x;
+          if (current[index]) continue;
+          if ((x > 0 && current[index - 1]) || (x + 1 < width && current[index + 1])
+            || (y > 0 && current[index - width]) || (y + 1 < height && current[index + width])) next[index] = 1;
+        }
+        current = next;
+      }
+      return current;
+    }
+
+    function outerLeftoverStats(canonicalSource, alphaAfterCapture, spec, excludedMask) {
+      if (!canonicalSource || !alphaAfterCapture || canonicalSource.width * canonicalSource.height !== alphaAfterCapture.length) {
+        throw new Error("outerLeftover評価のcanonicalSource/alpha寸法が一致しません");
+      }
+      const width = canonicalSource.width, height = canonicalSource.height, count = width * height;
+      const alphaMask = new Uint8Array(count), outerBg = new Uint8Array(count), queue = new Int32Array(count);
+      for (let index = 0; index < count; index += 1) if (alphaAfterCapture[index] > 0) alphaMask[index] = 1;
+      let head = 0, tail = 0;
+      function enqueue(index) {
+        if (index < 0 || index >= count || alphaMask[index] || outerBg[index]) return;
+        outerBg[index] = 1; queue[tail++] = index;
+      }
+      for (let x = 0; x < width; x += 1) { enqueue(x); enqueue((height - 1) * width + x); }
+      for (let y = 1; y + 1 < height; y += 1) { enqueue(y * width); enqueue(y * width + width - 1); }
+      while (head < tail) {
+        const index = queue[head++], x = index % width, y = (index - x) / width;
+        if (x > 0) enqueue(index - 1); if (x + 1 < width) enqueue(index + 1); if (y > 0) enqueue(index - width); if (y + 1 < height) enqueue(index + width);
+      }
+      // `outside` is intentionally limited to the actual outer background;
+      // enclosed holes are never part of the residual audit.  `boundary` is
+      // exactly alphaAfterCapture ∩ dilate4(outerBg, 1), per §0-E-5.
+      const outside = dilate8Mask(alphaMask, width, height, 8), boundaryBg = dilate4Mask(outerBg, width, height, 1), boundary = new Uint8Array(count);
+      for (let index = 0; index < count; index += 1) if (alphaMask[index] && boundaryBg[index]) boundary[index] = 1;
+      let residualPx = 0, boundaryPx = 0;
+      for (let index = 0; index < count; index += 1) {
+        if (boundary[index]) boundaryPx += 1;
+        if (!outside[index] || outerBg[index] !== 1 || (excludedMask && excludedMask[index])) continue;
+        const offset = index * 4;
+        // RGB must come from canonicalSource, never from base.png (alpha=0
+        // RGB is undefined after defringe/PNG round trips).
+        const lum = luminance(canonicalSource.data[offset], canonicalSource.data[offset + 1], canonicalSource.data[offset + 2]);
+        if (lum < (spec.manualRecipe && spec.manualRecipe.outlineLumMax !== undefined ? spec.manualRecipe.outlineLumMax : .75)) residualPx += 1;
+      }
+      const thresholdPercent = spec.label === "horseshoe" ? 1 : 10;
+      return { residualPx: residualPx, boundaryPx: boundaryPx, ratePercent: boundaryPx ? residualPx / boundaryPx * 100 : Infinity, thresholdPercent: thresholdPercent };
+    }
+
+    function binaryMaskFromAlpha(alpha) {
+      const mask = new Uint8Array(alpha.length);
+      for (let index = 0; index < alpha.length; index += 1) if (alpha[index] > 0) mask[index] = 1;
+      return mask;
+    }
+
+    function xorMask(a, b) {
+      if (!a || !b || a.length !== b.length) throw new Error("差分マスク寸法が一致しません");
+      const out = new Uint8Array(a.length);
+      for (let index = 0; index < out.length; index += 1) out[index] = (a[index] ? 1 : 0) ^ (b[index] ? 1 : 0);
+      return out;
+    }
+
+    function maskCount(mask) {
+      let count = 0;
+      for (let index = 0; index < mask.length; index += 1) count += mask[index] ? 1 : 0;
+      return count;
+    }
+
+    function maskMismatchCount(a, b) {
+      if (!a || !b || a.length !== b.length) return Infinity;
+      let count = 0;
+      for (let index = 0; index < a.length; index += 1) if (!!a[index] !== !!b[index]) count += 1;
+      return count;
+    }
+
+    function maskSubsetViolation(subset, superset) {
+      if (!subset || !superset || subset.length !== superset.length) return Infinity;
+      let count = 0;
+      for (let index = 0; index < subset.length; index += 1) if (subset[index] && !superset[index]) count += 1;
+      return count;
+    }
+
+    function resampleBinaryMaskNearest(mask, width, height, axis, scale) {
+      if (!mask || mask.length !== width * height) throw new Error("binary maskの寸法が不正です");
+      const dstWidth = axis === "W" ? Math.round(width * scale) : width;
+      const dstHeight = axis === "H" ? Math.round(height * scale) : height;
+      if (dstWidth < 1 || dstHeight < 1) throw new Error("binary mask補正後の寸法が不正です");
+      const out = new Uint8Array(dstWidth * dstHeight);
+      const srcLength = axis === "W" ? width : height;
+      const dstLength = axis === "W" ? dstWidth : dstHeight;
+      for (let y = 0; y < dstHeight; y += 1) for (let x = 0; x < dstWidth; x += 1) {
+        const dstAxisIndex = axis === "W" ? x : y;
+        const nearestAxis = clamp(Math.floor((dstAxisIndex + .5) * srcLength / dstLength), 0, srcLength - 1);
+        const sx = axis === "W" ? nearestAxis : x;
+        const sy = axis === "H" ? nearestAxis : y;
+        out[y * dstWidth + x] = mask[sy * width + sx] ? 1 : 0;
+      }
+      return { mask: out, width: dstWidth, height: dstHeight };
+    }
+
+    async function maskSha256(mask) {
+      const bytes = new Uint8Array(mask.length);
+      for (let index = 0; index < mask.length; index += 1) bytes[index] = mask[index] ? 255 : 0;
+      return sha256(bytes);
+    }
+
+    async function evaluateSwanBeakAudit(audit, correction) {
+      if (!audit || !correction || !correction.aspectCorrection) return null;
+      const without = binaryMaskFromAlpha(audit.alphaWithout), withMask = binaryMaskFromAlpha(audit.alphaWith), expected = audit.expectedDiff;
+      const workXor = xorMask(without, withMask);
+      const workExpectedMismatch = maskMismatchCount(workXor, expected);
+      const workSubsetViolation = maskSubsetViolation(withMask, without);
+      const workCount = maskCount(expected);
+      const range = BEAK_OUTLINE_REMOVAL.beakExpectedDiffRange;
+      const workPass = workExpectedMismatch === 0 && workSubsetViolation === 0 && workCount >= range.countMin && workCount <= range.countMax;
+      const aspect = correction.aspectCorrection;
+      const transformedWithout = aspect.applied ? resampleBinaryMaskNearest(without, audit.width, audit.height, aspect.axis, aspect.effectiveScale) : { mask: without.slice(0), width: audit.width, height: audit.height };
+      const transformedWith = aspect.applied ? resampleBinaryMaskNearest(withMask, audit.width, audit.height, aspect.axis, aspect.effectiveScale) : { mask: withMask.slice(0), width: audit.width, height: audit.height };
+      const transformedExpected = aspect.applied ? resampleBinaryMaskNearest(expected, audit.width, audit.height, aspect.axis, aspect.effectiveScale) : { mask: expected.slice(0), width: audit.width, height: audit.height };
+      const assetXor = xorMask(transformedWithout.mask, transformedWith.mask);
+      const assetExpectedMismatch = maskMismatchCount(assetXor, transformedExpected.mask);
+      const assetSubsetViolation = maskSubsetViolation(transformedWith.mask, transformedWithout.mask);
+      const assetPass = assetExpectedMismatch === 0 && assetSubsetViolation === 0;
+      const keepPass = audit.beakPxCount === SWAN_KEEP_EXPECTED.beakPxCount
+        && audit.stonePxCount === SWAN_KEEP_EXPECTED.stonePxCount
+        && audit.beakPxCount + audit.stonePxCount === SWAN_KEEP_EXPECTED.totalPxCount;
+      const result = {
+        work: { pass: workPass, xorMismatchPx: workExpectedMismatch, subsetViolationPx: workSubsetViolation, count: workCount, width: audit.width, height: audit.height, sha256: await maskSha256(expected) },
+        asset: { pass: assetPass, xorMismatchPx: assetExpectedMismatch, subsetViolationPx: assetSubsetViolation, count: maskCount(transformedExpected.mask), width: transformedExpected.width, height: transformedExpected.height, sha256: await maskSha256(transformedExpected.mask) },
+        keep: { pass: keepPass, beakPxCount: audit.beakPxCount, stonePxCount: audit.stonePxCount, totalPxCount: audit.beakPxCount + audit.stonePxCount },
+        pass: workPass && assetPass && keepPass && (!!aspect.applied === (transformedExpected.width !== audit.width || transformedExpected.height !== audit.height))
+      };
+      if (!result.pass) throw new Error("swan BEAK_EXPECTED_DIFFの5条件が不合格です: " + JSON.stringify(result));
+      return result;
+    }
+
+    function inspections17Failures(inspections, spec) {
+      const failures = [];
+      if (!inspections || typeof inspections !== "object") return ["inspections17 missing"];
+      if (inspections.mixedOwnershipPxCount !== 0) failures.push("mixedOwnershipPxCount=" + inspections.mixedOwnershipPxCount);
+      const outer = inspections.outerLeftover;
+      const threshold = spec.label === "horseshoe" ? 1 : 10;
+      if (!outer || !Number.isFinite(outer.ratePercent) || outer.ratePercent > threshold || outer.thresholdPercent !== threshold) failures.push("outerLeftover rate/threshold");
+      const logo = inspections.logoInspection;
+      if (!logo || logo.logoThreshold !== spec.logoThreshold || logo.rangeCheck !== true) failures.push("logoRange");
+      const grain = inspections.grainLocalDeviation || {};
+      Object.keys(grain).forEach(function (materialKey) {
+        const deviation = grain[materialKey];
+        if (!deviation || !Number.isFinite(deviation.max) || deviation.max > .15 || deviation.threshold !== .15) failures.push("grainLocalDeviation=" + materialKey);
+      });
+      return failures;
+    }
+
+    function assertInspections17(inspections, spec, label) {
+      const failures = inspections17Failures(inspections, spec);
+      if (failures.length) throw new Error((label || spec.label) + " inspections17 fail-fast: " + failures.join("; "));
+    }
+
+    function medianNearest(values, index) {
+      const window = [];
+      for (let offset = -12; offset <= 12; offset += 1) window.push(values[Math.max(0, Math.min(values.length - 1, index + offset))]);
+      window.sort(function (a, b) { return a - b; });
+      return window[12];
+    }
+
+    function grainLocalDeviation(grainContext) {
+      if (!grainContext || !grainContext.afterBake || !grainContext.workMasks) return null;
+      const base = grainContext.afterBake, masks = grainContext.workMasks, width = base.width, height = base.height;
+      const rows = [], cols = [];
+      for (let y = 0; y < height; y += 1) {
+        let sum = 0, count = 0;
+        for (let x = 0; x < width; x += 1) { const offset = (y * width + x) * 4; if (masks.data[offset + 3] >= 128 && masks.data[offset] >= 128) { sum += base.data[offset] / 255; count += 1; } }
+        if (count >= 40) rows.push(sum / count);
+      }
+      for (let x = 0; x < width; x += 1) {
+        let sum = 0, count = 0;
+        for (let y = 0; y < height; y += 1) { const offset = (y * width + x) * 4; if (masks.data[offset + 3] >= 128 && masks.data[offset] >= 128) { sum += base.data[offset] / 255; count += 1; } }
+        if (count >= 40) cols.push(sum / count);
+      }
+      if (rows.length < 25 || cols.length < 25) return { rowDev: NaN, colDev: NaN, max: Infinity, threshold: .15 };
+      let rowDev = -Infinity, colDev = -Infinity;
+      rows.forEach(function (value, index) { rowDev = Math.max(rowDev, value - medianNearest(rows, index)); });
+      cols.forEach(function (value, index) { colDev = Math.max(colDev, value - medianNearest(cols, index)); });
+      return { rowDev: rowDev, colDev: colDev, max: Math.max(rowDev, colDev), threshold: .15 };
+    }
+
+    function inspections17For(spec, derived, correction, grainContext, canonicalSource, manual) {
+      const grain = grainContext && grainContext.record;
+      const excluded = manual && manual.keep ? alphaToArray(manual.keep) : null;
+      if (spec.label === "swan" && excluded && correction.swanBeakAudit && correction.swanBeakAudit.expectedDiff) {
+        for (let index = 0; index < excluded.length; index += 1) if (correction.swanBeakAudit.expectedDiff[index]) excluded[index] = 255;
+      }
+      return {
+        mixedOwnershipPxCount: derived.mixedOwnershipPxCount,
+        outerLeftover: outerLeftoverStats(canonicalSource, correction.workAlpha || alphaToArray(correction.base), spec, excluded),
+        grainLocalDeviation: grain ? { [grain.materialKey]: grainLocalDeviation(grainContext) } : {},
+        logoInspection: {
+          logoPxCountWork: correction.preDerived.logoPxCount,
+          logoComponentCountWork: correction.preDerived.logoComponentCount,
+          logoThreshold: spec.logoThreshold,
+          rangeCheck: spec.logoRange ? (correction.preDerived.logoPxCount >= spec.logoRange.countMin && correction.preDerived.logoPxCount <= spec.logoRange.countMax && correction.preDerived.logoComponentCount >= spec.logoRange.componentMin && correction.preDerived.logoComponentCount <= spec.logoRange.componentMax) : false
+        }
       };
     }
 
@@ -4302,6 +5042,7 @@
         baseMeta: assetMeta,
         workSize: { w: base.width, h: base.height },
         assetSize: { w: assetBase.width, h: assetBase.height },
+        workAlpha: alphaToArray(base),
         aspectCorrection: aspectCorrection,
         stitchPathsWork: stitchPathsWork,
         stitchPathsAsset: stitchPathsAsset,
@@ -4546,7 +5287,7 @@
 
     function flatCheckDetail(finalCoreCount, finalCoreNonGray, peerComplete, failures, mutationGate) {
       const detected = mutationGate && Number.isInteger(mutationGate.detectedCount) ? mutationGate.detectedCount : 0;
-      const required = mutationGate && Number.isInteger(mutationGate.requiredCount) ? mutationGate.requiredCount : 5;
+      const required = mutationGate && Number.isInteger(mutationGate.requiredCount) ? mutationGate.requiredCount : 6;
       return "F-1 core=" + finalCoreCount + "/nonGray=" + finalCoreNonGray
         + " / F-oracle mutation " + detected + "/" + required + (mutationGate && mutationGate.pass === true ? " PASS" : " FAIL")
         + " / F-2 grain / F-3 material / F-4 variants"
@@ -4569,7 +5310,7 @@
       const grainBlob = await imageDataToBlob(grainImage);
       const rawBytes = await grainBlob.arrayBuffer();
       const resource = { file: "flat-oracle-mutation.png", sha256: await sha256(rawBytes), width: width, height: height, rawBytes: rawBytes, sourceImageData: grainImage };
-      const defaultRecord = { grainRadiusPx: radius, grainAmp: amp, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
+      const defaultRecord = { grainRadiusPx: radius, grainAmp: amp, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1, shadeMin: GRAIN_DEFAULTS.shadeMin };
       const oracleResource = await getFlatOracleResource(resource, defaultRecord, operationToken);
       const productionG0 = new Float64Array(width * height);
       for (let index = 0; index < productionG0.length; index += 1) {
@@ -4667,11 +5408,40 @@
         baseline: nonLeatherBaseline.audit,
         audit: nonLeatherAudit
       };
+      // Revision 17 mutation: applying shadeMin to a non-one-hot ownership
+      // pixel must be detected. Keep R=255 and inject G=255 at the first
+      // low-luminance leather pixel, then deliberately bake the wrong value.
+      const shadeMutationMasks = cloneImageData(masks);
+      let shadeMutationOffset = -1;
+      for (let offset = 0; offset < shadeMutationMasks.data.length; offset += 4) {
+        if (shadeMutationMasks.data[offset + 3] >= 128 && shadeMutationMasks.data[offset] === 255
+          && luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]) < defaultRecord.shadeMin) {
+          shadeMutationOffset = offset; break;
+        }
+      }
+      let shadeMutation = { detected: false, reason: "no suitable non-one-hot mutation pixel" };
+      if (shadeMutationOffset >= 0) {
+        shadeMutationMasks.data[shadeMutationOffset + 1] = 255;
+        const wrongAfter = cloneImageData(before);
+        for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+          const offset = rgbaIndex(x, y, width), leather = shadeMutationMasks.data[offset + 3] >= 128 && shadeMutationMasks.data[offset] >= 128;
+          if (!leather) continue;
+          const shade = clamp(luminance(before.data[offset], before.data[offset + 1], before.data[offset + 2]) / defaultRecord.flatWhite, 0, 1);
+          const shadeEff = Math.max(shade, defaultRecord.shadeMin); // intentionally wrong for non-one-hot owners
+          const u = Math.floor((x + .5) / defaultRecord.grainScaleX), v = Math.floor((y + .5) / defaultRecord.grainScaleY);
+          const grain = correct[mirrorIndex(v, height) * width + mirrorIndex(u, width)];
+          const gray = Math.round(clamp(defaultRecord.grainBase * shadeEff * grain, 0, 255));
+          wrongAfter.data[offset] = wrongAfter.data[offset + 1] = wrongAfter.data[offset + 2] = gray;
+        }
+        const shadeAudit = await auditFlatBakeOracle(oracleResource, before, wrongAfter, shadeMutationMasks, defaultRecord);
+        shadeMutation = { detected: shadeAudit.expectedMismatchPxCount > 0, audit: shadeAudit, mutationOffset: shadeMutationOffset };
+      }
+      mutations.shadeMinScope = shadeMutation;
       const detectedCount = Object.values(mutations).filter(function (item) { return item.detected; }).length;
       return {
-        pass: normalPass && detectedCount === 5,
+        pass: normalPass && detectedCount === 6,
         normal: { pass: normalPass, audit: normal.audit },
-        requiredCount: 5,
+        requiredCount: 6,
         detectedCount: detectedCount,
         mutations: mutations
       };
@@ -4708,8 +5478,8 @@
       let mutationGate = null;
       try { mutationGate = await getFlatOracleMutationGate(operationToken); }
       catch (error) { failures.push("F oracle mutation gate: " + error.message); }
-      if (!mutationGate || mutationGate.pass !== true || mutationGate.requiredCount !== 5 || mutationGate.detectedCount !== 5) {
-        failures.push("F oracle mutation gate did not detect all 5 mutations");
+      if (!mutationGate || mutationGate.pass !== true || mutationGate.requiredCount !== 6 || mutationGate.detectedCount !== 6) {
+        failures.push("F oracle mutation gate did not detect all 6 mutations");
       }
       let finalCoreCount = 0, finalCoreNonGray = 0;
       for (let offset = 0; offset < base.data.length; offset += 4) {
@@ -4726,7 +5496,13 @@
         || !Number.isInteger(record.grainBase) || record.grainBase < 1 || record.grainBase > 255
         || !Number.isFinite(record.grainAmp) || record.grainAmp <= 0 || record.grainAmp > 1
         || !Number.isInteger(record.grainRadiusPx) || record.grainRadiusPx <= 0
-        || !Number.isFinite(record.grainScaleMm) || record.grainScaleMm <= 0 || !recomputedWork
+        || !Number.isFinite(record.grainScaleMm) || record.grainScaleMm <= 0
+        || record.grainSourceInset !== GRAIN_DEFAULTS.grainSourceInset
+        || !Number.isInteger(record.effectiveWidth) || record.effectiveWidth !== MATERIAL_PROFILES[record.materialKey].canonicalOutput.width - record.grainSourceInset * 2
+        || !Number.isInteger(record.effectiveHeight) || record.effectiveHeight !== MATERIAL_PROFILES[record.materialKey].canonicalOutput.height - record.grainSourceInset * 2
+        || !/^[0-9a-f]{64}$/.test(record.effectiveRoiSha256 || "")
+        || !grainContext || !grainContext.oracleGrainResource || record.effectiveRoiSha256 !== grainContext.oracleGrainResource.effectiveRoiSha256
+        || !Number.isFinite(record.shadeMin) || record.shadeMin !== GRAIN_DEFAULTS.shadeMin || !recomputedWork
         || !numbersEqual(record.pxPerMmWorkW, recomputedWork.pxPerMmWorkW) || !numbersEqual(record.pxPerMmWorkH, recomputedWork.pxPerMmWorkH)
         || !numbersEqual(record.flatWhite, recomputedWork.flatWhite)
         || !numbersEqual(record.grainScaleX, record.grainScaleMm * recomputedWork.pxPerMmWorkW)
@@ -4997,6 +5773,10 @@
         pxPerMm: derived.pxPerMm,
         baseLum: derived.baseLum,
         keepPxCount: derived.keepPxCount,
+        keepPxCountWork: correction.preDerived ? correction.preDerived.keepPxCount : derived.keepPxCount,
+        logoPxCountWork: correction.preDerived ? correction.preDerived.logoPxCount : derived.logoPxCount,
+        logoComponentCountWork: correction.preDerived ? correction.preDerived.logoComponentCount : derived.logoComponentCount,
+        mixedOwnershipPxCount: derived.mixedOwnershipPxCount,
         aspectCorrection: correction.aspectCorrection,
         stitchPathsAsset: correction.stitchPathsAsset,
         corePxCount: derived.corePxCount,
@@ -5064,6 +5844,9 @@
       const checks = checks1to7.concat([manifestCheck, flatCheck, { status: "pending", detail: "書き出し済みアーカイブの再読込待ち", values: {} }]);
       const stitchDiff = countRgbDiff(decodedWhiteOutput, decodedBlackOutput);
       const browser = browserInfo();
+      const inspections17 = inspections17For(spec, decodedDerived, decodedCorrection, grainContext, job.sourceImageData, job.manual);
+      assertInspections17(inspections17, spec, key);
+      const swanBeakAuditResult = key === "swan" ? await evaluateSwanBeakAudit(job.swanBeakAudit, decodedCorrection) : null;
 
       const prep = {
         schemaVersion: SCHEMA_VERSION,
@@ -5086,6 +5869,7 @@
           order: ["transform", "auto-alpha", "manual-alpha", "defringe", "auto-owner", "manual-owner", "manual-keep", "manual-inpaint", "grain-bake-if-colorless", "grain-redefringe-if-colorless", "derived-work", "aspect-correction-geometry", "aspect-correction-redefringe", "derived-asset", "checks"]
         },
         manual: publicManualRecords(manualRecords),
+        inspections17: inspections17,
         inputs: {
           sizeMm: spec.sizeMm,
           sizeMmMeasured: { confirmed: spec.sizeMmMeasured.confirmed, receivedAt: spec.sizeMmMeasured.receivedAt },
@@ -5107,6 +5891,11 @@
             grainScaleMm: grainContext.record.grainScaleMm, grainScaleX: grainContext.record.grainScaleX,
             grainScaleY: grainContext.record.grainScaleY, pxPerMmWorkW: grainContext.record.pxPerMmWorkW,
             pxPerMmWorkH: grainContext.record.pxPerMmWorkH, flatWhite: grainContext.record.flatWhite,
+            grainSourceInset: grainContext.record.grainSourceInset,
+            effectiveWidth: grainContext.record.effectiveWidth,
+            effectiveHeight: grainContext.record.effectiveHeight,
+            effectiveRoiSha256: grainContext.record.effectiveRoiSha256,
+            shadeMin: grainContext.record.shadeMin,
             tileMode: grainContext.record.tileMode
           } } : null
         },
@@ -5121,7 +5910,9 @@
       return {
         checks: checks, prep: prep, baseBlob: baseBlob, masksBlob: masksBlob, manualRecords: manualRecords, stitchDiff: stitchDiff,
         base: decodedBase, masks: decodedMasks, derived: decodedDerived, correction: decodedCorrection,
-        previews: { white: decodedWhiteOutput, black: decodedBlackOutput }
+        previews: { white: decodedWhiteOutput, black: decodedBlackOutput },
+        swanBeakAudit: swanBeakAuditResult,
+        inspections17: inspections17
       };
     }
 
@@ -5199,6 +5990,11 @@
           assertArchive(Number.isInteger(grain.grainBase) && grain.grainBase >= 1 && grain.grainBase <= 255
             && Number.isFinite(grain.grainAmp) && grain.grainAmp > 0 && grain.grainAmp <= 1
             && grain.grainRadiusPx === GRAIN_DEFAULTS.grainRadiusPx
+            && grain.grainSourceInset === GRAIN_DEFAULTS.grainSourceInset
+            && grain.effectiveWidth === MATERIAL_PROFILES[materialKey].canonicalOutput.width - grain.grainSourceInset * 2
+            && grain.effectiveHeight === MATERIAL_PROFILES[materialKey].canonicalOutput.height - grain.grainSourceInset * 2
+            && /^[0-9a-f]{64}$/.test(grain.effectiveRoiSha256 || "")
+            && Number.isFinite(grain.shadeMin) && grain.shadeMin === GRAIN_DEFAULTS.shadeMin
             && Number.isFinite(grain.grainScaleMm) && grain.grainScaleMm > 0
             && Number.isFinite(grain.grainScaleX) && grain.grainScaleX > 0
             && Number.isFinite(grain.grainScaleY) && grain.grainScaleY > 0
@@ -5245,7 +6041,8 @@
       assertArchive(pipeline.background && Number.isFinite(pipeline.background.low) && Number.isFinite(pipeline.background.high)
         && pipeline.background.low >= 0 && pipeline.background.high > pipeline.background.low && pipeline.background.high <= 255, key + " background閾値が不正です");
       assertFiniteRecord(pipeline.background.sampledRgb, ["r", "g", "b"], key + " sampledRgb");
-      assertArchive(Number.isFinite(pipeline.logoThreshold) && pipeline.logoThreshold >= 0 && pipeline.logoThreshold <= 100, key + " logoThresholdが不正です");
+      assertArchive(pipeline.logoThreshold === null || (Number.isFinite(pipeline.logoThreshold) && pipeline.logoThreshold >= 0 && pipeline.logoThreshold <= 100), key + " logoThresholdが不正です");
+      assertArchive(pipeline.logoThreshold === expected.logoThreshold, key + " logoThresholdがCHARM_SPECSと一致しません");
       assertArchive(Number.isFinite(pipeline.stitchContrast) && pipeline.stitchContrast >= 0 && pipeline.stitchContrast <= 1, key + " stitchContrastが不正です");
       const order = ["transform", "auto-alpha", "manual-alpha", "defringe", "auto-owner", "manual-owner", "manual-keep", "manual-inpaint", "grain-bake-if-colorless", "grain-redefringe-if-colorless", "derived-work", "aspect-correction-geometry", "aspect-correction-redefringe", "derived-asset", "checks"];
       assertArchive(jsonEqual(pipeline.order, order), key + " pipeline.orderが一致しません");
@@ -5263,6 +6060,23 @@
       assertArchive(prep.expectedOutput.base.width === pipeline.assetSize.w && prep.expectedOutput.base.height === pipeline.assetSize.h
         && prep.expectedOutput.masks.width === pipeline.assetSize.w && prep.expectedOutput.masks.height === pipeline.assetSize.h, key + " assetSizeとexpectedOutput寸法が一致しません");
       assertArchive(prep.derived && typeof prep.derived === "object" && prep.checks && typeof prep.checks === "object" && !Array.isArray(prep.checks), key + " derived/checksがありません");
+      assertArchive(prep.inspections17 && typeof prep.inspections17 === "object", key + " inspections17がありません");
+      assertArchive(Number.isInteger(prep.inspections17.mixedOwnershipPxCount) && prep.inspections17.mixedOwnershipPxCount >= 0, key + " inspections17.mixedOwnershipPxCountが不正です");
+      const outer = prep.inspections17.outerLeftover;
+      assertArchive(outer && Number.isInteger(outer.residualPx) && outer.residualPx >= 0 && Number.isInteger(outer.boundaryPx) && outer.boundaryPx > 0
+        && Number.isFinite(outer.ratePercent) && outer.ratePercent >= 0 && (outer.thresholdPercent === 1 || outer.thresholdPercent === 10), key + " inspections17.outerLeftoverが不正です");
+      const logoInspection = prep.inspections17.logoInspection;
+      assertArchive(logoInspection && Number.isInteger(logoInspection.logoPxCountWork) && logoInspection.logoPxCountWork >= 0
+        && Number.isInteger(logoInspection.logoComponentCountWork) && logoInspection.logoComponentCountWork >= 0
+        && (logoInspection.logoThreshold === null || Number.isFinite(logoInspection.logoThreshold)), key + " inspections17.logoInspectionが不正です");
+      assertArchive(logoInspection.logoThreshold === expected.logoThreshold && logoInspection.logoPxCountWork === prep.derived.logoPxCountWork
+        && logoInspection.logoComponentCountWork === prep.derived.logoComponentCountWork, key + " inspections17.logoInspectionとderivedが不一致です");
+      Object.keys(prep.inspections17.grainLocalDeviation || {}).forEach(function (materialKey) {
+        const deviation = prep.inspections17.grainLocalDeviation[materialKey];
+        assertArchive(deviation && Number.isFinite(deviation.rowDev) && Number.isFinite(deviation.colDev) && Number.isFinite(deviation.max) && deviation.threshold === .15, key + " grainLocalDeviationが不正です");
+      });
+      try { assertInspections17(prep.inspections17, expected, key + " archive"); }
+      catch (error) { throw new Error(error.message); }
       assertArchive(jsonEqual(Object.keys(prep.checks).sort(), ["1", "2", "3", "4", "5", "6", "7", "F", "M"]), key + " checksは1〜7・M・Fの完全列挙が必要です");
       Object.keys(prep.checks).forEach(function (checkKey) {
         const check = prep.checks[checkKey];
@@ -5390,10 +6204,12 @@
         assertArchive(bitmap.width > 0 && bitmap.height > 0 && bitmap.width <= 10000 && bitmap.height <= 10000, key + " source寸法が不正です");
         const crop = normalizeSourceRect(prep.pipeline.crop, bitmap.width, bitmap.height, key + " crop");
         const work = prep.pipeline.workSize;
+        if (key === "swan") return renderColorlessReferenceImageData(bitmap, crop, work);
         const canvas = document.createElement("canvas");
         setCanvasSize(canvas, work.w, work.h);
-        getContext(canvas).drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, work.w, work.h);
-        return getContext(canvas).getImageData(0, 0, work.w, work.h);
+        const context = getContext(canvas); context.imageSmoothingEnabled = true;
+        context.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, work.w, work.h);
+        return context.getImageData(0, 0, work.w, work.h);
       } finally {
         if (bitmap.close) bitmap.close();
       }
@@ -5425,6 +6241,7 @@
       const preDerived = computeDerived(baseMeta.imageData, masks, spec, baseMeta, calibrationInput);
       const correction = applyAspectCorrection(baseMeta.imageData, masks, spec, preDerived, baseMeta, calibrationInput);
       correction.grainContext = grainContext;
+      correction.swanBeakAudit = key === "swan" ? regenerateSwanBeakAudit(source, spec) : null;
       const derived = correction.derived;
       const verificationBlackTarget = variantTarget("calf:black");
       const stitchOutputs = stitchVerificationOutputs(correction.base, correction.masks, derived, verificationBlackTarget, spec, correction.stitchPathsAsset);
@@ -5456,6 +6273,9 @@
         }).filter(Boolean);
         throw new Error(key + " 再生成した検査1〜7＋M/FにFAILがあります / " + failedChecks.join(" | "));
       }
+      const regeneratedInspections17 = inspections17For(spec, decodedDerived, decodedCorrection, grainContext, source, inputs.manual);
+      assertInspections17(regeneratedInspections17, spec, key + " 再生成");
+      if (key === "swan") await evaluateSwanBeakAudit(decodedCorrection.swanBeakAudit, decodedCorrection);
       const mismatches = [];
       if (!imageDataEqual(decodedBase, archivedOutputs.base.imageData)) mismatches.push("base decoded RGBA");
       if (!imageDataEqual(decodedMasks, archivedOutputs.masks.imageData)) mismatches.push("masks decoded RGBA");
@@ -5466,6 +6286,7 @@
       if (!jsonEqual(publicChecksRecord(checks), prep.checks)) mismatches.push("checks 1-7/M/F record");
       if (!jsonEqual(correction.workSize, pipeline.workSize) || !jsonEqual(correction.assetSize, pipeline.assetSize)) mismatches.push("work/asset size");
       if (!jsonEqual(correction.stitchPathsWork, prep.inputs.stitchPathsWork) || !jsonEqual(correction.stitchPathsAsset, prep.derived.stitchPathsAsset)) mismatches.push("stitch paths");
+      if (!jsonEqual(regeneratedInspections17, prep.inspections17)) mismatches.push("inspections17");
       if (mismatches.length) throw new Error(key + " 再生成不一致: " + mismatches.join(", "));
       return { base: decodedBase, masks: decodedMasks, derived: decodedDerived, correction: decodedCorrection, checks: checks };
     }
@@ -6049,6 +6870,7 @@
         const preDerived = computeDerived(baseMeta.imageData, masks, spec, baseMeta, calibrationInput);
         const correction = applyAspectCorrection(baseMeta.imageData, masks, spec, preDerived, baseMeta, calibrationInput);
         correction.grainContext = grainContext;
+        correction.swanBeakAudit = job.swanBeakAudit;
         const derived = correction.derived;
         const ivoryTarget = variantTarget("calf:ivory");
         const artifacts = await buildChecksAndConfig(job, correction.base, correction.masks, derived, correction.baseMeta, correction, grainContext);
@@ -6137,8 +6959,8 @@
         const failures = Array.isArray(previousValues.failures) ? previousValues.failures.filter(function (failure) { return failure !== "F-2 grainScaleMm peer mismatch"; }) : [];
         if (!complete || !same) failures.push("F-2 grainScaleMm peer mismatch");
         const mutationGate = previousValues.mutationGate;
-        const mutationFailure = "F oracle mutation gate did not detect all 5 mutations";
-        if ((!mutationGate || mutationGate.pass !== true || mutationGate.requiredCount !== 5 || mutationGate.detectedCount !== 5)
+        const mutationFailure = "F oracle mutation gate did not detect all 6 mutations";
+        if ((!mutationGate || mutationGate.pass !== true || mutationGate.requiredCount !== 6 || mutationGate.detectedCount !== 6)
           && !failures.includes(mutationFailure)) {
           failures.push(mutationFailure);
         }
@@ -6240,6 +7062,84 @@
       return { provided: true, applied: true, stitchMode: mode, threadColor: threadColor, stitchPathsWork: stitchPathsWork };
     }
 
+    async function loadCanonicalWorkForSelfTest(key) {
+      const spec = CHARM_SPECS[key];
+      const response = await fetch(spec.source, { cache: "no-store" });
+      if (!response.ok) throw new Error(key + " canonicalSource HTTP " + response.status);
+      const bytes = await response.arrayBuffer();
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: mimeForSource(spec.source) }));
+      try {
+        const crop = spec.cropSource ? normalizeSourceRect(spec.cropSource, bitmap.width, bitmap.height, key + " cropSource") : { x: 0, y: 0, w: bitmap.width, h: bitmap.height };
+        const work = computeWork(bitmap.width, bitmap.height, spec, crop);
+        return {
+          source: renderWorkImageData(bitmap, crop, work, spec),
+          work: work,
+          bytes: bytes
+        };
+      } finally {
+        if (bitmap.close) bitmap.close();
+      }
+    }
+
+    function selfTestManualGeneration(source, spec) {
+      const savedManual = state.manual, savedStats = state.manualRecipeStats, savedAudit = state.swanBeakAudit;
+      try {
+        state.manual = { alpha: emptyLayer(source.width, source.height), owner: emptyLayer(source.width, source.height), keep: emptyLayer(source.width, source.height), inpaint: emptyLayer(source.width, source.height) };
+        state.manualRecipeStats = null; state.swanBeakAudit = null;
+        seedDeterministicManualLayers(spec, source);
+        return {
+          manual: cloneManualLayers(state.manual),
+          stats: state.manualRecipeStats ? jsonClone(state.manualRecipeStats) : null,
+          swanBeakAudit: cloneSwanBeakAudit(state.swanBeakAudit)
+        };
+      } finally {
+        state.manual = savedManual; state.manualRecipeStats = savedStats; state.swanBeakAudit = savedAudit;
+      }
+    }
+
+    function selfTestCalibration(spec, work) {
+      if (spec.calibration.mode === "manual-line") return {
+        mode: "manual-line",
+        widthLine: spec.calibration.widthLine,
+        heightLine: spec.calibration.heightLine
+      };
+      return { mode: "bbox", widthLine: null, heightLine: null };
+    }
+
+    async function buildSelfTestGrainResources(materialKey) {
+      const manifest = grainManifestFor(materialKey);
+      const resource = await fetchImageResource(manifest.file, manifest.sha256);
+      const identity = { materialKey: materialKey, file: manifest.file, sha256: manifest.sha256, rawBytes: resource.bytes };
+      const accepted = await buildGrainResource(resource.imageData, Object.assign({}, GRAIN_DEFAULTS, { grainSourceInset: GRAIN_DEFAULTS.grainSourceInset }), identity);
+      const inset0 = await buildGrainResource(resource.imageData, Object.assign({}, GRAIN_DEFAULTS, { grainSourceInset: 0 }), identity);
+      return { accepted: accepted, inset0: inset0 };
+    }
+
+    async function selfTestCharmGeneration(key, grainResources) {
+      const spec = CHARM_SPECS[key], loaded = await loadCanonicalWorkForSelfTest(key), generated = selfTestManualGeneration(loaded.source, spec);
+      const matte = buildMatte(loaded.source, generated.manual.alpha, 12, 32);
+      const alpha = matte.alpha, baseMeta = buildBase(loaded.source, alpha), calibration = selfTestCalibration(spec, loaded.work);
+      baseMeta.background = matte.background;
+      const masks = buildMasks(baseMeta.imageData, alpha, spec, generated.manual.owner, generated.manual.keep, loaded.work.logoRoi, spec.logoThreshold, Number(dom.stitchContrast.value) / 100);
+      const grainBefore = cloneImageData(baseMeta.imageData);
+      let grainContext = null, insetDeviation = null;
+      if (spec.sourceMode === "colorless") {
+        grainContext = await applyColorlessGrain(baseMeta.imageData, masks, spec, baseMeta, calibration, { grainScaleMm: GRAIN_DEFAULTS.grainScaleMm, materialKey: "calf", grainSourceInset: GRAIN_DEFAULTS.grainSourceInset, shadeMin: GRAIN_DEFAULTS.shadeMin }, grainResources.accepted);
+        const insetBaseMeta = { imageData: grainBefore, background: baseMeta.background, edgeCount: baseMeta.edgeCount, edgeBad: baseMeta.edgeBad, nearest: baseMeta.nearest };
+        const insetContext = await applyColorlessGrain(grainBefore, masks, spec, insetBaseMeta, calibration, { grainScaleMm: GRAIN_DEFAULTS.grainScaleMm, materialKey: "calf", grainSourceInset: 0, shadeMin: GRAIN_DEFAULTS.shadeMin }, grainResources.inset0);
+        insetDeviation = grainLocalDeviation(insetContext);
+      }
+      const preDerived = computeDerived(baseMeta.imageData, masks, spec, baseMeta, calibration);
+      const correction = applyAspectCorrection(baseMeta.imageData, masks, spec, preDerived, baseMeta, calibration);
+      correction.swanBeakAudit = generated.swanBeakAudit;
+      const excluded = alphaToArray(generated.manual.keep);
+      if (generated.swanBeakAudit && generated.swanBeakAudit.expectedDiff) for (let index = 0; index < excluded.length; index += 1) if (generated.swanBeakAudit.expectedDiff[index]) excluded[index] = 255;
+      const outer = outerLeftoverStats(loaded.source, correction.workAlpha, spec, excluded);
+      const logoCount = preDerived.logoPxCount, logoComponents = preDerived.logoComponentCount;
+      const result = { key: key, source: loaded.source, work: loaded.work, generated: generated, masks: masks, preDerived: preDerived, correction: correction, outer: outer, logoCount: logoCount, logoComponents: logoComponents, grain: grainContext ? { accepted: grainLocalDeviation(grainContext), inset0: insetDeviation } : null };
+      return result;
+    }
+
     async function runInternalSelfTestsBody() {
       // 自己検査はUI全体をロックしない。production入口のロックと、manual import/editorの許可を検証するため、
       // 各production関数が必要な範囲で個別にbeginOperationする。
@@ -6294,7 +7194,7 @@
         }) && charmKeys.every(function (key) {
           return CHARM_SPECS[key].sizeMmMeasured.confirmed === true && CHARM_SPECS[key].sizeMmMeasured.receivedAt;
         });
-        record("phase3-schema-and-version", TOOL_VERSION === "0.7.0" && SCHEMA_VERSION === 5, "toolVersion=" + TOOL_VERSION + ", schemaVersion=" + SCHEMA_VERSION);
+        record("phase3-schema-and-version", TOOL_VERSION === "0.8.0" && SCHEMA_VERSION === 6, "toolVersion=" + TOOL_VERSION + ", schemaVersion=" + SCHEMA_VERSION);
         record("phase3-counts", charmKeys.length === 8 && materialKeys.length === 2 && LEATHER_VARIANTS.length === 27 && calfVariants.length === 24 && chevreVariants.length === 3, "charms=" + charmKeys.length + ", materials=" + materialKeys.length + ", variants=" + LEATHER_VARIANTS.length + ", calf=" + calfVariants.length + ", chevre=" + chevreVariants.length);
         record("phase3-source-tone-one-to-one", sourceModeToneModePass && sourceKeys.length === charmKeys.length, "all canonical sources are colorless/flat");
         const freeze = await loadColorFreeze();
@@ -6365,15 +7265,40 @@
         record("phase3-frenchie-crop-source", jsonEqual(CHARM_SPECS.frenchie.cropSource, FRENCHIE_CROP_SOURCE)
           && FRENCHIE_CROP_SOURCE.x === 320 && FRENCHIE_CROP_SOURCE.y === 848 && FRENCHIE_CROP_SOURCE.w === 1105 && FRENCHIE_CROP_SOURCE.h === 1312,
           JSON.stringify(CHARM_SPECS.frenchie.cropSource));
+        const closedWhiteKeys = ["horse", "frenchie", "dachshund", "toypoodle", "cat", "swan"];
+        const closedWhiteCommonPass = jsonEqual(
+          Object.fromEntries(["backgroundDistance", "autoAlphaLow", "autoAlphaHigh", "designPaddingPx", "sealPasses", "mainComponentAreaFraction"].map(function (name) { return [name, COLORLESS_CLOSED_WHITE[name]]; })),
+          { backgroundDistance: 14, autoAlphaLow: 12, autoAlphaHigh: 32, designPaddingPx: 12, sealPasses: 2, mainComponentAreaFraction: .05 }
+        );
+        const closedWhitePass = COLORLESS_CLOSED_WHITE.id === "colorless-closedwhite-20260730-v1"
+          && closedWhiteCommonPass
+          && closedWhiteKeys.every(function (key) {
+            const recipe = CHARM_SPECS[key].manualRecipe, expected = COLORLESS_CLOSED_WHITE_SPECS[key];
+            return recipe && recipe.id === COLORLESS_CLOSED_WHITE.id && jsonEqual(recipe, Object.assign({}, COLORLESS_CLOSED_WHITE, expected));
+          });
+        record("phase3-colorless-closedwhite-contract", closedWhitePass, "6種 closedWhite id/共通定数/チャーム別 range・seed を照合");
+        const swanBeakExpected = { beakSatMin: 40, beakValueMin: 60, beakRoiPaddingPx: 12, beakOutlineRadius: 12, beakBridgeRadius: 3, beakExpectedDiffRange: { countMin: 1069, countMax: 1307 } };
+        record("phase3-swan-beak-keep-contract", jsonEqual(BEAK_OUTLINE_REMOVAL, swanBeakExpected)
+          && jsonEqual(CHARM_SPECS.swan.beakRemoval, swanBeakExpected)
+          && jsonEqual(CHARM_SPECS.swan.stoneRoi, [.5245, .7600, .6155, .8158])
+          && CHARM_SPECS.swan.stoneLumMax === .965, "swan BEAK_OUTLINE_REMOVAL/stone keep 定数を照合");
+        const horseStitchContractPass = CHARM_SPECS.horse.stitchMode === "none" && CHARM_SPECS.horse.threadColor === null && Array.isArray(CHARM_SPECS.horse.stitchPathsWork) && CHARM_SPECS.horse.stitchPathsWork.length === 0;
+        record("phase3-horse-stitch-contract", horseStitchContractPass, "horse stitchMode=none / threadColor=null / stitchPathsWork=[]");
+        const grainContractPass = GRAIN_DEFAULTS.grainSourceInset === 2 && GRAIN_DEFAULTS.shadeMin === .78
+          && MATERIAL_PROFILES.calf.canonicalOutput.width - GRAIN_DEFAULTS.grainSourceInset * 2 === 1007
+          && MATERIAL_PROFILES.calf.canonicalOutput.height - GRAIN_DEFAULTS.grainSourceInset * 2 === 672
+          && MATERIAL_PROFILES.chevre.canonicalOutput.width - GRAIN_DEFAULTS.grainSourceInset * 2 === 820
+          && MATERIAL_PROFILES.chevre.canonicalOutput.height - GRAIN_DEFAULTS.grainSourceInset * 2 === 379;
+        record("phase3-grain-inset-shade-contract", grainContractPass, "calf 1007x672 / chevre 820x379 / shadeMin=.78");
         const expectedRecipe = {
-          id: "osanpo-colorless-20260728-v1", backgroundDistance: 14, autoAlphaLow: 12, autoAlphaHigh: 32, featureDistance: 4, designPaddingPx: 12,
+          id: "osanpo-colorless-20260730-v2", backgroundDistance: 14, autoAlphaLow: 12, autoAlphaHigh: 32, featureDistance: 4, designPaddingPx: 12,
           mainWhiteRange: { areaMin: 120000, areaMax: 146000, widthMin: 400, widthMax: 435, heightMin: 660, heightMax: 700 },
           hangingHoleSeed: [.495, .273], hangingHoleRoi: [.465, .245, .525, .305],
           hangingHoleRange: { areaMin: 850, areaMax: 1150, widthMin: 30, widthMax: 40, heightMin: 30, heightMax: 42 },
           minorClosedWhiteMaxArea: 500, logoRoi: [.53, .27, .68, .43], logoBoundaryMin: 45,
           logoRange: { countMin: 1000, countMax: 1500, componentMin: 1, componentMax: 2 },
-          stitch: { seedBoundaryMin: 15, seedBoundaryMax: 40, finalBoundaryMin: 12, finalBoundaryMax: 43, dilatePasses: 3, exclusionDilatePasses: 2 },
-          stitchRange: { rawComponentMin: 18, rawComponentMax: 34, finalCountMin: 14000, finalCountMax: 20000, finalComponentMin: 1, finalComponentMax: 3 }
+          stitch: { seedBoundaryMin: 15, seedBoundaryMax: 40, finalBoundaryMin: 12, finalBoundaryMax: 43, dilatePasses: 0, exclusionDilatePasses: 2, logoProtectDilatePasses: 2 },
+          stitchRange: { rawComponentMin: 22, rawComponentMax: 34, finalCountMin: 8200, finalCountMax: 11500, finalComponentMin: 20, finalComponentMax: 34 }
         };
         const recipeContractPass = jsonEqual(OSANPO_COLORLESS_MANUAL, expectedRecipe)
           && jsonEqual(CHARM_SPECS.osanpo.manualRecipe, expectedRecipe);
@@ -6394,21 +7319,163 @@
           context.drawImage(bitmap, 0, 0, width, height);
           const image = context.getImageData(0, 0, width, height);
           if (bitmap.close) bitmap.close();
-          const savedManual = state.manual;
-          state.manual = { alpha: emptyLayer(width, height), owner: emptyLayer(width, height), keep: emptyLayer(width, height), inpaint: emptyLayer(width, height) };
-          const stats = seedOsanpoManualLayers(image, OSANPO_COLORLESS_MANUAL);
-          state.manual = savedManual;
-          recipeGenerationPass = stats.mainWhiteArea >= OSANPO_COLORLESS_MANUAL.mainWhiteRange.areaMin && stats.mainWhiteArea <= OSANPO_COLORLESS_MANUAL.mainWhiteRange.areaMax
-            && stats.hangingHoleArea >= OSANPO_COLORLESS_MANUAL.hangingHoleRange.areaMin && stats.hangingHoleArea <= OSANPO_COLORLESS_MANUAL.hangingHoleRange.areaMax
-            && stats.rawStitchComponentCount >= OSANPO_COLORLESS_MANUAL.stitchRange.rawComponentMin && stats.rawStitchComponentCount <= OSANPO_COLORLESS_MANUAL.stitchRange.rawComponentMax
-            && stats.finalStitchCount >= OSANPO_COLORLESS_MANUAL.stitchRange.finalCountMin && stats.finalStitchCount <= OSANPO_COLORLESS_MANUAL.stitchRange.finalCountMax
-            && stats.finalStitchComponentCount >= OSANPO_COLORLESS_MANUAL.stitchRange.finalComponentMin && stats.finalStitchComponentCount <= OSANPO_COLORLESS_MANUAL.stitchRange.finalComponentMax
-            && stats.logoCount >= OSANPO_COLORLESS_MANUAL.logoRange.countMin && stats.logoCount <= OSANPO_COLORLESS_MANUAL.logoRange.countMax
-            && stats.logoComponentCount >= OSANPO_COLORLESS_MANUAL.logoRange.componentMin && stats.logoComponentCount <= OSANPO_COLORLESS_MANUAL.logoRange.componentMax;
-          recipeGenerationDetail = JSON.stringify({ width: width, height: height, mainWhiteArea: stats.mainWhiteArea, hangingHoleArea: stats.hangingHoleArea, rawStitchComponentCount: stats.rawStitchComponentCount, finalStitchCount: stats.finalStitchCount, finalStitchComponentCount: stats.finalStitchComponentCount, logoCount: stats.logoCount, logoComponentCount: stats.logoComponentCount });
+          const savedManual = state.manual, savedStats = state.manualRecipeStats, savedAudit = state.swanBeakAudit;
+          try {
+            state.manual = { alpha: emptyLayer(width, height), owner: emptyLayer(width, height), keep: emptyLayer(width, height), inpaint: emptyLayer(width, height) };
+            state.manualRecipeStats = null; state.swanBeakAudit = null;
+            const stats = seedOsanpoManualLayers(image, OSANPO_COLORLESS_MANUAL);
+            recipeGenerationPass = stats.mainWhiteArea >= OSANPO_COLORLESS_MANUAL.mainWhiteRange.areaMin && stats.mainWhiteArea <= OSANPO_COLORLESS_MANUAL.mainWhiteRange.areaMax
+              && stats.hangingHoleArea >= OSANPO_COLORLESS_MANUAL.hangingHoleRange.areaMin && stats.hangingHoleArea <= OSANPO_COLORLESS_MANUAL.hangingHoleRange.areaMax
+              && stats.rawStitchComponentCount >= OSANPO_COLORLESS_MANUAL.stitchRange.rawComponentMin && stats.rawStitchComponentCount <= OSANPO_COLORLESS_MANUAL.stitchRange.rawComponentMax
+              && stats.finalStitchCount >= OSANPO_COLORLESS_MANUAL.stitchRange.finalCountMin && stats.finalStitchCount <= OSANPO_COLORLESS_MANUAL.stitchRange.finalCountMax
+              && stats.finalStitchComponentCount >= OSANPO_COLORLESS_MANUAL.stitchRange.finalComponentMin && stats.finalStitchComponentCount <= OSANPO_COLORLESS_MANUAL.stitchRange.finalComponentMax
+              && stats.logoCount >= OSANPO_COLORLESS_MANUAL.logoRange.countMin && stats.logoCount <= OSANPO_COLORLESS_MANUAL.logoRange.countMax
+              && stats.logoComponentCount >= OSANPO_COLORLESS_MANUAL.logoRange.componentMin && stats.logoComponentCount <= OSANPO_COLORLESS_MANUAL.logoRange.componentMax
+              && stats.rawFinalIdentityMismatch === 0;
+            recipeGenerationDetail = JSON.stringify({ width: width, height: height, mainWhiteArea: stats.mainWhiteArea, hangingHoleArea: stats.hangingHoleArea, rawStitchPxCount: stats.rawStitchPxCount, rawStitchComponentCount: stats.rawStitchComponentCount, finalStitchCount: stats.finalStitchCount, finalStitchComponentCount: stats.finalStitchComponentCount, rawFinalIdentityMismatch: stats.rawFinalIdentityMismatch, logoCount: stats.logoCount, logoComponentCount: stats.logoComponentCount });
+          } finally {
+            state.manual = savedManual; state.manualRecipeStats = savedStats; state.swanBeakAudit = savedAudit;
+          }
         } catch (error) { recipeGenerationDetail = error.message; }
         record("phase3-osanpo-recipe-generation-ranges", recipeGenerationPass, recipeGenerationDetail);
       } catch (error) { record("phase3-contract-suite", false, error.message); }
+
+      // Revision 17 canonical-source regression generation.  These checks are
+      // deliberately executed against the real eight canonical sources, not
+      // synthetic masks, so a recipe/ROI/range drift cannot hide behind a
+      // constants-only selftest.
+      try {
+        const charmKeys = Object.keys(CHARM_SPECS);
+        const grainResources = await buildSelfTestGrainResources("calf");
+        const generated = {};
+        for (const key of charmKeys) generated[key] = await selfTestCharmGeneration(key, grainResources);
+        const closedWhiteKeysForTest = ["horse", "frenchie", "dachshund", "toypoodle", "cat", "swan"];
+        const closedWhitePassRuntime = closedWhiteKeysForTest.every(function (key) {
+          const spec = CHARM_SPECS[key], recipe = spec.manualRecipe, stats = generated[key].generated.stats;
+          if (!stats || stats.recipeId !== COLORLESS_CLOSED_WHITE.id) return false;
+          const main = recipe.mainWhiteRange, hole = recipe.hangingHoleRange, roi = roiBounds(recipe.hangingHoleRoi, generated[key].work.w, generated[key].work.h);
+          const bbox = stats.mainWhiteBbox, holeBbox = stats.hangingHoleBbox;
+          return stats.mainWhiteArea >= main.areaMin && stats.mainWhiteArea <= main.areaMax
+            && stats.mainComponentCount >= main.componentMin && stats.mainComponentCount <= main.componentMax
+            && stats.mainComponentAreas.every(function (area) { return area > 0; })
+            && bbox.w >= main.widthMin && bbox.w <= main.widthMax && bbox.h >= main.heightMin && bbox.h <= main.heightMax
+            && stats.hangingHoleArea >= hole.areaMin && stats.hangingHoleArea <= hole.areaMax
+            && holeBbox.w >= hole.widthMin && holeBbox.w <= hole.widthMax && holeBbox.h >= hole.heightMin && holeBbox.h <= hole.heightMax
+            && stats.minorMaxArea <= recipe.minorClosedWhiteMaxArea
+            && stats.hangingHoleBbox.x >= roi.x0 && stats.hangingHoleBbox.y >= roi.y0
+            && stats.hangingHoleBbox.x + stats.hangingHoleBbox.w <= roi.x1 && stats.hangingHoleBbox.y + stats.hangingHoleBbox.h <= roi.y1
+            && Number.isFinite(stats.hangingHoleSeedDistance);
+        });
+        record("phase3-colorless-closedwhite-generation", closedWhitePassRuntime, JSON.stringify(Object.fromEntries(closedWhiteKeysForTest.map(function (key) {
+          const stats = generated[key].generated.stats; return [key, stats ? { main: stats.mainWhiteArea, components: stats.mainComponentCount, hole: stats.hangingHoleArea, minorMax: stats.minorMaxArea, seedDistance: stats.hangingHoleSeedDistance } : null];
+        }))));
+
+        const osanpoStats = generated.osanpo.generated.stats;
+        const osanpoRecipe = OSANPO_COLORLESS_MANUAL;
+        const osanpoPass = osanpoStats && osanpoStats.recipeId === osanpoRecipe.id
+          && osanpoStats.rawFinalIdentityMismatch === 0
+          && osanpoStats.rawStitchPxCount > 0
+          && osanpoStats.rawStitchComponentCount >= osanpoRecipe.stitchRange.rawComponentMin && osanpoStats.rawStitchComponentCount <= osanpoRecipe.stitchRange.rawComponentMax
+          && osanpoStats.finalStitchCount >= osanpoRecipe.stitchRange.finalCountMin && osanpoStats.finalStitchCount <= osanpoRecipe.stitchRange.finalCountMax
+          && osanpoStats.finalStitchComponentCount >= osanpoRecipe.stitchRange.finalComponentMin && osanpoStats.finalStitchComponentCount <= osanpoRecipe.stitchRange.finalComponentMax;
+        record("phase3-osanpo-raw-final-identity", osanpoPass, JSON.stringify(osanpoStats));
+
+        const horse = generated.horseshoe, horseSpec = CHARM_SPECS.horseshoe;
+        const horseRadius12 = horse.outer.ratePercent <= 1 && horse.outer.thresholdPercent === 1;
+        const savedManual = state.manual, savedStats = state.manualRecipeStats, savedAudit = state.swanBeakAudit;
+        let horseRadius8 = null;
+        try {
+          state.manual = { alpha: emptyLayer(horse.source.width, horse.source.height), owner: emptyLayer(horse.source.width, horse.source.height), keep: emptyLayer(horse.source.width, horse.source.height), inpaint: emptyLayer(horse.source.width, horse.source.height) };
+          seedHorseshoeAlpha(horse.source, Object.assign({}, HORSESHOE_COLORLESS_MANUAL, { outlineCaptureRadius: 8 }));
+          horseRadius8 = outerLeftoverStats(horse.source, alphaToArray(state.manual.alpha), horseSpec, null);
+        } finally {
+          state.manual = savedManual; state.manualRecipeStats = savedStats; state.swanBeakAudit = savedAudit;
+        }
+        record("phase3-horseshoe-outline-effective", horseRadius12 && horseRadius8 && horseRadius8.ratePercent > 1, JSON.stringify({ accepted: horse.outer, radius8: horseRadius8, captureRadius: HORSESHOE_COLORLESS_MANUAL.outlineCaptureRadius, probeRadius: HORSESHOE_COLORLESS_MANUAL.outlineProbeRadius }));
+
+        // The accepted radius is a per-charm gate: every canonical source must
+        // satisfy its own residual threshold (horseshoe is stricter at 1%).
+        // Keep this as a separate all-eight record so a passing horseshoe probe
+        // cannot mask a regression in one of the other seven sources.
+        const outerAllPass = charmKeys.every(function (key) {
+          const outer = generated[key].outer, threshold = key === "horseshoe" ? 1 : 10;
+          return outer && outer.thresholdPercent === threshold
+            && Number.isFinite(outer.ratePercent) && outer.ratePercent <= threshold;
+        });
+        record("phase3-outer-leftover-all8", outerAllPass, JSON.stringify(Object.fromEntries(charmKeys.map(function (key) {
+          const outer = generated[key].outer;
+          return [key, outer ? { residualPx: outer.residualPx, boundaryPx: outer.boundaryPx, ratePercent: outer.ratePercent, thresholdPercent: outer.thresholdPercent } : null];
+        }))));
+
+        const swan = generated.swan, swanSpec = CHARM_SPECS.swan;
+        // Exercise the real swan source through the future Phase 4 detect
+        // branch.  This guards the manual-owner merge: a sparse swan owner
+        // layer must leave automatically detected B (stitch) ownership alive.
+        const swanDetectSpec = Object.assign({}, swanSpec, { stitchMode: "detect", threadColor: "light", stitchPathsWork: [] });
+        const swanDetectMatte = buildMatte(swan.source, swan.generated.manual.alpha, 12, 32);
+        const swanDetectBaseMeta = buildBase(swan.source, swanDetectMatte.alpha);
+        const swanDetectMasks = buildMasks(swanDetectBaseMeta.imageData, swanDetectMatte.alpha, swanDetectSpec, swan.generated.manual.owner, swan.generated.manual.keep, swan.work.logoRoi, swanSpec.logoThreshold, Number(dom.stitchContrast.value) / 100);
+        const swanDetectDerived = computeDerived(swanDetectBaseMeta.imageData, swanDetectMasks, swanDetectSpec, swanDetectBaseMeta, selfTestCalibration(swanSpec, swan.work));
+        const swanDetectOutputs = stitchVerificationOutputs(swanDetectBaseMeta.imageData, swanDetectMasks, swanDetectDerived, variantTarget("calf:black"), swanDetectSpec, []);
+        const swanDetectGate = evaluateStitchContract(swanDetectSpec, swanDetectMasks, swanDetectDerived, swanDetectOutputs.white, swanDetectOutputs.black, { stitchPathsAsset: [] }, { inpaint: emptyLayer(swan.work.w, swan.work.h) });
+        record("phase3-swan-detect-owner-merge", swanDetectGate.pass, JSON.stringify({ stitchPxCount: swanDetectGate.stitchPxCount, diffPxCount: swanDetectGate.diffPxCount, manualOwnerPxCount: maskCount(alphaToArray(swan.generated.manual.owner)) }));
+        const swanBeak = await evaluateSwanBeakAudit(swan.generated.swanBeakAudit, swan.correction);
+        const swanKeepMask = binaryMaskFromAlpha(alphaToArray(swan.generated.manual.keep));
+        const swanKeepComponents = countMaskComponents8(swanKeepMask, swan.work.w, swan.work.h);
+        const swanRoi = roiBounds(swanSpec.logoRoi, swan.work.w, swan.work.h), swanStoneRoi = roiBounds(swanSpec.stoneRoi, swan.work.w, swan.work.h);
+        // The revision-17 numeric regression is measured on the deterministic
+        // reference raster (Pillow-compatible 16-bit bilinear), while the
+        // production masks continue to use the browser work raster.  This
+        // keeps the contractual 1221/6 -> 898/5 assertion independent of
+        // Canvas resampling differences.
+        const swanLogoBase = swan.source;
+        const swanLogoAlpha = alphaToArray(swan.generated.manual.alpha);
+        const swanLogoWithoutKeep = detectLogo(swanLogoBase, swanLogoAlpha, swanSpec.logoRoi, swanSpec.logoThreshold, null);
+        const swanLogoWithKeep = detectLogo(swanLogoBase, swanLogoAlpha, swanSpec.logoRoi, swanSpec.logoThreshold, swanKeepMask);
+        const swanPass = swanBeak.pass && swanBeak.keep && swanBeak.keep.beakPxCount === SWAN_KEEP_EXPECTED.beakPxCount
+          && swanBeak.keep.stonePxCount === SWAN_KEEP_EXPECTED.stonePxCount && swanBeak.keep.totalPxCount === SWAN_KEEP_EXPECTED.totalPxCount
+          && swanKeepComponents === 2
+          && maskCount(swanKeepMask) >= 4630 && maskCount(swanKeepMask) <= 5658
+          && swan.work.w === 797 && swan.work.h === 1200
+          && swanRoi.x0 === 369 && swanRoi.y0 === 889 && swanRoi.x1 === 446 && swanRoi.y1 === 970
+          && swanStoneRoi.x0 === 418 && swanStoneRoi.y0 === 912 && swanStoneRoi.x1 === 491 && swanStoneRoi.y1 === 979
+          && swanLogoWithoutKeep.reduce(function (sum, value) { return sum + value; }, 0) === 1221
+          && countMaskComponents8(swanLogoWithoutKeep, swan.work.w, swan.work.h) === 6
+          && swanLogoWithKeep.reduce(function (sum, value) { return sum + value; }, 0) === 898
+          && countMaskComponents8(swanLogoWithKeep, swan.work.w, swan.work.h) === 5;
+        record("phase3-swan-beak-diff-and-logo-keep", swanPass, JSON.stringify({ beak: swanBeak, keepExpected: SWAN_KEEP_EXPECTED, keepPxCountWork: maskCount(swanKeepMask), keepComponents8: swanKeepComponents, logoWithoutKeep: { count: swanLogoWithoutKeep.reduce(function (sum, value) { return sum + value; }, 0), components: countMaskComponents8(swanLogoWithoutKeep, swan.work.w, swan.work.h) }, logoWithKeep: { count: swanLogoWithKeep.reduce(function (sum, value) { return sum + value; }, 0), components: countMaskComponents8(swanLogoWithKeep, swan.work.w, swan.work.h) }, derivedLogo: swan.logoCount, logoRoi: swanRoi, stoneRoi: swanStoneRoi }));
+
+        const expectedLogoThresholds = { horse: 18, frenchie: 18, dachshund: 18, toypoodle: 18, cat: 18, swan: 10, horseshoe: null, osanpo: null };
+        const exactThresholdPass = charmKeys.every(function (key) { return CHARM_SPECS[key].logoThreshold === expectedLogoThresholds[key]; });
+        const catRoi = roiBounds(CHARM_SPECS.cat.logoRoi, generated.cat.work.w, generated.cat.work.h);
+        const catRoiPass = generated.cat.work.w === 1200 && generated.cat.work.h === 1200
+          && catRoi.x0 === 585 && catRoi.y0 === 851 && catRoi.x1 === 708 && catRoi.y1 === 955;
+        const swanRoiContractPass = swanRoi.x0 === 369 && swanRoi.y0 === 889 && swanRoi.x1 === 446 && swanRoi.y1 === 970
+          && swanStoneRoi.x0 === 418 && swanStoneRoi.y0 === 912 && swanStoneRoi.x1 === 491 && swanStoneRoi.y1 === 979;
+        const logoAllPass = exactThresholdPass && catRoiPass && swanRoiContractPass && charmKeys.every(function (key) {
+          const result = generated[key], spec = CHARM_SPECS[key], count = result.logoCount, components = result.logoComponents;
+          return count >= spec.logoRange.countMin && count <= spec.logoRange.countMax && components >= spec.logoRange.componentMin && components <= spec.logoRange.componentMax
+            && (spec.logoThreshold === null || Number.isFinite(spec.logoThreshold));
+        });
+        const mixedOwnershipPass = charmKeys.every(function (key) {
+          const result = generated[key];
+          return result.preDerived.mixedOwnershipPxCount === 0 && result.correction.derived.mixedOwnershipPxCount === 0;
+        });
+        record("phase3-logo-range-all8", logoAllPass, JSON.stringify({ exactThresholdPass: exactThresholdPass, catRoiPass: catRoiPass, swanRoiContractPass: swanRoiContractPass, catRoi: catRoi, swanRoi: swanRoi, swanStoneRoi: swanStoneRoi, expectedThresholds: expectedLogoThresholds, actual: Object.fromEntries(charmKeys.map(function (key) { return [key, { count: generated[key].logoCount, components: generated[key].logoComponents, threshold: CHARM_SPECS[key].logoThreshold, range: CHARM_SPECS[key].logoRange }]; })) }));
+        record("phase3-mixed-ownership-zero", mixedOwnershipPass, JSON.stringify(Object.fromEntries(charmKeys.map(function (key) { return [key, { work: generated[key].preDerived.mixedOwnershipPxCount, asset: generated[key].correction.derived.mixedOwnershipPxCount }]; }))));
+
+        const grainAcceptedPass = charmKeys.every(function (key) { const value = generated[key].grain && generated[key].grain.accepted; return value && Number.isFinite(value.max) && value.max <= .15 && value.threshold === .15; });
+        const grainInset0Values = Object.fromEntries(charmKeys.map(function (key) { return [key, generated[key].grain && generated[key].grain.inset0 ? generated[key].grain.inset0.max : null]; }));
+        const grainInset0HorsePass = Number.isFinite(grainInset0Values.horseshoe) && grainInset0Values.horseshoe <= .15;
+        const grainInset0OtherKeys = ["horse", "frenchie", "dachshund", "toypoodle", "cat", "osanpo", "swan"];
+        const grainInset0OtherPass = grainInset0OtherKeys.length === 7 && grainInset0OtherKeys.every(function (key) {
+          return Number.isFinite(grainInset0Values[key]) && grainInset0Values[key] > .15;
+        });
+        const grainInset0RegressionPass = grainInset0HorsePass && grainInset0OtherPass;
+        record("phase3-grain-local-deviation", grainAcceptedPass && grainInset0RegressionPass, JSON.stringify({ accepted: Object.fromEntries(charmKeys.map(function (key) { return [key, generated[key].grain && generated[key].grain.accepted]; })), inset0: grainInset0Values, horseshoePass: grainInset0HorsePass, otherPass: grainInset0OtherPass }));
+      } catch (error) {
+        record("phase3-canonical-generation-regressions", false, error.message);
+      }
 
       try {
         const savedDecision = state.swanStitchDecision;
@@ -7011,7 +8078,7 @@
           forceTimeout = false;
           const rawBytes = new Uint8Array([7, 8, 9]).buffer;
           const fakeResource = { file: "selftest-worker.png", sha256: await sha256(rawBytes), width: 1, height: 1, rawBytes: rawBytes, sourceImageData: new ImageData(new Uint8ClampedArray([128,128,128,255]), 1, 1) };
-          const fakeRecord = { grainRadiusPx: 1, grainAmp: .25, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
+          const fakeRecord = { grainRadiusPx: 1, grainAmp: .25, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1, shadeMin: GRAIN_DEFAULTS.shadeMin };
           const rawBytesB = new Uint8Array([4, 5, 6]).buffer;
           const fakeResourceB = { file: "selftest-worker-b.png", sha256: await sha256(rawBytesB), width: 1, height: 1, rawBytes: rawBytesB, sourceImageData: new ImageData(new Uint8ClampedArray([128,128,128,255]), 1, 1) };
           const oracleFirst = getFlatOracleResource(fakeResource, fakeRecord, operationToken).then(function () { return false; }, function () { return true; });
@@ -7047,11 +8114,17 @@
         for (let offset = 0; offset < grainData.length; offset += 4) { grainData[offset] = grainData[offset + 1] = grainData[offset + 2] = 128; grainData[offset + 3] = 255; }
         const grainImage = new ImageData(grainData, 2, 2), grainBlob = await imageDataToBlob(grainImage), rawBytes = await grainBlob.arrayBuffer();
         const resource = { file: "selftest.png", sha256: await sha256(rawBytes), width: 2, height: 2, rawBytes: rawBytes, sourceImageData: grainImage };
-        const oracleRecord = { grainRadiusPx: 1, grainAmp: .25, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1 };
+        const oracleRecord = { grainRadiusPx: 1, grainAmp: .25, grainBase: 200, grainScaleX: 1, grainScaleY: 1, flatWhite: 1, shadeMin: GRAIN_DEFAULTS.shadeMin };
         const oracleResource = await getFlatOracleResource(resource, oracleRecord, operationToken);
         const beforeData = new Uint8ClampedArray([255,255,255,255, 128,128,128,255, 64,64,64,255, 32,32,32,255]);
         const before = new ImageData(beforeData, 2, 2), after = cloneImageData(before), masks = emptyLayer(2, 2);
-        for (let offset = 0; offset < masks.data.length; offset += 4) { masks.data[offset] = 255; masks.data[offset + 3] = 255; const gray = Math.round(200 * before.data[offset] / 255); after.data[offset] = after.data[offset + 1] = after.data[offset + 2] = gray; }
+        for (let offset = 0; offset < masks.data.length; offset += 4) {
+          masks.data[offset] = 255; masks.data[offset + 3] = 255;
+          const shade = before.data[offset] / 255;
+          const shadeEff = Math.max(shade, oracleRecord.shadeMin);
+          const gray = Math.round(oracleRecord.grainBase * shadeEff);
+          after.data[offset] = after.data[offset + 1] = after.data[offset + 2] = gray;
+        }
         const audit = await auditFlatBakeOracle(oracleResource, before, after, masks, oracleRecord);
         record("oracle-2x2-constant-gray", audit.expectedMismatchPxCount === 0 && audit.bakedPxCount === 4, JSON.stringify(audit));
       } catch (error) { record("oracle-2x2-constant-gray", false, error.message); }
