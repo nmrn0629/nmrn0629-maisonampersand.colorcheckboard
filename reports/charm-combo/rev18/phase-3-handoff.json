@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "phase": 3,
+  "planRevision": 18,
+  "selectedLockCommit": "37414ad9b0c82f1b8a12852d6547391cdcbcd1ae",
+  "selectedPhase2EvidenceCommit": "7ebbee98eff702306a1b9ad48a2a367378beab8f",
+  "phase3StartHead": "7ebbee98eff702306a1b9ad48a2a367378beab8f",
+  "phaseInputCommits": ["7ebbee98eff702306a1b9ad48a2a367378beab8f"],
+  "phaseOutputCommit": "b028f47160d71504119c518c0d036629ec3df59c",
+  "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+  "sourceFreeze": {
+    "path": "plans/charm-approved-source-freeze.json",
+    "byteLength": 11365,
+    "sha256": "2e5f1bbbfba08aff37a6b512ed2f05dc48410f4a84272f4f5d56e1d29df1a1a6"
+  },
+  "colorFreeze": {
+    "path": "plans/charm-approved-color-freeze.json",
+    "byteLength": 36807,
+    "sha256": "93f38ddcce813fb3b43f145e53ff194383c85b5edf0c7f5b3f26c8971bae1fec"
+  },
+  "dedicatedWorktree": {
+    "path": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard/.worktrees/rev18-phase3",
+    "branch": "feature/charm-combo-codex-rev18",
+    "head": "b028f47160d71504119c518c0d036629ec3df59c",
+    "startHead": "7ebbee98eff702306a1b9ad48a2a367378beab8f",
+    "cleanAtStart": true
+  },
+  "originalWorktree": {
+    "path": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard",
+    "branch": "feature/charm-combo-codex",
+    "tipAtPhase3Start": "9ffc9cde804717d641e82056f508e7de368b80d0",
+    "statusAndSHA": "recorded-before-phase3-and-left-untouched",
+    "backupLedger": ".git/codex-checkpoints/charm-rev18-premerge-20260812T104959Z",
+    "readOnlyAfterStart": true
+  },
+  "lockedDocuments": [
+    { "path": "plans/charm-combo-display-plan.md", "byteLength": 356038, "sha256": "81c46c6491c6aa4ee7868f3861c4389b902aef96fbfa46f925ded3ad518fc532" },
+    { "path": "plans/impl-instructions-charm-combo-display-v2.md", "byteLength": 56184, "sha256": "feb0a768edd169c6015481be08c361bb05fab718259a779bdc7bf44e8a26337b" },
+    { "path": "plans/impl-instructions-charm-combo-display.md", "byteLength": 26401, "sha256": "226455c82ac74433d27be9caa16523e0959c33c61b3cf0f8571922d657556177" }
+  ],
+  "protectedFiles": [
+    {
+      "path": "index.html",
+      "phase3StartSha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b",
+      "worktreeSha256": "2d8572032af1331b7b25755194d96227315865165f847488d9ffa97128cd664b",
+      "gitDiffExitCode": 0
+    }
+  ],
+  "bagsHtml": {
+    "status": "read-only-reference",
+    "reason": "planRevision18 protectedFilesはindex.htmlのみ。bags.htmlは変更せず b29274f を参照",
+    "readOnlyReference": "b29274f:bags.html"
+  },
+  "tool": {
+    "path": "tools/charm-prep.html",
+    "byteLength": 571964,
+    "sha256": "fe6e79e01654db093abb64402bb74052cb7d648270e56fb6be4a24b565e73667",
+    "toolCommit": "b028f47160d71504119c518c0d036629ec3df59c",
+    "toolCommitParent": "7ebbee98eff702306a1b9ad48a2a367378beab8f"
+  },
+  "artifacts": [
+    { "path": "tools/charm-prep.html", "byteLength": 571964, "sha256": "fe6e79e01654db093abb64402bb74052cb7d648270e56fb6be4a24b565e73667" },
+    { "path": "reports/charm-combo/rev18/prep-selftest.json", "byteLength": 5187, "sha256": "8974ef458cbe2970cc0bfe013ede73adf170d48be70318cf78df7e66a71b21c6" }
+  ],
+  "manifestChecks": {
+    "inputManifestSha256": "ebec30a9c625531a3be48c09f522be5a607e33424647944e03735e258bd306b5",
+    "colorReferenceManifestSha256": "0b6421d94cf1816f61aaa491dc8c1782bcb311464f90f041f2087e5a3a875ddb",
+    "materialProfilesSha256": "646d2c8189bbd392f4f36a2b06809d7ff8ece580c2bad1ab89fbfbf4027bee95",
+    "leatherVariantsSha256": "5ac6f61cd0afd88f6358aeaf1e373e3bac8dcb9665c4d6ac0a76e5fcaf1f2fa0",
+    "toolVersion": "0.9.0",
+    "schemaVersion": 6,
+    "charms": 8,
+    "materialProfiles": 2,
+    "leatherVariants": 27,
+    "calfVariants": 24,
+    "chevreVariants": 3,
+    "finiteCases": 192,
+    "layouts": 81
+  },
+  "selftest": {
+    "path": "reports/charm-combo/rev18/prep-selftest.json",
+    "byteLength": 5187,
+    "sha256": "8974ef458cbe2970cc0bfe013ede73adf170d48be70318cf78df7e66a71b21c6",
+    "status": "pass",
+    "resultCount": 47,
+    "verificationSpec13": { "normal": "8/8", "negative": "9/9", "tracking": "3/3" }
+  },
+  "checks": {
+    "revisionLock": "pass",
+    "selectedPhase2Parent": "pass",
+    "selectedPhase2AllowedPaths": "pass",
+    "selectedPhase2HandoffPayload": "pass",
+    "toolOnlyDiff": "pass",
+    "toolCommitDirectParent": "pass",
+    "protectedIndexHtml": "pass",
+    "lockedDocuments": "pass",
+    "sourceAndColorFreezeSHA": "pass",
+    "browserSelftest": "pass",
+    "inlineScriptSyntax": "pass",
+    "gitDiffCheck": "pass",
+    "mainWorktreePreserved": "pass",
+    "codexCliReview": "not-run-environment-constraint"
+  },
+  "reviewNotes": [
+    "HTTP selftest=1は現行toolVersion 0.9.0で47件全PASS。⑬は本番verificationSpecFromPrep直呼び、通常8/8・負変異9/9・追跡3/3 PASS。",
+    "FIELD_ATTRIBUTION_MAPはCHARM_SPECSから独立した全8種の明示projectionで、deepFreezeにより各entryまで凍結。",
+    "toolCommitは指定selectedPhase2EvidenceCommitを唯一の親とし、tools/charm-prep.htmlだけを変更。",
+    "Codex CLIレビューは環境制約で未実施。静的監査・アンチパターン監査・HTTP selftestを実施。"
+  ],
+  "unresolved": [
+    "Phase 4開始前にcanonicalSource 8点のSHA/寸法照合を報告し、チェックポイント①のユーザー確認を得る。",
+    "Phase 4でswanのstitchModeを実画素から確定し、全8種の派生アセットと検査8（三者照合）を再実行する。",
+    "Phase 4以降の派生アセット生成・目視・性能・モバイル実機確認は未実施。"
+  ],
+  "nextPhaseReady": false,
+  "canStartPhase4": false,
+  "nextPhaseGate": {
+    "required": true,
+    "checkpoint": "Phase 4 checkpoint ①",
+    "action": "canonicalSource 8点のSHA/寸法照合結果を報告し、ユーザー確認後にのみ全8種再生成へ進む"
+  },
+  "handoffPayloadSha256": "43371337361e5700d33b67921f168f905fcf174675d5c98415285d1c5480ac71"
+}
