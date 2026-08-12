@@ -322,7 +322,7 @@
   <script>
     "use strict";
 
-    const TOOL_VERSION = "0.8.0";
+    const TOOL_VERSION = "0.9.0";
     const SCHEMA_VERSION = 6;
     const WORK_MAX = 1200;
     const ARCHIVE_FORMAT = "maison-charm-prep-archive";
@@ -549,6 +549,163 @@
       osanpo: { label: "osanpo", source: "../source-photos/osanpo-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 92, h: 40 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: "light", stitchMode: "detect", stitchPathsWork: [], calibration: { mode: "manual-line", reason: "canonicalSource上の主軸・短軸を再計測（2026-07-22）。2304px原寸の計測線をWORK_MAX=1200の作業座標へ25/48倍変換し、幅線は長軸92mm、高さ線は短軸40mmに対応", widthLine: [[693.2291666667,254.6875],[495.3125,902.6041666667]], heightLine: [[662.5,871.875],[375,783.8541666667]] }, logoRoi: [.53,.27,.68,.43], logoThreshold: null, logoRange: OSANPO_COLORLESS_MANUAL.logoRange, manualRecipe: OSANPO_COLORLESS_MANUAL, grain: GRAIN_DEFAULTS },
       cat: { label: "cat", source: "../source-photos/cat-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 68, h: 65 }, sizeMmMeasured: SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: "none", stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.4875,.7092,.5900,.7958], logoThreshold: 18, logoRange: Object.freeze({ countMin: 1669, countMax: 2503, componentMin: 2, componentMax: 4 }), manualRecipe: closedWhiteRecipeFor("cat"), grain: GRAIN_DEFAULTS },
       swan: { label: "swan", source: "../source-photos/swan-colorless.png", sourceMode: "colorless", toneMode: "flat", sizeMm: { w: 90, h: 90 }, sizeMmMeasured: SWAN_SIZE_MM_MEASURED, attachmentMode: "none", threadColor: null, stitchMode: null, stitchPathsWork: [], calibration: { mode: "bbox", reason: BBOX_REASON }, logoRoi: [.4630,.7412,.5590,.8083], logoThreshold: 10, logoRange: Object.freeze({ countMin: 718, countMax: 1078, componentMin: 3, componentMax: 8 }), stoneRoi: [.5245,.7600,.6155,.8158], stoneLumMax: .965, beakRemoval: BEAK_OUTLINE_REMOVAL, manualRecipe: closedWhiteRecipeFor("swan"), grain: GRAIN_DEFAULTS }
+    });
+
+    // Revision 18: frozen, explicit attribution of every CHARM_SPECS own
+    // field.  This table is deliberately independent from CHARM_SPECS so a
+    // future field addition cannot silently make the projection tautological.
+    // `layer` is either the measured prep record or the tool contract layer;
+    // `specPath` is always a top-level field on the composed verification
+    // spec, while `prepPath` is null for pure tool constants.
+    const FIELD_ATTRIBUTION_MAP = deepFreeze({
+      horse: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      horseshoe: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      frenchie: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "cropSource", layer: "tool", specPath: "cropSource", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      dachshund: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      toypoodle: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      osanpo: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      cat: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "tool", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "tool", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ]),
+      swan: Object.freeze([
+        { field: "label", layer: "tool", specPath: "label", prepPath: "label" },
+        { field: "source", layer: "tool", specPath: "source", prepPath: "source.file" },
+        { field: "sourceMode", layer: "tool", specPath: "sourceMode", prepPath: "inputs.sourceMode" },
+        { field: "toneMode", layer: "tool", specPath: "toneMode", prepPath: "derived.toneMode" },
+        { field: "sizeMm", layer: "tool", specPath: "sizeMm", prepPath: "inputs.sizeMm" },
+        { field: "sizeMmMeasured", layer: "tool", specPath: "sizeMmMeasured", prepPath: "inputs.sizeMmMeasured" },
+        { field: "attachmentMode", layer: "tool", specPath: "attachmentMode", prepPath: "inputs.attachmentMode" },
+        { field: "threadColor", layer: "measured", specPath: "threadColor", prepPath: "inputs.threadColor" },
+        { field: "stitchMode", layer: "measured", specPath: "stitchMode", prepPath: "inputs.stitchMode" },
+        { field: "stitchPathsWork", layer: "measured", specPath: "stitchPathsWork", prepPath: "inputs.stitchPathsWork" },
+        { field: "calibration", layer: "measured", specPath: "calibration", prepPath: "inputs.calibration" },
+        { field: "logoRoi", layer: "tool", specPath: "logoRoi", prepPath: null },
+        { field: "logoThreshold", layer: "tool", specPath: "logoThreshold", prepPath: "pipeline.logoThreshold" },
+        { field: "logoRange", layer: "tool", specPath: "logoRange", prepPath: null },
+        { field: "stoneRoi", layer: "tool", specPath: "stoneRoi", prepPath: null },
+        { field: "stoneLumMax", layer: "tool", specPath: "stoneLumMax", prepPath: null },
+        { field: "beakRemoval", layer: "tool", specPath: "beakRemoval", prepPath: null },
+        { field: "manualRecipe", layer: "tool", specPath: "manualRecipe", prepPath: null },
+        { field: "grain", layer: "measured", specPath: "grain", prepPath: "inputs.grain" }
+      ])
     });
 
     function deepFreeze(value) {
@@ -5830,17 +5987,21 @@
       const checks1to7 = computeChecks1to7(key, spec, baseBlob, masksBlob, decodedMasks, decodedDerived, decodedWhiteOutput, decodedBlackOutput, decodedCorrection, job.manual);
       const manifestCheck = computeManifestCheck(key, spec, sourceHash, grainContext);
       const grainScalePeers = grainContext ? [grainContext.record.grainScaleMm] : [];
-      job.batchPeerPreps.forEach(function (prep) {
-        if (prep.charmKey !== key && prep.inputs.sourceMode === "colorless" && prep.inputs.grain && prep.inputs.grain.calf) {
-          grainScalePeers.push(prep.inputs.grain.calf.grainScaleMm);
-        }
-      });
+      if (Array.isArray(job.batchPeerGrainScales)) {
+        job.batchPeerGrainScales.forEach(function (value) { if (Number.isFinite(value) && value > 0) grainScalePeers.push(value); });
+      } else {
+        job.batchPeerPreps.forEach(function (prep) {
+          if (prep.charmKey !== key && prep.inputs.sourceMode === "colorless" && prep.inputs.grain && prep.inputs.grain.calf) {
+            grainScalePeers.push(prep.inputs.grain.calf.grainScaleMm);
+          }
+        });
+      }
       const materialAssets = grainContext ? { [grainContext.record.materialKey]: {
         materialKey: grainContext.record.materialKey, base: { file: "assets/charms/" + key + ".base.png", width: decodedBase.width, height: decodedBase.height, decodedRgbaSha256: baseHash, byteLength: baseBlob.size },
         baseLum: decodedDerived.baseLum, textureProfileKey: MATERIAL_PROFILES[grainContext.record.materialKey].textureProfileKey,
         generationMode: MATERIAL_PROFILES[grainContext.record.materialKey].generationMode
       } } : {};
-      const flatCheck = await computeFlatCheck(spec, decodedBase, decodedMasks, grainContext, { grainScalePeers: grainScalePeers, batchPeersComplete: false, materialAssets: materialAssets, operationToken: job.operationToken });
+      const flatCheck = await computeFlatCheck(spec, decodedBase, decodedMasks, grainContext, { grainScalePeers: grainScalePeers, batchPeersComplete: job.batchPeersComplete === true, materialAssets: materialAssets, operationToken: job.operationToken });
       const checks = checks1to7.concat([manifestCheck, flatCheck, { status: "pending", detail: "書き出し済みアーカイブの再読込待ち", values: {} }]);
       const stitchDiff = countRgbDiff(decodedWhiteOutput, decodedBlackOutput);
       const browser = browserInfo();
@@ -5952,7 +6113,129 @@
       });
     }
 
-    function verificationSpecFromPrep(prep, key, archiveBrowser) {
+    const canonicalSourceDimensionCache = new Map();
+
+    async function canonicalSourceDimensions(key) {
+      if (canonicalSourceDimensionCache.has(key)) return canonicalSourceDimensionCache.get(key);
+      const manifest = INPUT_MANIFEST[key];
+      if (!manifest) throw new Error(key + " canonicalSource manifestがありません");
+      const meta = await fetchByteImageMeta(manifest.file, manifest.sha256);
+      const dimensions = { width: meta.width, height: meta.height };
+      canonicalSourceDimensionCache.set(key, dimensions);
+      return dimensions;
+    }
+
+    function ownPathValue(value, path) {
+      const parts = String(path || "").split(".");
+      let current = value;
+      for (const part of parts) {
+        if (!current || typeof current !== "object" || !Object.prototype.hasOwnProperty.call(current, part)) return { present: false, value: undefined };
+        current = current[part];
+      }
+      return { present: true, value: current };
+    }
+
+    function normalizeProjectedValue(field, value) {
+      // CHARM_SPECS.source is rooted at ../ while prep.source.file is rooted
+      // at the repository.  This is the sole intentional path normalization.
+      if (field === "source" && typeof value === "string") return value.replace(/^\.\.\//, "");
+      return value;
+    }
+
+    function assertVerificationSpecProjection(prep, key, spec) {
+      const rows = FIELD_ATTRIBUTION_MAP[key];
+      const expected = CHARM_SPECS[key];
+      const failures = [];
+      if (!rows || !expected) return { pass: false, failures: [key + " attribution row missing"] };
+      const expectedFields = Object.keys(expected);
+      const seen = new Map();
+      rows.forEach(function (row) {
+        if (!row || typeof row !== "object") { failures.push("invalid attribution entry"); return; }
+        if (!expectedFields.includes(row.field)) failures.push("unrecognized field " + row.field);
+        if (seen.has(row.field)) failures.push("duplicate field " + row.field);
+        seen.set(row.field, row);
+        if (!["tool", "measured"].includes(row.layer)) failures.push("invalid layer " + row.field);
+        if (row.specPath !== row.field) failures.push("specPath mismatch " + row.field);
+        const specValue = ownPathValue(spec, row.specPath);
+        if (!specValue.present || specValue.value === undefined) failures.push("spec property missing " + row.field);
+        let prepValue = { present: true, value: undefined };
+        if (row.prepPath !== null) {
+          prepValue = ownPathValue(prep, row.prepPath);
+          if (!prepValue.present || prepValue.value === undefined) failures.push("prep property missing " + row.field);
+        }
+        if (row.layer === "tool") {
+          if (!jsonEqual(specValue.value, expected[row.field])) failures.push("tool constant mismatch " + row.field);
+          // Tool-layer fields are authoritative in CHARM_SPECS, but when a
+          // prep projection is recorded the archive must still carry the
+          // same value.  This keeps the attribution map an actual two-sided
+          // contract instead of allowing a stale prep record to pass.
+          if (row.prepPath !== null) {
+            const left = normalizeProjectedValue(row.field, specValue.value);
+            const right = normalizeProjectedValue(row.field, prepValue.value);
+            if (!jsonEqual(left, right)) failures.push("tool/prep projection mismatch " + row.field);
+          }
+        }
+        if (row.layer === "measured" && row.prepPath !== null) {
+          const left = normalizeProjectedValue(row.field, specValue.value);
+          const right = normalizeProjectedValue(row.field, prepValue.value);
+          if (!jsonEqual(left, right)) failures.push("measured projection mismatch " + row.field);
+        }
+      });
+      expectedFields.forEach(function (field) { if (!seen.has(field)) failures.push("unclassified field " + field); });
+      return { pass: failures.length === 0, failures: failures, rowCount: rows.length, fieldCount: expectedFields.length };
+    }
+
+    function composeVerificationSpec(prep, key, sourceDimensions) {
+      const expected = CHARM_SPECS[key];
+      const manifest = INPUT_MANIFEST[key];
+      const pipeline = prep && prep.pipeline;
+      const inputs = prep && prep.inputs;
+      if (!expected || !manifest || !pipeline || !inputs) throw new Error(key + " 検証specの合成入力が不足しています");
+      assertArchive(jsonEqual(inputs.sizeMm, expected.sizeMm), key + " sizeMmがCHARM_SPECSと一致しません");
+      assertArchive(jsonEqual(inputs.sizeMmMeasured, expected.sizeMmMeasured), key + " sizeMmMeasuredがCHARM_SPECSと一致しません");
+      assertArchive(inputs.attachmentMode === expected.attachmentMode, key + " attachmentModeがCHARM_SPECSと一致しません");
+      if (key !== "swan") {
+        assertArchive(inputs.threadColor === expected.threadColor, key + " threadColorがCHARM_SPECSと一致しません");
+        assertArchive(inputs.stitchMode === expected.stitchMode, key + " stitchModeがCHARM_SPECSと一致しません");
+      }
+      const expectedCrop = expected.cropSource
+        ? expected.cropSource
+        : { x: 0, y: 0, w: sourceDimensions.width, h: sourceDimensions.height };
+      assertArchive(jsonEqual(pipeline.crop, expectedCrop), key + " cropが一意化契約と一致しません");
+      if (!expected.logoRoiSource) assertArchive(jsonEqual(pipeline.logoRoiWork, expected.logoRoi), key + " logoRoiとpipeline.logoRoiWorkが一致しません");
+      assertArchive(pipeline.logoThreshold === expected.logoThreshold, key + " logoThresholdがCHARM_SPECSと一致しません");
+
+      // Tool constants come from CHARM_SPECS; measured inputs come from prep.
+      // In particular, swan's Phase-4 decision and all grain leaves must never
+      // be replaced by the literal seed/default values in CHARM_SPECS.
+      const spec = {
+        key: key,
+        label: expected.label,
+        source: expected.source,
+        sizeMm: jsonClone(expected.sizeMm),
+        sizeMmMeasured: jsonClone(expected.sizeMmMeasured),
+        attachmentMode: expected.attachmentMode,
+        sourceMode: expected.sourceMode,
+        toneMode: expected.toneMode,
+        threadColor: key === "swan" ? inputs.threadColor : expected.threadColor,
+        stitchMode: key === "swan" ? inputs.stitchMode : expected.stitchMode,
+        stitchPathsWork: cloneStitchPaths(inputs.stitchPathsWork),
+        calibration: jsonClone(inputs.calibration),
+        grain: inputs.grain ? jsonClone(inputs.grain) : null,
+        logoRoi: jsonClone(expected.logoRoi),
+        logoRoiWork: jsonClone(pipeline.logoRoiWork),
+        logoThreshold: expected.logoThreshold,
+        logoRange: jsonClone(expected.logoRange),
+        manualRecipe: jsonClone(expected.manualRecipe)
+      };
+      if (Object.prototype.hasOwnProperty.call(expected, "cropSource")) spec.cropSource = jsonClone(expected.cropSource);
+      if (Object.prototype.hasOwnProperty.call(expected, "beakRemoval")) spec.beakRemoval = jsonClone(expected.beakRemoval);
+      if (Object.prototype.hasOwnProperty.call(expected, "stoneRoi")) spec.stoneRoi = jsonClone(expected.stoneRoi);
+      if (Object.prototype.hasOwnProperty.call(expected, "stoneLumMax")) spec.stoneLumMax = expected.stoneLumMax;
+      return spec;
+    }
+
+    async function verificationSpecFromPrep(prep, key, archiveBrowser) {
       const expected = CHARM_SPECS[key];
       const manifest = INPUT_MANIFEST[key];
       assertArchive(prep && typeof prep === "object" && !Array.isArray(prep), key + " prepがオブジェクトではありません");
@@ -6083,22 +6366,11 @@
         assertArchive(check && check.status === "pass" && typeof check.detail === "string" && check.values && typeof check.values === "object", key + " checks." + checkKey + "がPASS記録ではありません");
       });
 
-      return {
-        key: key,
-        label: prep.label,
-        source: "../" + prep.source.file,
-        sizeMm: jsonClone(prep.inputs.sizeMm),
-        sizeMmMeasured: jsonClone(prep.inputs.sizeMmMeasured),
-        attachmentMode: prep.inputs.attachmentMode,
-        threadColor: prep.inputs.threadColor,
-        stitchMode: prep.inputs.stitchMode,
-        stitchPathsWork: cloneStitchPaths(prep.inputs.stitchPathsWork),
-        calibration: jsonClone(prep.inputs.calibration),
-        logoRoiWork: jsonClone(pipeline.logoRoiWork),
-        sourceMode: prep.inputs.sourceMode,
-        toneMode: prep.derived.toneMode,
-        grain: prep.inputs.grain ? jsonClone(prep.inputs.grain) : null
-      };
+      const dimensions = await canonicalSourceDimensions(key);
+      const spec = composeVerificationSpec(prep, key, dimensions);
+      const projection = assertVerificationSpecProjection(prep, key, spec);
+      assertArchive(projection.pass, key + " verification spec attributionが不一致です: " + projection.failures.join("; "));
+      return spec;
     }
 
     function pngDimensions(bytes, label) {
@@ -6304,7 +6576,7 @@
         const reasons = [];
         let spec = null, inputs = null, outputs = null;
         let inputMatch = false, outputMatch = false, regenerationMatch = false;
-        try { spec = verificationSpecFromPrep(prep, key, parsed.archive.browser); } catch (error) { reasons.push(error.message); }
+        try { spec = await verificationSpecFromPrep(prep, key, parsed.archive.browser); } catch (error) { reasons.push(error.message); }
         if (spec && spec.sourceMode === "colorless" && flatVerificationError) reasons.push("flat context: " + flatVerificationError);
         if (spec) {
           try { inputs = await loadVerifiedInputs(parsed, prep, key, flatVerification); inputMatch = true; } catch (error) { reasons.push("input: " + error.message); }
@@ -7074,7 +7346,9 @@
         return {
           source: renderWorkImageData(bitmap, crop, work, spec),
           work: work,
-          bytes: bytes
+          bytes: bytes,
+          sourceWidth: bitmap.width,
+          sourceHeight: bitmap.height
         };
       } finally {
         if (bitmap.close) bitmap.close();
@@ -7116,7 +7390,17 @@
     }
 
     async function selfTestCharmGeneration(key, grainResources) {
-      const spec = CHARM_SPECS[key], loaded = await loadCanonicalWorkForSelfTest(key), generated = selfTestManualGeneration(loaded.source, spec);
+      const sourceSpec = CHARM_SPECS[key];
+      const loaded = await loadCanonicalWorkForSelfTest(key);
+      // Phase 3 must exercise the swan decision-injection path without
+      // freezing the eventual Phase 4 detector result.  Normalize the fixed
+      // vector through the same decision gate used by production, then apply
+      // it only to this self-test's working spec.
+      const injectedDecision = key === "swan"
+        ? normalizeSwanStitchDecision({ stitchMode: "detect", threadColor: "light", stitchPathsWork: [] }, { w: loaded.work.w, h: loaded.work.h })
+        : null;
+      const spec = injectedDecision ? Object.assign({}, sourceSpec, injectedDecision) : sourceSpec;
+      const generated = selfTestManualGeneration(loaded.source, spec);
       const matte = buildMatte(loaded.source, generated.manual.alpha, 12, 32);
       const alpha = matte.alpha, baseMeta = buildBase(loaded.source, alpha), calibration = selfTestCalibration(spec, loaded.work);
       baseMeta.background = matte.background;
@@ -7136,8 +7420,110 @@
       if (generated.swanBeakAudit && generated.swanBeakAudit.expectedDiff) for (let index = 0; index < excluded.length; index += 1) if (generated.swanBeakAudit.expectedDiff[index]) excluded[index] = 255;
       const outer = outerLeftoverStats(loaded.source, correction.workAlpha, spec, excluded);
       const logoCount = preDerived.logoPxCount, logoComponents = preDerived.logoComponentCount;
-      const result = { key: key, source: loaded.source, work: loaded.work, generated: generated, masks: masks, preDerived: preDerived, correction: correction, outer: outer, logoCount: logoCount, logoComponents: logoComponents, grain: grainContext ? { accepted: grainLocalDeviation(grainContext), inset0: insetDeviation } : null };
+      // Build the verification fixture through the same production composer
+      // used by processCurrent.  No synthetic hashes, scale values, or
+      // hand-written prep records are permitted here.
+      const selfJob = {
+        operationToken: undefined,
+        key: key,
+        spec: deepFreeze(jsonClone(spec)),
+        sourceBytes: loaded.bytes.slice(0),
+        sourceImageData: cloneImageData(loaded.source),
+        manual: cloneManualLayers(generated.manual),
+        manualRecipeStats: generated.stats ? jsonClone(generated.stats) : null,
+        swanBeakAudit: key === "swan" ? cloneSwanBeakAudit(generated.swanBeakAudit) : null,
+        work: jsonClone(loaded.work),
+        calibrationInput: selfTestCalibration(spec, loaded.work),
+        thresholds: Object.freeze({
+          bgLow: 12,
+          bgHigh: 32,
+          logoThreshold: spec.logoThreshold === null ? null : Number(spec.logoThreshold),
+          stitchContrast: Number(dom.stitchContrast.value) / 100
+        }),
+        grainScaleMm: GRAIN_DEFAULTS.grainScaleMm,
+        batchPeerPreps: [],
+        batchPeerGrainScales: Array.from({ length: CHARM_KEYS.length - 1 }, function () { return GRAIN_DEFAULTS.grainScaleMm; }),
+        batchPeersComplete: true
+      };
+      const production = await buildChecksAndConfig(selfJob, correction.base, correction.masks, correction.derived, correction.baseMeta, correction, grainContext);
+      const result = {
+        key: key, source: loaded.source, sourceWidth: loaded.sourceWidth, sourceHeight: loaded.sourceHeight,
+        work: loaded.work, generated: generated, masks: masks, preDerived: preDerived, correction: correction,
+        outer: outer, logoCount: logoCount, logoComponents: logoComponents,
+        grain: grainContext ? { accepted: grainLocalDeviation(grainContext), inset0: insetDeviation } : null,
+        production: production, prep: production.prep
+      };
       return result;
+    }
+    function verificationPrepFixture(key, generated) {
+      if (!generated || !generated.prep) throw new Error(key + " production生成prepがありません");
+      return jsonClone(generated.prep);
+    }
+
+    async function selfTestVerificationSpecSuite(generatedByKey) {
+      const fixture = {};
+      for (const key of CHARM_KEYS) fixture[key] = verificationPrepFixture(key, generatedByKey[key]);
+      const composed = {};
+      const normal = {};
+      for (const key of CHARM_KEYS) {
+        const prep = fixture[key];
+        try {
+          // Exercise the exact production verification path used by
+          // verifyParsedArchive, including archive-browser and prep-record
+          // validation.  The generated prep is the same production snapshot
+          // captured above; do not substitute a selftest-only composer here.
+          const spec = await verificationSpecFromPrep(prep, key, prep.generatedBy.browser);
+          const projection = assertVerificationSpecProjection(prep, key, spec);
+          composed[key] = spec;
+          normal[key] = { pass: projection.pass, failures: projection.failures || [] };
+        } catch (error) { normal[key] = { pass: false, failures: [error.message] }; }
+      }
+
+      function cloneFixture(key) { return jsonClone(fixture[key]); }
+      async function runMutation(number, key, mutatePrep, mutateSpec, tracking) {
+        const prep = cloneFixture(key);
+        try {
+          if (mutatePrep) mutatePrep(prep);
+          // Mutations must pass through the production verifier itself so
+          // every fail-fast assertion remains covered by selftest ⑬.
+          const spec = await verificationSpecFromPrep(prep, key, prep.generatedBy.browser);
+          if (mutateSpec) mutateSpec(spec);
+          const projection = assertVerificationSpecProjection(prep, key, spec);
+          if (tracking) {
+            const field = tracking.field, expectedValue = tracking.value(prep, spec);
+            return { number: number, key: key, detected: projection.pass && jsonEqual(spec[field], expectedValue), mode: "tracking", failures: projection.failures || [] };
+          }
+          return { number: number, key: key, detected: projection.pass !== true, mode: "negative", failures: projection.failures || ["mutation was not rejected"] };
+        } catch (error) {
+          return { number: number, key: key, detected: !tracking, mode: tracking ? "tracking" : "negative", failures: [error.message] };
+        }
+      }
+
+      const mutations = [];
+      mutations.push(await runMutation(1, "horse", function (prep) { prep.inputs.sizeMm.w += 1; }));
+      mutations.push(await runMutation(2, "frenchie", function (prep) { prep.pipeline.crop.x += 1; }));
+      mutations.push(await runMutation(3, "horse", null, function (spec) { delete spec.logoRange; }));
+      mutations.push(await runMutation(4, "swan", null, function (spec) { delete spec.stoneRoi; }));
+      mutations.push(await runMutation(5, "horseshoe", null, function (spec) { spec.manualRecipe.id = "selftest-mutated"; }));
+      mutations.push(await runMutation(6, "cat", function (prep) { prep.pipeline.logoRoiWork[0] += .01; }));
+      mutations.push(await runMutation(7, "dachshund", function (prep) { prep.pipeline.crop.x += 1; }));
+      mutations.push(await runMutation(8, "swan", null, function (spec) { spec.stitchMode = null; }));
+      mutations.push(await runMutation(9, "osanpo", function (prep) { prep.inputs.calibration.reason += "(selftest-mutation)"; }, null, { field: "calibration", value: function (prep) { return prep.inputs.calibration; } }));
+      mutations.push(await runMutation(10, "toypoodle", function (prep) { prep.inputs.grain.calf.grainBase += 1; }, null, { field: "grain", value: function (prep) { return prep.inputs.grain; } }));
+      mutations.push(await runMutation(11, "horse", function (prep) { prep.inputs.stitchPathsWork.push({ points: [[100, 100], [200, 200]], widthMm: 1, dashMm: 2, gapMm: 2 }); }, null, { field: "stitchPathsWork", value: function (prep) { return prep.inputs.stitchPathsWork; } }));
+      mutations.push(await runMutation(12, "horseshoe", function (prep) { prep.inputs.threadColor = "dark"; }, null));
+      const normalPass = CHARM_KEYS.every(function (key) { return normal[key] && normal[key].pass; });
+      const negative = mutations.filter(function (item) { return item.number <= 8 || item.number === 12; });
+      const tracking = mutations.filter(function (item) { return item.number >= 9 && item.number <= 11; });
+      const mutationPass = negative.every(function (item) { return item.detected; }) && tracking.every(function (item) { return item.detected; });
+      return {
+        pass: normalPass && mutationPass,
+        fixture: { swan: { stitchMode: "detect", threadColor: "light", stitchPathsWork: [] } },
+        normal: normal,
+        mutations: mutations,
+        expectedNegativeCount: negative.length, detectedNegativeCount: negative.filter(function (item) { return item.detected; }).length,
+        expectedTrackingCount: tracking.length, passedTrackingCount: tracking.filter(function (item) { return item.detected; }).length
+      };
     }
 
     async function runInternalSelfTestsBody() {
@@ -7194,7 +7580,7 @@
         }) && charmKeys.every(function (key) {
           return CHARM_SPECS[key].sizeMmMeasured.confirmed === true && CHARM_SPECS[key].sizeMmMeasured.receivedAt;
         });
-        record("phase3-schema-and-version", TOOL_VERSION === "0.8.0" && SCHEMA_VERSION === 6, "toolVersion=" + TOOL_VERSION + ", schemaVersion=" + SCHEMA_VERSION);
+        record("phase3-schema-and-version", TOOL_VERSION === "0.9.0" && SCHEMA_VERSION === 6, "toolVersion=" + TOOL_VERSION + ", schemaVersion=" + SCHEMA_VERSION);
         record("phase3-counts", charmKeys.length === 8 && materialKeys.length === 2 && LEATHER_VARIANTS.length === 27 && calfVariants.length === 24 && chevreVariants.length === 3, "charms=" + charmKeys.length + ", materials=" + materialKeys.length + ", variants=" + LEATHER_VARIANTS.length + ", calf=" + calfVariants.length + ", chevre=" + chevreVariants.length);
         record("phase3-source-tone-one-to-one", sourceModeToneModePass && sourceKeys.length === charmKeys.length, "all canonical sources are colorless/flat");
         const freeze = await loadColorFreeze();
@@ -7340,15 +7726,27 @@
         record("phase3-osanpo-recipe-generation-ranges", recipeGenerationPass, recipeGenerationDetail);
       } catch (error) { record("phase3-contract-suite", false, error.message); }
 
+      // Revision 18: inspection-8 verification-spec composition contract.
+      // The suite calls the production composer and projection checker; it
+      // does not maintain a second implementation of either path.
+      let phase3Generated = null, phase3GrainResources = null;
+      try {
+        phase3GrainResources = await buildSelfTestGrainResources("calf");
+        phase3Generated = {};
+        for (const key of CHARM_KEYS) phase3Generated[key] = await selfTestCharmGeneration(key, phase3GrainResources);
+        const verificationSpecSuite = await selfTestVerificationSpecSuite(phase3Generated);
+        record("phase3-verification-spec-13", verificationSpecSuite.pass, JSON.stringify(verificationSpecSuite));
+      } catch (error) { record("phase3-verification-spec-13", false, error.message); }
+
       // Revision 17 canonical-source regression generation.  These checks are
       // deliberately executed against the real eight canonical sources, not
       // synthetic masks, so a recipe/ROI/range drift cannot hide behind a
       // constants-only selftest.
       try {
         const charmKeys = Object.keys(CHARM_SPECS);
-        const grainResources = await buildSelfTestGrainResources("calf");
-        const generated = {};
-        for (const key of charmKeys) generated[key] = await selfTestCharmGeneration(key, grainResources);
+        const grainResources = phase3GrainResources || await buildSelfTestGrainResources("calf");
+        const generated = phase3Generated || {};
+        if (!phase3Generated) for (const key of charmKeys) generated[key] = await selfTestCharmGeneration(key, grainResources);
         const closedWhiteKeysForTest = ["horse", "frenchie", "dachshund", "toypoodle", "cat", "swan"];
         const closedWhitePassRuntime = closedWhiteKeysForTest.every(function (key) {
           const spec = CHARM_SPECS[key], recipe = spec.manualRecipe, stats = generated[key].generated.stats;
