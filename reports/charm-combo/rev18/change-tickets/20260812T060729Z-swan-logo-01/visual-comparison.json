@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "ticketId": "20260812T060729Z-swan-logo-01",
+  "observedAt": "2026-08-12T06:07:29Z",
+  "comparison": {
+    "requested": "スワンの&.をキャットのように明瞭な箔押しとして表示する。スワン元画像の角度・位置・比率は変更しない。",
+    "reference": {
+      "key": "cat",
+      "basePath": "assets/charms/cat.base.png",
+      "baseByteLength": 359894,
+      "baseSha256": "4f284b1fbf7402e56f1f787031351ab3c9cbfd82245b527b0671179801a95018",
+      "sourcePath": "source-photos/cat-colorless.png",
+      "sourceByteLength": 215615,
+      "sourceSha256": "563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7",
+      "logoRoi": [0.4875, 0.7092, 0.59, 0.7958],
+      "logoThreshold": 18,
+      "logoPxCountWork": 2074,
+      "logoComponentCountWork": 2
+    },
+    "observed": {
+      "key": "swan",
+      "sourcePath": "source-photos/swan-colorless.png",
+      "sourceByteLength": 316073,
+      "sourceSha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435",
+      "basePath": "assets/charms/swan.base.png",
+      "baseByteLength": 416696,
+      "baseSha256": "559437421e6a33009225209f1c4ceda642f7916f64dbb339e99abe4b3abe497c",
+      "masksPath": "assets/charms/swan.masks.png",
+      "masksByteLength": 12800,
+      "masksSha256": "49109b0c3d3b458f28a03cea7cab2ddd0beb26b06212df32d80268dcac718930",
+      "prepPath": "assets/charms/swan.prep.json",
+      "prepByteLength": 14271,
+      "prepSha256": "030d575d68a2e9bfb53bb085c20b4db379bf8f0bca4c0e77628032e93b79d3ab",
+      "logoRoi": [0.463, 0.7412, 0.559, 0.8083],
+      "stoneRoi": [0.5245, 0.76, 0.6155, 0.8158],
+      "logoThreshold": 10,
+      "logoPxCountWork": 898,
+      "logoPxCountAsset": 840,
+      "logoComponentCountWork": 5,
+      "angleAndSize": "保持対象"
+    }
+  },
+  "interpretation": [
+    "現行スワンはロゴROIがストーンROIに近接・一部重複し、リカラー後に&.の輪郭がキャットほど明瞭に見えない。",
+    "角度・位置・比率を変えず、ロゴ全体（アンパサンドの開口部とドットを含む）をG所有の箔領域として再定義する必要がある。",
+    "くちばし・ストーンのmanual-keep、detectステッチ、革面の所有権は維持する。"
+  ],
+  "requiredVerification": [
+    "スワンのlogoRoi/logoRange/所有権の再定義をCHARM_SPECS・prepへ反映",
+    "検査1〜8・M/F・selftest⑬・検査8三者照合を再実行",
+    "スワンの角度・bbox・sizeMm・aspect correctionが不変であることを確認",
+    "Phase 5形状QAでユーザー目視承認を再取得"
+  ]
+}

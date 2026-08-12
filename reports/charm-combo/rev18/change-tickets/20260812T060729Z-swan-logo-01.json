@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "ticketId": "20260812T060729Z-swan-logo-01",
+  "ticketPath": "reports/charm-combo/rev18/change-tickets/20260812T060729Z-swan-logo-01.json",
+  "selectedLockCommit": "37414ad9b0c82f1b8a12852d6547391cdcbcd1ae",
+  "originPhase": "Phase 4",
+  "requestedRestartPhase": "Phase 3",
+  "implementationCommit": "cf69bf01c9542ed7711747bcf52f6141527f4605",
+  "affectedCharms": ["swan"],
+  "changedArtifacts": [
+    {"path": "tools/charm-prep.html", "before": {"byteLength": 571964, "sha256": "fe6e79e01654db093abb64402bb74052cb7d648270e56fb6be4a24b565e73667"}, "after": null},
+    {"path": "assets/charms/swan.masks.png", "before": {"byteLength": 12800, "sha256": "49109b0c3d3b458f28a03cea7cab2ddd0beb26b06212df32d80268dcac718930"}, "after": null},
+    {"path": "assets/charms/swan.manual-owner.png", "before": {"byteLength": 4818, "sha256": "d4a3c9143a1554f0e604cb32edcf8c0a1afc7eb81d646ff37d7ebdd7c451d5cf"}, "after": null},
+    {"path": "assets/charms/swan.prep.json", "before": {"byteLength": 14271, "sha256": "030d575d68a2e9bfb53bb085c20b4db379bf8f0bca4c0e77628032e93b79d3ab"}, "after": null}
+  ],
+  "inputBefore": {"path": "source-photos/swan-colorless.png", "byteLength": 316073, "sha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435"},
+  "inputAfter": {"path": "source-photos/swan-colorless.png", "byteLength": 316073, "sha256": "77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435", "expected": "unchanged; logo ownership only"},
+  "contractChanged": [
+    "CHARM_SPECS.swanのロゴ所有領域・logoRoi・logoRange（角度・位置・比率は不変）",
+    "スワンのG箔所有と革R所有の境界、およびストーンmanual-keepとの分離",
+    "検査8再生成照合、selftest⑬、Phase 4/5のスワン証跡"
+  ],
+  "reason": "ユーザー目視で、スワンの&.がキャットほど明瞭に見えないことを確認した。角度は現状のまま、アンパサンドとドット全体が独立した箔押しとして明確に見えるようにする。現行のスワンはlogoRoiがストーンROIに近接・一部重複し、作業ロゴ898画素・5成分（キャットは2074画素・2成分）で、リカラー後に輪郭が弱く見えるため、charms.html単独の変更では契約を満たせない。",
+  "approvalEvidenceId": null,
+  "approvalEvidenceReason": "ユーザーから修正実施の指示は受領済み。正式な形状承認IDは再生成後のPhase 5目視確認で発行する。",
+  "visualApproval": {"status": "requested", "reference": "reports/charm-combo/rev18/change-tickets/20260812T060729Z-swan-logo-01/visual-comparison.json", "note": "キャットの明瞭な&.を比較基準とし、スワンの角度・位置・比率は固定する。"},
+  "derivedImpact": {
+    "prep": true,
+    "manual": true,
+    "base": false,
+    "masks": true,
+    "CHARMS": true,
+    "DISPLAY_VARIANTS": false,
+    "layout": false,
+    "phase5ShapeApproval": true,
+    "phase6Charms": true
+  },
+  "verification": {
+    "visualComparisonPath": "reports/charm-combo/rev18/change-tickets/20260812T060729Z-swan-logo-01/visual-comparison.json",
+    "visualComparisonSha256": "3611baead77e61556c47bf95a4b5c62923e30f44344bcc81b835070d54ea3c4a",
+    "checks1to8": "pass-before-change; not-run-after-change",
+    "M/F": "pass-before-change; not-run-after-change",
+    "selftest": "pass-before-change; not-run-after-change",
+    "visual": "clarity issue confirmed; angle/position/ratio requested unchanged"
+  },
+  "planSections": ["§0-E-8", "§0-F-1", "§0-F-2", "§5-2", "§5-4", "§7", "§8 Phase 4", "§9", "sync §12-1", "sync §12-2"],
+  "stopStatus": {"stoppedUntilPlanRevision": true, "note": "計画改訂・Codexレビューok:true・新lock・Phase 3からの再実行指示を受領するまで、スワンのツール定数・manualレイヤ・派生アセットは変更しない。"},
+  "ticketPayloadSha256": "109e7ad90b8ce2e6c0f0a22b3d3deb1e7eb73794c3525bc4a04ccfed37f45f74"
+}
