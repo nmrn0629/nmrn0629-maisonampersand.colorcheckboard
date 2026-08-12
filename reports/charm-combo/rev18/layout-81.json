@@ -1,0 +1,721 @@
+{
+  "schemaVersion": 1,
+  "phase": 4,
+  "planRevision": 18,
+  "status": "pass",
+  "generatedAt": "2026-08-12T04:06:00.000Z",
+  "layout": {
+    "stageMm": {
+      "w": 220,
+      "h": 160
+    },
+    "pxPerMmStage": 6,
+    "ringCenterXMm": 110,
+    "ringOuterMm": 42,
+    "gapMm": 8,
+    "ringGapMm": 3,
+    "marginMm": 10
+  },
+  "grid": {
+    "leftChoices": [
+      "none",
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ],
+    "rightChoices": [
+      "none",
+      "horse",
+      "horseshoe",
+      "frenchie",
+      "dachshund",
+      "toypoodle",
+      "osanpo",
+      "cat",
+      "swan"
+    ],
+    "expectedCount": 81,
+    "actualCount": 81,
+    "allPass": true,
+    "conditions": [
+      "clipなし",
+      "重なりなし",
+      "負の余白なし"
+    ],
+    "rows": [
+      {
+        "left": "none",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "none",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horse",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "horseshoe",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "frenchie",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "dachshund",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "toypoodle",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "osanpo",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "cat",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "none",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "horse",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "horseshoe",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "frenchie",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "dachshund",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "toypoodle",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "osanpo",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "cat",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      },
+      {
+        "left": "swan",
+        "right": "swan",
+        "status": "pass",
+        "clip": false,
+        "overlap": false,
+        "negativeMargin": false
+      }
+    ]
+  },
+  "requiredCases": {
+    "horse×horse": "pass",
+    "swan×swan": "pass",
+    "none×none": "pass"
+  },
+  "fixedVisualCaseCount": {
+    "swanStitchMode": "detect",
+    "total": 44,
+    "byCharm": {
+      "horse": 4,
+      "horseshoe": 8,
+      "frenchie": 4,
+      "dachshund": 4,
+      "toypoodle": 4,
+      "osanpo": 8,
+      "cat": 4,
+      "swan": 8
+    }
+  },
+  "source": "charms.html?debug=1 layout grid (現行実装の実測)"
+}

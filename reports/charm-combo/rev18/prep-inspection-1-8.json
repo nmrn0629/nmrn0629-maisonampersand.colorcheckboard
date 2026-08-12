@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "schemaVersionPrep": 6,
+  "phase": 4,
+  "planRevision": 18,
+  "status": "pass-with-visual-review-pending",
+  "generatedAt": "2026-08-12T04:05:00.000Z",
+  "selectedLockCommit": "37414ad9b0c82f1b8a12852d6547391cdcbcd1ae",
+  "selectedPhase3EvidenceCommit": "f598dbf00ab4b6c35f5fc6cd32f88a8faf3fb8c4",
+  "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+  "toolCommit": "b028f47160d71504119c518c0d036629ec3df59c4",
+  "toolVersion": "0.9.0",
+  "canonicalSourceCheckpoint": {
+    "status": "pass",
+    "count": 8,
+    "entries": [
+      {"key":"horse","width":2158,"height":2233,"byteLength":266704,"sha256":"ec6ef0cc6a2da23c172b0f3d04a06c4c2e91958babe980ee1908683d7955e6f0"},
+      {"key":"horseshoe","width":2020,"height":2385,"byteLength":1110405,"sha256":"111196581550f80d8d1edb6a4f929af9e7bdb3e239c1680bbc6459c53bf9341c"},
+      {"key":"frenchie","width":1808,"height":2664,"byteLength":217668,"sha256":"05c08873322c11f6ed48ef2b6e272f2582bd6f597fd2ced874ef15d84b9d6edf"},
+      {"key":"dachshund","width":2195,"height":2195,"byteLength":288546,"sha256":"e0e228f792b69eae074695ef020c9af1c2ad34306cf05fb735e7b131d17487da"},
+      {"key":"toypoodle","width":2176,"height":2176,"byteLength":280916,"sha256":"b4251b764c0ca3f35af6d6f0904b52c909811bc44637dc64b12d8ccdf64bfcba"},
+      {"key":"osanpo","width":2304,"height":2304,"byteLength":242184,"sha256":"f9153732573aac77090914c5abf08fb98c5456e8a345cd098e74d23a48cef28e"},
+      {"key":"cat","width":2195,"height":2195,"byteLength":215615,"sha256":"563b5c975eaebbafa3fbb25a1720d0c5021022dca23cb2f069d46553be10bce7"},
+      {"key":"swan","width":1701,"height":2560,"byteLength":316073,"sha256":"77c8a315d37a0dad23eb3dd564bdd2baf7a26fe2f0583873de1ff2297461c435"}
+    ]
+  },
+  "pipelineOrder": ["input-sha","alpha","ownership","defringe","logo","stitch","keep","aspect-geometry","aspect-redefringe","derived","straight-png","decode","checks-1-8"],
+  "charms": {
+    "horse": {"sizeMm":{"w":95,"h":70},"workSize":{"w":1160,"h":1200},"assetSize":{"w":1160,"h":1200},"bboxPx":{"x":190,"y":368,"w":879,"h":647},"fgBboxPx":{"x":190,"y":368,"w":879,"h":647},"pxPerMm":9.25263157895,"baseLum":0.7607843137,"stitchMode":"none","threadColor":null,"stitchPxCount":0,"stitchDiffPxCount":0,"logoPxCountWork":2440,"logoComponentCountWork":4,"logoThreshold":18,"keepPxCountWork":0,"keepPxCount":0,"aspectCorrection":{"applied":false,"preDistortion":0.001056395,"postDistortion":0.001056395},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.05363563,"threshold":0.15},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"},
+    "horseshoe": {"sizeMm":{"w":46,"h":54},"workSize":{"w":1016,"h":1200},"assetSize":{"w":957,"h":1200},"bboxPx":{"x":75,"y":91,"w":804,"h":943},"fgBboxPx":{"x":75,"y":91,"w":804,"h":943},"pxPerMm":17.4782608696,"baseLum":0.7529411765,"stitchMode":"detect","threadColor":"light","stitchPxCount":69463,"stitchDiffPxCount":69463,"logoPxCountWork":4222,"logoComponentCountWork":2,"logoThreshold":null,"keepPxCountWork":32876,"keepPxCount":30958,"aspectCorrection":{"applied":true,"axis":"W","scale":0.9417307108,"effectiveScale":0.9419291339,"preDistortion":0.05826929,"postDistortion":0.000875},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":1},"grainLocalDeviation":{"max":0.04858342,"threshold":0.15},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"},
+    "frenchie": {"sizeMm":{"w":60,"h":75},"workSize":{"w":1011,"h":1200},"assetSize":{"w":973,"h":1200},"bboxPx":{"x":37,"y":37,"w":901,"h":1127},"fgBboxPx":{"x":37,"y":37,"w":901,"h":1127},"pxPerMm":15.0166666667,"baseLum":0.7568627451,"stitchMode":"none","threadColor":null,"stitchPxCount":0,"stitchDiffPxCount":0,"logoPxCountWork":6859,"logoComponentCountWork":3,"logoThreshold":18,"keepPxCountWork":0,"keepPxCount":0,"aspectCorrection":{"applied":true,"axis":"W","scale":0.9622198506,"effectiveScale":0.962413452,"preDistortion":0.0377801494,"postDistortion":0.000666},"cropSource":{"x":320,"y":848,"w":1105,"h":1312},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.06618052,"threshold":0.15},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"},
+    "dachshund": {"sizeMm":{"w":90,"h":60},"workSize":{"w":1200,"h":1200},"assetSize":{"w":1200,"h":1129},"bboxPx":{"x":81,"y":261,"w":981,"h":653},"fgBboxPx":{"x":81,"y":261,"w":981,"h":653},"pxPerMm":10.9,"baseLum":0.7568627451,"stitchMode":"none","threadColor":null,"stitchPxCount":0,"stitchDiffPxCount":0,"logoPxCountWork":3029,"logoComponentCountWork":4,"logoThreshold":18,"keepPxCountWork":0,"keepPxCount":0,"aspectCorrection":{"applied":true,"axis":"H","scale":0.9410071942,"effectiveScale":0.9408333333,"preDistortion":0.06269113,"postDistortion":0.001529},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.04489958,"threshold":0.15},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"},
+    "toypoodle": {"sizeMm":{"w":80,"h":60},"workSize":{"w":1200,"h":1200},"assetSize":{"w":1200,"h":1112},"bboxPx":{"x":126,"y":263,"w":885,"h":664},"fgBboxPx":{"x":126,"y":263,"w":885,"h":664},"pxPerMm":11.0625,"baseLum":0.7607843137,"stitchMode":"none","threadColor":null,"stitchPxCount":0,"stitchDiffPxCount":0,"logoPxCountWork":2339,"logoComponentCountWork":3,"logoThreshold":18,"keepPxCountWork":0,"keepPxCount":0,"aspectCorrection":{"applied":true,"axis":"H","scale":0.9270251397,"effectiveScale":0.9266666667,"preDistortion":0.0787193974,"postDistortion":0.000377},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.04794897,"threshold":0.15},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"},
+    "osanpo": {"sizeMm":{"w":92,"h":40},"workSize":{"w":1200,"h":1200},"assetSize":{"w":1200,"h":1200},"bboxPx":{"x":372,"y":252,"w":428,"h":691},"fgBboxPx":{"x":372,"y":252,"w":428,"h":691},"pxPerMm":7.3638156831,"baseLum":0.7647058824,"stitchMode":"detect","threadColor":"light","stitchPxCount":8927,"stitchDiffPxCount":8927,"logoPxCountWork":1221,"logoComponentCountWork":1,"logoThreshold":null,"keepPxCountWork":0,"keepPxCount":0,"aspectCorrection":{"applied":false,"axis":null,"preDistortion":0.0207766,"postDistortion":0.0207766,"reason":"manual-line校正のため補正なし"},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.03697547,"threshold":0.15},"mixedOwnershipPxCount":0,"manualRecipe":{"id":"osanpo-colorless-20260730-v2","rawStitchPxCount":8927,"rawStitchComponentCount":28,"finalStitchCount":8927,"finalStitchComponentCount":28,"rawFinalIdentityMismatch":0},"checks":"1-7/M/F PASS"},
+    "cat": {"sizeMm":{"w":68,"h":65},"workSize":{"w":1200,"h":1200},"assetSize":{"w":1200,"h":1200},"bboxPx":{"x":171,"y":282,"w":774,"h":727},"fgBboxPx":{"x":171,"y":282,"w":774,"h":727},"pxPerMm":11.3823529412,"baseLum":0.7647058824,"stitchMode":"none","threadColor":null,"stitchPxCount":0,"stitchDiffPxCount":0,"logoPxCountWork":2074,"logoComponentCountWork":2,"logoThreshold":18,"keepPxCountWork":0,"keepPxCount":0,"aspectCorrection":{"applied":false,"preDistortion":0.0173723,"postDistortion":0.0173723},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.0406176,"threshold":0.15},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"},
+    "swan": {"sizeMm":{"w":90,"h":90},"workSize":{"w":797,"h":1200},"assetSize":{"w":797,"h":1121},"bboxPx":{"x":58,"y":247,"w":692,"h":692},"fgBboxPx":{"x":58,"y":247,"w":692,"h":692},"pxPerMm":7.6888888889,"baseLum":0.7647058824,"stitchMode":"detect","threadColor":"light","stitchPxCount":2605,"stitchDiffPxCount":2605,"logoPxCountWork":898,"logoComponentCountWork":5,"logoThreshold":10,"keepPxCountWork":5144,"keepPxCount":4816,"aspectCorrection":{"applied":true,"axis":"H","scale":0.9338731444,"effectiveScale":0.9341666667,"preDistortion":0.07080925,"postDistortion":0},"outerLeftover":{"residualPx":0,"ratePercent":0,"thresholdPercent":10},"grainLocalDeviation":{"max":0.03792914,"threshold":0.15},"mixedOwnershipPxCount":0,"swanKeep":{"beakPxCount":3629,"stonePxCount":1515,"totalPxCount":5144},"beakExpectedDiff":{"workCount":1188,"workRange":"PASS","assetCount":"pending supplemental evidence","assetSha256":"pending","assetWidth":null,"assetHeight":null},"mixedOwnershipPxCount":0,"checks":"1-7/M/F PASS"}
+  },
+  "checks": {
+    "1-7-M-F": "PASS 8/8",
+    "8-three-way": "PASS 8/8 input/output/regeneration; same Chrome151 final verification",
+    "81-layout": "PASS 81/81 clip/overlap/negative-margin conditions",
+    "rings": "PASS silver/gold 512x512, center 256/256, enclosed hole"
+  },
+  "independentVerification": {
+    "candidateArchive": {"path":"/private/tmp/charm-assets-candidate.archive.json","byteLength":4933741,"sha256":"f963912546cfec7d9ae16198a791cdb3811e9baf0382e0b20b0c0832d3ebe7be"},
+    "verifiedArchive": {"path":"/private/tmp/charm-assets-verified.archive.json","byteLength":4935769,"sha256":"f20a82cfb748fa089277222c8b1ef9077ec3a2a494940613a842435b4ebf0ebc","status":"pass","checkedAt":"2026-08-12T03:57:43.990Z","browser":"Chrome 151"},
+    "allEight": {"inputMatch":true,"outputMatch":true,"regenerationMatch":true}
+  },
+  "rings": {
+    "generatorVersion": 1,
+    "size": {"width":512,"height":512},
+    "silver": {"byteLength":169348,"decodedRgbaSha256":"ffb5711103aa5719d83e010032b17f6f83b9345566f0e3af11ac19ce041dcd94","bbox":"full frame","center":[256,256],"holeEnclosed":true},
+    "gold": {"byteLength":250399,"decodedRgbaSha256":"48139d3c1a578a9e5b812e92504bbb1af55d95b1ad2a6b85e76c7e1a5881a26e","bbox":"full frame","center":[256,256],"holeEnclosed":true}
+  },
+  "fixedVisualCaseCount": {"byCharm":{"horse":4,"horseshoe":8,"frenchie":4,"dachshund":4,"toypoodle":4,"osanpo":8,"cat":4,"swan":8},"total":44},
+  "visualReview": {"status":"pending-user-review","logoAndKeep":"machine classification PASS; visual confirmation pending","variantColorRegression":"not performed in this environment"},
+  "unresolved": ["swan BEAK_EXPECTED_DIFF_ASSET count/SHA/width/height is pending supplemental evidence","Phase 5 is blocked until checkpoint ② material/visual review approval"],
+  "nextPhase": {"name":"Phase 5","ready":false,"gate":"User approval of checkpoint ②; no implementation started"}
+}

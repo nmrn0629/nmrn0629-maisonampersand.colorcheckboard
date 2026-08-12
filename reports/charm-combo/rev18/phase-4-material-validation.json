@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "phase": 4,
+  "planRevision": 18,
+  "status": "pass-with-visual-review-pending",
+  "generatedAt": "2026-08-12T04:05:00.000Z",
+  "selectedPhase3EvidenceCommit": "f598dbf00ab4b6c35f5fc6cd32f88a8faf3fb8c4",
+  "toolCommit": "b028f47160d71504119c518c0d036629ec3df59c4",
+  "toolVersion": "0.9.0",
+  "fixedVisualCaseCount": {"byCharm":{"horse":4,"horseshoe":8,"frenchie":4,"dachshund":4,"toypoodle":4,"osanpo":8,"cat":4,"swan":8},"total":44},
+  "schemaVersionPrep": 6,
+  "canonicalSourceCheckpoint": "pass (8/8 SHA・寸法一致)",
+  "checks": {
+    "1_input_sha_dimensions": "PASS: canonicalSource 8/8",
+    "2_background_alpha": "PASS: 8/8",
+    "3_ownership_and_derived": "PASS: 8/8; mixedOwnershipPxCount=0",
+    "4_defringe": "PASS: 8/8; badRatio=0",
+    "5_stitch_integrity": "PASS: horseshoe detect/light B69463 diff69463; osanpo detect/light B8927 diff8927; swan detect/light B2605 diff2605; other5 none/B0/diff0",
+    "6_keep_and_attachment": "PASS: 8/8; horseshoe keep30958 final/components6/6; swan keep4816 (beak3629+stone1515)",
+    "7_size_budget": "PASS: 8/8 under 900KB",
+    "M_manifest": "PASS: source/mode/grain all 8",
+    "F_oracle": "PASS: F-1 + independent oracle + mutation 6/6 + F-2/F-3/F-4 all 8",
+    "8_three_way": "PASS: all8 input/output/regeneration + final re-verification same Chrome151",
+    "81_layout": "PASS: 81/81 no clip/overlap/negative margin",
+    "rings": "PASS: silver/gold 512px common frame"
+  },
+  "aspectCorrection": {
+    "horse": "not applied; post 0.1056%",
+    "horseshoe": "W scale 0.9417307108; post 0.0875%",
+    "frenchie": "W scale 0.9622198506; post 0.0666%",
+    "dachshund": "H scale 0.9410071942; post 0.1529%",
+    "toypoodle": "H scale 0.9270251397; post 0.0377%",
+    "osanpo": "manual-line; not applied; post 2.0777%",
+    "cat": "not applied; post 1.7372%",
+    "swan": "H scale 0.9338731444; post 0%"
+  },
+  "stitchModes": {
+    "horse": "none",
+    "horseshoe": "detect/light",
+    "frenchie": "none",
+    "dachshund": "none",
+    "toypoodle": "none",
+    "osanpo": "detect/light",
+    "cat": "none",
+    "swan": "detect/light"
+  },
+  "frenchie": {
+    "cropSource": {
+      "x": 320,
+      "y": 848,
+      "w": 1105,
+      "h": 1312
+    },
+    "foregroundAfterCrop": "901x1127",
+    "result": "PASS"
+  },
+  "osanpoRecipe": {
+    "id": "osanpo-colorless-20260730-v2",
+    "rawStitchPxCount": 8927,
+    "rawComponentCount": 28,
+    "finalStitchPxCount": 8927,
+    "finalComponentCount": 28,
+    "logoPxCount": 1221,
+    "logoComponentCount": 1,
+    "rawFinalIdentityMismatch": 0,
+    "rangeChecks": "PASS"
+  },
+  "swanBeak": {
+    "beakPxCount": 3629,
+    "stonePxCount": 1515,
+    "keepPxCountWork": 5144,
+    "keepPxCountAsset": 4816,
+    "beakExpectedDiffWorkCount": 1188,
+    "beakExpectedDiffAsset": "未取得（補完要）",
+    "conditions": "work count/range and keep totals PASS; asset count/hash/dim unresolved"
+  },
+  "outerLeftover": "8/8 residual=0; horseshoe threshold 1%, others 10%",
+  "grain": "8/8 local deviation max <=0.15; grainSourceInset=2; shadeMin=0.78; peer grainScale=0.105 all8",
+  "logo": "8/8 logoRange pass; manual horseshoe/osanpo threshold null; swan keep exclusion applied",
+  "visualReview": "logo/ラインストーンの目視・色回帰はクライアント確認待ち",
+  "unresolved": [
+    "swan BEAK_EXPECTED_DIFF_ASSET count/SHA/width/height is pending supplemental evidence",
+    "visual QA is not executable in this report environment; user/client visual confirmation required"
+  ]
+}

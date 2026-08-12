@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "phase": 4,
+  "planRevision": 18,
+  "status": "pass-with-visual-review-pending",
+  "generatedAt": "2026-08-12T04:10:00.000Z",
+  "selectedLockCommit": "37414ad9b0c82f1b8a12852d6547391cdcbcd1ae",
+  "selectedPhase3EvidenceCommit": "f598dbf00ab4b6c35f5fc6cd32f88a8faf3fb8c4",
+  "phaseInputCommits": [
+    "f598dbf00ab4b6c35f5fc6cd32f88a8faf3fb8c4"
+  ],
+  "phaseOutputCommit": "e48dc4150f02d900eea7f5565ae8d06ddb348fc3",
+  "sourceFreezeCommit": "8b3bdb41bd3205287f2612ca9fb071b4d53e8376",
+  "toolCommit": "b028f47160d71504119c518c0d036629ec3df59c4",
+  "dedicatedWorktree": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard/.worktrees/rev18-phase3",
+  "originalWorktree": "/Users/ah266/nmrn0629-maisonampersand.colorcheckboard",
+  "protectedFiles": [
+    "index.html"
+  ],
+  "tool": {
+    "path": "tools/charm-prep.html",
+    "toolVersion": "0.9.0",
+    "schemaVersion": 6
+  },
+  "assets": {
+    "count": 44,
+    "assetCommitChangedFileCount": 42,
+    "commit": "e48dc4150f02d900eea7f5565ae8d06ddb348fc3",
+    "files": [
+      {
+        "path": "assets/charms/cat.base.png",
+        "byteLength": 359894,
+        "sha256": "4f284b1fbf7402e56f1f787031351ab3c9cbfd82245b527b0671179801a95018"
+      },
+      {
+        "path": "assets/charms/cat.manual-alpha.png",
+        "byteLength": 21836,
+        "sha256": "9e1aac9451ce72cc1e39402394be9c37eb75b5ad3d59ff6900996ef0619608a9"
+      },
+      {
+        "path": "assets/charms/cat.manual-owner.png",
+        "byteLength": 9637,
+        "sha256": "e031621f66cfeb2cdc0c82c824945609755fcc05093018c283214d0e42e6a418"
+      },
+      {
+        "path": "assets/charms/cat.masks.png",
+        "byteLength": 13183,
+        "sha256": "d203c16d72e5d334a176abdda1ab6840212b162b14347feb40f9295d2c037f52"
+      },
+      {
+        "path": "assets/charms/cat.prep.json",
+        "byteLength": 13697,
+        "sha256": "e28baa0365ceb5fbf347c16a3b2cf0f4f2426205af605641892e3b3f5fefb047"
+      },
+      {
+        "path": "assets/charms/dachshund.base.png",
+        "byteLength": 363499,
+        "sha256": "33391f35576f0a4672596b2551ade8dd0e79e9390089c18a25c138954d71538c"
+      },
+      {
+        "path": "assets/charms/dachshund.manual-alpha.png",
+        "byteLength": 22721,
+        "sha256": "9f912f9bb273e1e4573f80d888593388ba32588c23f01daf076e3279a2dd6fb1"
+      },
+      {
+        "path": "assets/charms/dachshund.manual-owner.png",
+        "byteLength": 10100,
+        "sha256": "55536cf60438f2ecbea581243e3040f73d274221b68c2ed728cab37d4c91a50f"
+      },
+      {
+        "path": "assets/charms/dachshund.masks.png",
+        "byteLength": 13237,
+        "sha256": "e747426c96b29b1899ecacf04f4a4911c6c9896f370c91e8dbe6df3e5bd1ea59"
+      },
+      {
+        "path": "assets/charms/dachshund.prep.json",
+        "byteLength": 13581,
+        "sha256": "c00990d35defae32615388125320d040f210173ea1af20aaeb99888e58ec8099"
+      },
+      {
+        "path": "assets/charms/frenchie.base.png",
+        "byteLength": 428284,
+        "sha256": "cdf01642b012ecdb5363500b22abd6b9c8a692f62148c05ae6e6e71138761165"
+      },
+      {
+        "path": "assets/charms/frenchie.manual-alpha.png",
+        "byteLength": 35292,
+        "sha256": "1fd9a6f3cde745e1b322c718953ee299369c8473a988d2225dcf38c9345c3332"
+      },
+      {
+        "path": "assets/charms/frenchie.manual-owner.png",
+        "byteLength": 9281,
+        "sha256": "44a3cb082dc1d946aabd84b738629d1b6b95431fc30107bcb1e83b091607d9a1"
+      },
+      {
+        "path": "assets/charms/frenchie.masks.png",
+        "byteLength": 13853,
+        "sha256": "420c953e855fb7ac4b83d003524fdc39608e9820f4c1ae01c5df1b442180b176"
+      },
+      {
+        "path": "assets/charms/frenchie.prep.json",
+        "byteLength": 13719,
+        "sha256": "8b0c7e28ed969a2a0cc59792d3b4e945c8de47db9ade0ce5c34e0679b7b5f110"
+      },
+      {
+        "path": "assets/charms/horse.base.png",
+        "byteLength": 367537,
+        "sha256": "4fa8d7f18e7079b9b8aeb640f58d4a219bc6a1ac8c4c8b98b71156d7ef174cca"
+      },
+      {
+        "path": "assets/charms/horse.manual-alpha.png",
+        "byteLength": 22910,
+        "sha256": "73bd32de5bd58de1ff9227c9a6928bfd472cd223b60e39fd29a1b60c72444ca9"
+      },
+      {
+        "path": "assets/charms/horse.manual-owner.png",
+        "byteLength": 9387,
+        "sha256": "79527edc5fee573db41662a912159a0fb3f93a2c6c154a2f379215e36f1adc9f"
+      },
+      {
+        "path": "assets/charms/horse.masks.png",
+        "byteLength": 13647,
+        "sha256": "312c26a5668e7010c7390de2427075b02b7bc66e0500310c311d9fbdae81cbea"
+      },
+      {
+        "path": "assets/charms/horse.prep.json",
+        "byteLength": 13680,
+        "sha256": "59f1ddae4c77266a6b69f63435bb34f614c79b0db8a602fa93734978d58b150e"
+      },
+      {
+        "path": "assets/charms/horseshoe.base.png",
+        "byteLength": 530979,
+        "sha256": "0144bef0545a9e0f95610c6aba4570be8cb058acdbdc410278cbe3fb0d62da8a"
+      },
+      {
+        "path": "assets/charms/horseshoe.manual-alpha.png",
+        "byteLength": 58093,
+        "sha256": "63be290e872541e7ca3af7d64b675c56d8f767a2f87899393a9a7bf276d7bd96"
+      },
+      {
+        "path": "assets/charms/horseshoe.manual-keep.png",
+        "byteLength": 8096,
+        "sha256": "2a09de650c4049b5711f1485cd10f40bcc0f39060d63dfbdbeac02f85cd11487"
+      },
+      {
+        "path": "assets/charms/horseshoe.manual-owner.png",
+        "byteLength": 16544,
+        "sha256": "9210b8ff2b08ab353f6d1082bf61d7b05f27f6d1217fd2531213ab773d5e0afd"
+      },
+      {
+        "path": "assets/charms/horseshoe.masks.png",
+        "byteLength": 21081,
+        "sha256": "7d96f369ac4cffae8360a4230c8c629585f860aa192b7e5e2842c56e3af9df36"
+      },
+      {
+        "path": "assets/charms/horseshoe.prep.json",
+        "byteLength": 14655,
+        "sha256": "ca551b3a388d13297719bf5a5b555caee338478be1860dbb0421edf872355de8"
+      },
+      {
+        "path": "assets/charms/osanpo.base.png",
+        "byteLength": 317339,
+        "sha256": "71aaa78caf33b25260e4d71dfadd7c4c5264c66a67ad3d40c2a16b27bd306588"
+      },
+      {
+        "path": "assets/charms/osanpo.manual-alpha.png",
+        "byteLength": 19269,
+        "sha256": "0887ff19540e85e1c46235c2e73c75cba47ec412de0bd2187d289c509b238e46"
+      },
+      {
+        "path": "assets/charms/osanpo.manual-owner.png",
+        "byteLength": 13218,
+        "sha256": "1a6b57a422c26cb427449528318d351585ba96a51d93e127982d9b1e0f34715b"
+      },
+      {
+        "path": "assets/charms/osanpo.masks.png",
+        "byteLength": 14738,
+        "sha256": "471f8d092621a5406c7dbe07a4d3876179d08f419a9744fcd348acb1479175c0"
+      },
+      {
+        "path": "assets/charms/osanpo.prep.json",
+        "byteLength": 14275,
+        "sha256": "da73de2ff1738db6d9bacbeaafdb1d377e59ccd3de7ec8ef95f1c48419d432a5"
+      },
+      {
+        "path": "assets/charms/swan.base.png",
+        "byteLength": 416696,
+        "sha256": "559437421e6a33009225209f1c4ceda642f7916f64dbb339e99abe4b3abe497c"
+      },
+      {
+        "path": "assets/charms/swan.manual-alpha.png",
+        "byteLength": 28482,
+        "sha256": "290b1976a30359f348964795aa2cc2cd904dc06b18170ec4f5c07455b379680e"
+      },
+      {
+        "path": "assets/charms/swan.manual-keep.png",
+        "byteLength": 5166,
+        "sha256": "390375682aac70afbe9b3346f0fa7f68eb721ec61b8d76b77ba93cf774341782"
+      },
+      {
+        "path": "assets/charms/swan.manual-owner.png",
+        "byteLength": 4818,
+        "sha256": "d4a3c9143a1554f0e604cb32edcf8c0a1afc7eb81d646ff37d7ebdd7c451d5cf"
+      },
+      {
+        "path": "assets/charms/swan.masks.png",
+        "byteLength": 12800,
+        "sha256": "49109b0c3d3b458f28a03cea7cab2ddd0beb26b06212df32d80268dcac718930"
+      },
+      {
+        "path": "assets/charms/swan.prep.json",
+        "byteLength": 14271,
+        "sha256": "030d575d68a2e9bfb53bb085c20b4db379bf8f0bca4c0e77628032e93b79d3ab"
+      },
+      {
+        "path": "assets/charms/toypoodle.base.png",
+        "byteLength": 362330,
+        "sha256": "5f34bfba020301fa9ec6f6cd25ee5872de1360f892acba91ee8dd0c8c54c75d7"
+      },
+      {
+        "path": "assets/charms/toypoodle.manual-alpha.png",
+        "byteLength": 21508,
+        "sha256": "4675ffb2b79d81b1e3a6a1d4fb891bb7c5aedc934f17c3080b7424598d72790f"
+      },
+      {
+        "path": "assets/charms/toypoodle.manual-owner.png",
+        "byteLength": 9721,
+        "sha256": "790cf5620f1c251a584139790d60d4a57084aa9488b2a545120df494d2331fcc"
+      },
+      {
+        "path": "assets/charms/toypoodle.masks.png",
+        "byteLength": 12452,
+        "sha256": "0179a50f179eddf2072cdc64aec2bee758239638bd27869a44cb9e70af12f2fe"
+      },
+      {
+        "path": "assets/charms/toypoodle.prep.json",
+        "byteLength": 13628,
+        "sha256": "262a977b092defbd054cc633f87bd18297f8c88469a0620935302f782dc17eab"
+      },
+      {
+        "path": "assets/rings/ring-gold.png",
+        "byteLength": 250399,
+        "sha256": "f9d3b97b7c2938a34224871dc3eb72ec0bf50f9e21d76bd4758fcbe89c80bc94"
+      },
+      {
+        "path": "assets/rings/ring-silver.png",
+        "byteLength": 169348,
+        "sha256": "681f7c2198444f44461759d7d67e6ed58e32d3687a822c3307d92399ef2bccea"
+      }
+    ]
+  },
+  "evidenceArtifacts": [
+    {
+      "path": "reports/charm-combo/rev18/prep-selftest.json",
+      "byteLength": 5187,
+      "sha256": "8974ef458cbe2970cc0bfe013ede73adf170d48be70318cf78df7e66a71b21c6"
+    },
+    {
+      "path": "reports/charm-combo/rev18/phase-3-handoff.json",
+      "byteLength": 5996,
+      "sha256": "307528f62078bcd7f4cc060be449380b1c714135a08d460bdcaecc769accc59d"
+    },
+    {
+      "path": "reports/charm-combo/rev18/prep-inspection-1-8.json",
+      "byteLength": 10299,
+      "sha256": "cdbb244a26ab86c07623a6e1d1adc1f882e8fd6802caafa414c5c6cc659c6d11"
+    },
+    {
+      "path": "reports/charm-combo/rev18/phase-4-material-validation.json",
+      "byteLength": 3520,
+      "sha256": "c782d54f9f542d6415225f88b9aab1d915606f8c3e9b75ae1c19b7b46a0157b5"
+    },
+    {
+      "path": "reports/charm-combo/rev18/layout-81.json",
+      "byteLength": 15708,
+      "sha256": "4b6524664416f989b0d62b71280eb961a2540f4d0656ad414669747607c75e62"
+    }
+  ],
+  "materialProfiles": {
+    "count": 2,
+    "leatherVariantCount": 27,
+    "calf": {
+      "materialKey": "calf",
+      "grainSourceSha256": "d0b7b644bcce2691b42b776f054ad2dd3f6c23313dab72f6a1b83b1292943a2a",
+      "generationMode": "baked-base"
+    },
+    "chevre": {
+      "materialKey": "chevre",
+      "grainSourceSha256": "f0a65c5b841285a1e34f9f39a7d9500ad414a23c11569c5b94c7a42b0492518d",
+      "profileAssetSha256": "5d3f86a0f2da40a482be2e4efc6aa98c636b108b05de32b3cdb341ac9bba6774",
+      "generationMode": "profile"
+    }
+  },
+  "checks": {
+    "inspection1to7": true,
+    "inspectionM": true,
+    "inspectionF": true,
+    "inspection8": {
+      "count": 8,
+      "inputMatch": true,
+      "outputMatch": true,
+      "regenerationMatch": true,
+      "browser": "Chrome 151",
+      "checkedAt": "2026-08-12T03:57:43.990Z"
+    },
+    "layout81": {
+      "count": 81,
+      "allPass": true,
+      "conditions": [
+        "clipなし",
+        "重なりなし",
+        "負の余白なし"
+      ]
+    },
+    "rings": {
+      "pass": true,
+      "generatorVersion": 1
+    }
+  },
+  "stitchModes": {
+    "horse": "none",
+    "horseshoe": "detect/light",
+    "frenchie": "none",
+    "dachshund": "none",
+    "toypoodle": "none",
+    "osanpo": "detect/light",
+    "cat": "none",
+    "swan": "detect/light"
+  },
+  "fixedVisualCaseCount": {
+    "byCharm": {
+      "horse": 4,
+      "horseshoe": 8,
+      "frenchie": 4,
+      "dachshund": 4,
+      "toypoodle": 4,
+      "osanpo": 8,
+      "cat": 4,
+      "swan": 8
+    },
+    "total": 44
+  },
+  "aspectCorrection": {
+    "horse": false,
+    "horseshoe": {
+      "axis": "W",
+      "postDistortion": 0.000875
+    },
+    "frenchie": {
+      "axis": "W",
+      "postDistortion": 0.000666
+    },
+    "dachshund": {
+      "axis": "H",
+      "postDistortion": 0.001529
+    },
+    "toypoodle": {
+      "axis": "H",
+      "postDistortion": 0.000377
+    },
+    "osanpo": false,
+    "cat": false,
+    "swan": {
+      "axis": "H",
+      "postDistortion": 0
+    }
+  },
+  "swanBeak": {
+    "beakPxCount": 3629,
+    "stonePxCount": 1515,
+    "keepPxCountWork": 5144,
+    "keepPxCountAsset": 4816,
+    "expectedDiffWorkCount": 1188,
+    "workPass": true,
+    "assetPass": true,
+    "assetCount": null,
+    "assetSha256": null,
+    "assetWidth": null,
+    "assetHeight": null,
+    "assetEvidence": "not exposed by the archive UI; pending supplemental evidence"
+  },
+  "archives": {
+    "candidate": {
+      "byteLength": 4933741,
+      "sha256": "f963912546cfec7d9ae16198a791cdb3811e9baf0382e0b20b0c0832d3ebe7be"
+    },
+    "verified": {
+      "byteLength": 4935769,
+      "sha256": "f20a82cfb748fa089277222c8b1ef9077ec3a2a494940613a842435b4ebf0ebc"
+    }
+  },
+  "selftest": {
+    "path": "reports/charm-combo/rev18/prep-selftest.json",
+    "toolVersion": "0.9.0",
+    "phase3Evidence": "f598dbf00ab4b6c35f5fc6cd32f88a8faf3fb8c4",
+    "status": "pass"
+  },
+  "visualReview": {
+    "status": "pending-user-review",
+    "logoAndKeep": "machine classification PASS; visual confirmation pending",
+    "variantColorRegression": "not performed in this environment"
+  },
+  "unresolved": [
+    "swan BEAK_EXPECTED_DIFF_ASSET count/SHA/width/height is pending supplemental evidence",
+    "Phase 5 is blocked until checkpoint ② material/visual review approval"
+  ],
+  "nextPhaseReady": false,
+  "nextPhaseGate": "Checkpoint ②: user approval of material validation and visual review; Phase 5 not started",
+  "handoffPayloadSha256": "e0e6cabd0a3ac03b06a9e91040d9538007862f61a4e54e0b46b6f0725413984f"
+}
